@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "test": "jest",
+    "compile-schemas": "json2ts -i schemas -o types"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.13",
+    "jest": "^26.4.2",
+    "json-schema-to-typescript": "^9.1.1",
+    "testcontainers": "^3.4.0",
+    "ts-jest": "^26.3.0",
+    "typescript": "^4.0.2"
+  },
+  "dependencies": {
+    "axios": "^0.20.0",
+    "bee-queue": "^1.2.3",
+    "fastify": "^3.3.0"
+  }
+}

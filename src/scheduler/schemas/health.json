@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "state": {
+      "type": "string",
+      "enum": ["up", "down"]
+    }
+  },
+  "title": "GET /health Response Schema",
+  "type": "object",
+  "properties": {
+    "redis": { "$ref": "#/definitions/state" }
+  },
+  "required": ["redis"],
+  "additionalProperties": false
+}
