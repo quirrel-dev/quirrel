@@ -1,7 +1,7 @@
 {
   "scripts": {
     "test": "jest",
-    "compile-schemas": "json2ts -i schemas -o types"
+    "compile-schemas": "json2ts -i src/scheduler/schemas/ -o src/scheduler/types/"
   },
   "devDependencies": {
     "@types/jest": "^26.0.13",
