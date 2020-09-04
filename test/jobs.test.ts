@@ -1,43 +1,66 @@
-import { AxiosInstance } from "axios"
-import { run } from "./runQuirrel"
-import fastify, { FastifyInstance } from "fastify"
-import delay from "delay"
+import { AxiosInstance } from "axios";
+import { run } from "./runQuirrel";
+import fastify, { FastifyInstance } from "fastify";
+import delay from "delay";
+import * as findFreePort from "find-free-port";
 
 describe("jobs", () => {
-    let client: AxiosInstance;
-    let teardown: () => Promise<void>;
+  let client: AxiosInstance;
+  let teardown: () => Promise<void>;
 
-    let server: FastifyInstance;
-    let lastBody: any;
+  let server: FastifyInstance;
+  let endpoint: string;
+  let lastBody: any;
+
+  beforeAll(async (done) => {
+    const res = await run();
+    client = res.client;
+    teardown = res.teardown;
     
-    beforeAll(async () => {
-        const res = await run()
-        client = res.client;
-        teardown = res.teardown;
+    const server = fastify();
+    server.post("/", (request, reply) => {
+      lastBody = request.body;
+      reply.status(200).send("OK");
+    });
 
-        const server = fastify();
-        server.post("/", (request, reply) => {
-            lastBody = request.body;
-            reply.status(200);
-        })
-        await server.listen(5000);
-    })
+    const [ port ] = await findFreePort(3000);
+    endpoint = await server.listen(port);
 
-    afterAll(async () => {
-        await teardown()
-        await server.close();
-    })
+    done()
+  });
 
-    test("post a job", async () => {
-        const { status } = await client.post("/jobs", {
-            endpoint: "http://localhost:5000/",
-            body: { "foo": "bar" }
-        })
+  afterAll(async () => {
+    await Promise.all([teardown(), server.close()]);
+  });
 
-        expect(status).toBe(200);
+  test("post a job", async () => {
+    const { status } = await client.post("/jobs", {
+      endpoint,
+      body: { foo: "bar" },
+    });
 
-        await delay(300);
+    expect(status).toBe(200);
 
-        expect(lastBody).toEqual({ "foo": "bar" });
-    })
-})
+    await delay(300);
+
+    expect(lastBody).toEqual({ foo: "bar" });
+  });
+
+  test("post a delayed job", async () => {
+    const { status } = await client.post("/jobs", {
+      endpoint,
+      body: { lol: "lel" },
+      runAt: new Date(Date.now() + 300).toISOString()
+    });
+
+    expect(status).toBe(200);
+
+    await delay(150);
+
+    expect(lastBody).not.toEqual({ lol: "lel" });
+
+    await delay(200);
+
+    expect(lastBody).toEqual({ lol: "lel" });
+  });
+});

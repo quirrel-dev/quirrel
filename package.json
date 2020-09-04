@@ -6,6 +6,7 @@
   "devDependencies": {
     "@types/jest": "^26.0.13",
     "@types/redis": "^2.8.27",
+    "find-free-port": "^2.0.0",
     "jest": "^26.4.2",
     "json-schema-to-typescript": "^9.1.1",
     "testcontainers": "^3.4.0",
@@ -18,6 +19,7 @@
     "delay": "^4.4.0",
     "fastify": "^3.3.0",
     "fastify-plugin": "^2.3.3",
+    "parse-duration": "^0.4.4",
     "redis": "^3.0.2"
   }
 }
