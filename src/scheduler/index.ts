@@ -1,15 +1,23 @@
 import fastify from "fastify";
+import redisPlugin from "./redis";
 import health from "./routes/health";
 import jobs from "./routes/jobs";
+import type * as redis from "redis";
 
-const app = fastify({
-    logger: true
-})
+export interface QuirrelServerConfig {
+    port?: number;
+    redis?: redis.ClientOpts;
+}
 
-app.register(health, { prefix: "/health" })
-app.register(jobs, { prefix: "/jobs" })
+export async function createServer({ port = 3000, redis }: QuirrelServerConfig) {    
+    const app = fastify({
+        logger: true
+    })
 
-export async function createServer(port: number = 3000) {
+    app.register(redisPlugin, redis)
+    app.register(health, { prefix: "/health" })
+    app.register(jobs, { prefix: "/jobs" })
+
     await app.listen(port)
 
     return {

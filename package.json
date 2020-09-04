@@ -5,6 +5,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.13",
+    "@types/redis": "^2.8.27",
     "jest": "^26.4.2",
     "json-schema-to-typescript": "^9.1.1",
     "testcontainers": "^3.4.0",
@@ -14,6 +15,9 @@
   "dependencies": {
     "axios": "^0.20.0",
     "bee-queue": "^1.2.3",
-    "fastify": "^3.3.0"
+    "delay": "^4.4.0",
+    "fastify": "^3.3.0",
+    "fastify-plugin": "^2.3.3",
+    "redis": "^3.0.2"
   }
 }

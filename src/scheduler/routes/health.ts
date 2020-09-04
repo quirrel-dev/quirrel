@@ -4,6 +4,18 @@ import * as GetHealthResponseSchema from "../schemas/health.json";
 import { GETHealthResponse } from "../types/health";
 
 const health: FastifyPluginCallback = (app, opts, done) => {
+  function checkRedis() {
+    return new Promise<boolean>((resolve, reject) => {
+      app.redis.ping((err, reply) => {
+        if (err) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      })
+    })
+  }
+
   app.get<{ Reply: GETHealthResponse }>("/", {
     schema: {
       response: {
@@ -12,9 +24,11 @@ const health: FastifyPluginCallback = (app, opts, done) => {
     },
 
     async handler(request, reply) {
-      reply.status(200);
+      const redis = await checkRedis();
+
+      reply.status(redis ? 200 : 502);
       reply.send({
-        redis: "up"
+        redis: redis ? "up" : "down"
       })
     },
   });
