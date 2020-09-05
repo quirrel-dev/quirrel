@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node": "12"
+  },
   "scripts": {
     "start": "node dist/src/main.js",
     "test": "jest",
