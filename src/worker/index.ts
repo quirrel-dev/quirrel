@@ -12,6 +12,7 @@ export async function createWorker({ redis }: QuirrelWorkerConfig) {
 
     jobsQueue.process(async (job) => {
         const { endpoint, body } = job.data as HttpJob;
+        console.log("Sending ", body, " to ", endpoint);
         await axios.post(endpoint, body);
     })
 
