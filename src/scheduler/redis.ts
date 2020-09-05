@@ -9,8 +9,8 @@ declare module "fastify" {
     }
 }
 
-const redisPlugin: FastifyPluginCallback<redis.ClientOpts> = async (fastify, opts, done) => {
-    fastify.decorate("redis", redis.createClient(opts));
+const redisPlugin: FastifyPluginCallback<{ opts: redis.ClientOpts | string }> = async (fastify, { opts }, done) => {
+    fastify.decorate("redis", redis.createClient(opts as any));
 
     fastify.addHook("onClose", (instance, done) => {
         fastify.redis.quit(() => {
