@@ -1,4 +1,5 @@
 {
+  "version": "0.1.0",
   "engines": {
     "node": "12"
   },
@@ -28,6 +29,7 @@
     "fastify": "^3.3.0",
     "fastify-basic-auth": "^1.0.1",
     "fastify-bearer-auth": "^5.0.2",
+    "fastify-oas": "^3.0.3",
     "fastify-plugin": "^2.3.3",
     "parse-duration": "^0.4.4",
     "redis": "^3.0.2",

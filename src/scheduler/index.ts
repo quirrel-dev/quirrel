@@ -5,6 +5,8 @@ import tokensRoute from "./routes/tokens";
 import health from "./routes/health";
 import jobs from "./routes/jobs";
 import type * as redis from "redis";
+import * as oas from "fastify-oas";
+import * as pack from "../../package.json";
 
 export interface QuirrelServerConfig {
   port?: number;
@@ -23,6 +25,24 @@ export async function createServer({
     logger: true,
   });
 
+  app.register(oas, {
+    routePrefix: "/documentation",
+    swagger: {
+      info: {
+        title: "Quirrel API",
+        description: "The Queueing Solution for Next.js x Vercel",
+        version: pack.version,
+      },
+      externalDocs: {
+        url: "https://quirrel.dev",
+        description: "Find more info here",
+      },
+      consumes: ["application/json"],
+      produces: ["application/json"],
+    },
+    exposeRoute: true,
+  });
+
   app.register(redisPlugin, { opts: redis });
 
   if (passphrases) {
@@ -34,6 +54,10 @@ export async function createServer({
   app.register(jobs, { prefix: "/jobs", auth: !!passphrases?.length });
 
   await app.listen(port, host);
+
+  app.ready(async () => {
+    await app.oas();
+  });
 
   return {
     port,
