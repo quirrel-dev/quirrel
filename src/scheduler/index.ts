@@ -12,7 +12,7 @@ export interface QuirrelServerConfig {
 
 export async function createServer({
   port = 3000,
-  host = "0.0.0.",
+  host = "0.0.0.0",
   redis,
 }: QuirrelServerConfig) {
   const app = fastify({
