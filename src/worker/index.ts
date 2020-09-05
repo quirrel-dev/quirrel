@@ -1,6 +1,6 @@
 import type * as redis from "redis"
 import * as Queue from "bee-queue";
-import { HttpJob, HTTP_JOB_QUEUE } from "../shared/HttpJob";
+import { HttpJob, HTTP_JOB_QUEUE } from "../shared/http-job";
 import axios from "axios";
 
 export interface QuirrelWorkerConfig {

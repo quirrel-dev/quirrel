@@ -3,7 +3,7 @@ import * as Queue from "bee-queue";
 
 import * as POSTJobsBodySchema from "../schemas/jobs/POST/body.json";
 import { POSTJobsBody } from "../types/jobs/POST/body";
-import { HttpJob, HTTP_JOB_QUEUE } from "../../shared/HttpJob";
+import { HttpJob, HTTP_JOB_QUEUE } from "../../shared/http-job";
 
 const jobs: FastifyPluginCallback = (app, opts, done) => {
   const jobs = new Queue(HTTP_JOB_QUEUE, {
