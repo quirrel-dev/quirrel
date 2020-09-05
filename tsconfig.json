@@ -1,6 +1,9 @@
 {
     "compilerOptions": {
+        "outDir": "dist",
         "strict": true,
-        "resolveJsonModule": true
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true
     }
 }
