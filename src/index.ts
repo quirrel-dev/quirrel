@@ -1,4 +1,3 @@
-import * as redis from "redis";
 import { createServer, QuirrelServerConfig } from "./scheduler";
 import { createWorker, QuirrelWorkerConfig } from "./worker";
 

@@ -1,6 +1,6 @@
 import { runQuirrel } from ".";
 
-const { PORT = 3000, REDIS_URL, HOST } = process.env;
+const { PORT = 3000, REDIS_URL, HOST, PASSPHRASES } = process.env;
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
@@ -12,6 +12,7 @@ async function main() {
     port: +PORT,
     host: HOST,
     redis: !!REDIS_URL ? REDIS_URL : undefined,
+    passphrases: !!PASSPHRASES ? PASSPHRASES.split(":") : undefined,
   });
 
   async function teardown(signal: string) {

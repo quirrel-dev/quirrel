@@ -12,6 +12,7 @@
   "devDependencies": {
     "@types/jest": "^26.0.13",
     "@types/redis": "^2.8.27",
+    "@types/uuid": "^8.3.0",
     "find-free-port": "^2.0.0",
     "jest": "^26.4.2",
     "json-schema-to-typescript": "^9.1.1",
@@ -25,8 +26,11 @@
     "bee-queue": "^1.2.3",
     "delay": "^4.4.0",
     "fastify": "^3.3.0",
+    "fastify-basic-auth": "^1.0.1",
+    "fastify-bearer-auth": "^5.0.2",
     "fastify-plugin": "^2.3.3",
     "parse-duration": "^0.4.4",
-    "redis": "^3.0.2"
+    "redis": "^3.0.2",
+    "uuid": "^8.3.0"
   }
 }
