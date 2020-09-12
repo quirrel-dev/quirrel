@@ -4,9 +4,11 @@ import tokensPlugin from "./tokens";
 import tokensRoute from "./routes/tokens";
 import health from "./routes/health";
 import jobs from "./routes/jobs";
+import usageRoute from "./routes/usage";
 import type * as redis from "redis";
 import * as oas from "fastify-oas";
 import * as pack from "../../package.json";
+import basicAuthPlugin from "./basic-auth";
 
 export interface QuirrelServerConfig {
   port?: number;
@@ -46,8 +48,10 @@ export async function createServer({
   app.register(redisPlugin, { opts: redis });
 
   if (passphrases) {
+    app.register(basicAuthPlugin, { passphrases });
     app.register(tokensPlugin);
-    app.register(tokensRoute, { prefix: "/tokens", passphrases });
+    app.register(tokensRoute, { prefix: "/tokens" });
+    app.register(usageRoute, { prefix: "/usage" });
   }
 
   app.register(health, { prefix: "/health" });

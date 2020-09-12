@@ -108,5 +108,17 @@ describe("authenticated jobs", () => {
     );
 
     expect(statusOnPostWithRevokedToken).toBe(401);
+
+    const { data: usage } = await client.delete("/usage/", {
+      auth: { username: "ignored", password: passphrase },
+    });
+    expect(usage).toEqual({
+      testproject: 1,
+    });
+
+    const { data: clearedUsage } = await client.delete("/usage/", {
+      auth: { username: "ignored", password: passphrase },
+    });
+    expect(clearedUsage).toEqual({});
   });
 });

@@ -1,6 +1,5 @@
 import { FastifyPluginCallback } from "fastify";
 import * as Queue from "bee-queue";
-import * as fastifyBearerAuth from "fastify-bearer-auth";
 
 import * as POSTJobsBodySchema from "../schemas/jobs/POST/body.json";
 import { POSTJobsBody } from "../types/jobs/POST/body";
@@ -11,14 +10,18 @@ interface JobsPluginOpts {
 }
 
 const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
-  if (opts.auth) {
-    app.register(fastifyBearerAuth, {
-      keys: new Set(["hello"]),
-      async auth(key: string) {
-        const payload = await app.tokens.check(key);
-        return !!payload;
-      },
-    });
+  async function getTokenID(authorizationHeader?: string) {
+    if (!authorizationHeader) {
+      return undefined;
+    }
+
+    if (!authorizationHeader.startsWith("Bearer ")) {
+      return undefined;
+    }
+
+    const [_, token] = authorizationHeader.split("Bearer ");
+    const tokenId = await app.tokens.check(token);
+    return tokenId ?? undefined;
   }
 
   const jobs = new Queue(HTTP_JOB_QUEUE, {
@@ -38,9 +41,20 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
     },
 
     async handler(request, reply) {
+      let tokenId: string | undefined;
+
+      if (opts.auth) {
+        const { authorization } = request.headers;
+        tokenId = await getTokenID(authorization);
+
+        if (!tokenId) {
+          reply.status(401).send("Unauthorized");
+          return;
+        }
+      }
       const { endpoint, body, runAt } = request.body;
 
-      let job = jobs.createJob<HttpJob>({ endpoint, body });
+      let job = jobs.createJob<HttpJob>({ endpoint, body, tokenId });
 
       if (runAt) {
         job = job.delayUntil(new Date(runAt));
