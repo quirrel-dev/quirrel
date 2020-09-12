@@ -54,7 +54,7 @@ const tokensPlugin: FastifyPluginCallback<TokensPluginOpts> = async (
 
       async handler(request, reply) {
         const success = await fastify.tokens.delete(request.params.id);
-        reply.status(success ? 200 : 404);
+        reply.status(success ? 204 : 404);
       },
     });
   });
