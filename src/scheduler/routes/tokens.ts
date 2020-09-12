@@ -1,8 +1,8 @@
 import { FastifyPluginCallback } from "fastify";
 import fastifyBasicAuth from "fastify-basic-auth";
 
-import * as POSTTokensBodySchema from "../schemas/tokens/POST/body.json";
-import { POSTTokensBody } from "../types/tokens/POST/body";
+import * as POSTTokensParamsSchema from "../schemas/tokens/PUT/params.json";
+import { POSTTokensParams } from "../types/tokens/PUT/params";
 
 import * as DELETETokenParamsSchema from "../schemas/tokens/DELETE/params.json";
 import { DELETETokensTokenParams } from "../types/tokens/DELETE/params";
@@ -29,17 +29,17 @@ const tokensPlugin: FastifyPluginCallback<TokensPluginOpts> = async (
   fastify.after(() => {
     fastify.addHook("onRequest", fastify.basicAuth);
 
-    fastify.post<{ Body: POSTTokensBody }>("/", {
+    fastify.put<{ Params: POSTTokensParams }>("/:id", {
       schema: {
-        body: {
-          data: POSTTokensBodySchema,
+        params: {
+          data: POSTTokensParamsSchema,
         },
       },
 
       async handler(request, reply) {
-        const { id } = request.body;
+        const { id } = request.params;
 
-        const token = await fastify.tokens.create({ id });
+        const token = await fastify.tokens.create(id);
 
         reply.status(201).send(token);
       },
@@ -54,7 +54,11 @@ const tokensPlugin: FastifyPluginCallback<TokensPluginOpts> = async (
 
       async handler(request, reply) {
         const success = await fastify.tokens.delete(request.params.id);
-        reply.status(success ? 204 : 404);
+        if (success) {
+          reply.status(204);
+        } else {
+          reply.status(404).send("Not Found");
+        }
       },
     });
   });

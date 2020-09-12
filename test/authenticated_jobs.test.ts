@@ -36,9 +36,9 @@ describe("authenticated jobs", () => {
   });
 
   test("post a job", async () => {
-    const { data: token } = await client.post(
-      "/tokens",
-      { id: "testproject" },
+    const { data: token } = await client.put(
+      "/tokens/testproject",
+      {},
       { auth: { username: "ignored", password: passphrase } }
     );
 
@@ -49,7 +49,7 @@ describe("authenticated jobs", () => {
         body: { foo: "bar" },
       },
       {
-        validateStatus: () => true
+        validateStatus: () => true,
       }
     );
 
@@ -73,6 +73,40 @@ describe("authenticated jobs", () => {
     await delay(300);
 
     expect(lastBody).toEqual({ foo: "bar" });
-  });
 
+    const { status: statusOnRevokeNonExistantToken } = await client.delete(
+      "/tokens/non-existant",
+      {
+        auth: { username: "ignored", password: passphrase },
+        validateStatus: () => true,
+      }
+    );
+
+    expect(statusOnRevokeNonExistantToken).toBe(404);
+
+    const { status: statusOnRevokeToken } = await client.delete(
+      "/tokens/testproject",
+      {
+        auth: { username: "ignored", password: passphrase },
+      }
+    );
+
+    expect(statusOnRevokeToken).toBe(204);
+
+    const { status: statusOnPostWithRevokedToken } = await client.post(
+      "/jobs",
+      {
+        endpoint,
+        body: { foo: "bar" },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        validateStatus: () => true,
+      }
+    );
+
+    expect(statusOnPostWithRevokedToken).toBe(401);
+  });
 });
