@@ -1,6 +1,4 @@
 import { FastifyPluginCallback } from "fastify";
-import * as fp from "fastify-plugin";
-import * as uuid from "uuid";
 import fastifyBasicAuth from "fastify-basic-auth";
 
 import * as POSTTokensBodySchema from "../schemas/tokens/POST/body.json";
@@ -12,8 +10,6 @@ import { DELETETokensTokenParams } from "../types/tokens/DELETE/params";
 interface TokensPluginOpts {
   passphrases: string[];
 }
-
-const TOKENS = "tokens";
 
 const tokensPlugin: FastifyPluginCallback<TokensPluginOpts> = async (
   fastify,
@@ -41,15 +37,15 @@ const tokensPlugin: FastifyPluginCallback<TokensPluginOpts> = async (
       },
 
       async handler(request, reply) {
-        const { projectId } = request.body;
+        const { id } = request.body;
 
-        const token = await fastify.tokens.create({ projectId });
+        const token = await fastify.tokens.create({ id });
 
         reply.status(201).send(token);
       },
     });
 
-    fastify.delete<{ Params: DELETETokensTokenParams }>("/:token", {
+    fastify.delete<{ Params: DELETETokensTokenParams }>("/:id", {
       schema: {
         params: {
           data: DELETETokenParamsSchema,
@@ -57,7 +53,7 @@ const tokensPlugin: FastifyPluginCallback<TokensPluginOpts> = async (
       },
 
       async handler(request, reply) {
-        const success = await fastify.tokens.delete(request.params.token);
+        const success = await fastify.tokens.delete(request.params.id);
         reply.status(success ? 200 : 404);
       },
     });

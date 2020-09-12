@@ -3,7 +3,7 @@ import * as fp from "fastify-plugin";
 import * as uuid from "uuid";
 
 interface TokenPayload {
-  projectId: string;
+  id: string;
 }
 
 interface PublicTokensService {

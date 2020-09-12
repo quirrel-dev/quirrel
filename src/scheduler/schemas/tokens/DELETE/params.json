@@ -1,13 +1,12 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "DELETE /tokens/:token params",
-    "type": "object",
-    "properties": {
-      "token": {
-        "type": "string"
-      }
-    },
-    "required": ["token"],
-    "additionalProperties": false
-  }
-  
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DELETE /tokens/:token params",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    }
+  },
+  "required": ["id"],
+  "additionalProperties": false
+}

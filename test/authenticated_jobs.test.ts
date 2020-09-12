@@ -38,7 +38,7 @@ describe("authenticated jobs", () => {
   test("post a job", async () => {
     const { data: token } = await client.post(
       "/tokens",
-      { projectId: "testproject" },
+      { id: "testproject" },
       { auth: { username: "ignored", password: passphrase } }
     );
 
