@@ -1,10 +1,8 @@
 import { FastifyPluginCallback } from "fastify";
-import * as fp from "fastify-plugin";
-import * as uuid from "uuid";
 import fastifyBasicAuth from "fastify-basic-auth";
 
-import * as POSTTokensBodySchema from "../schemas/tokens/POST/body.json";
-import { POSTTokensBody } from "../types/tokens/POST/body";
+import * as POSTTokensParamsSchema from "../schemas/tokens/PUT/params.json";
+import { POSTTokensParams } from "../types/tokens/PUT/params";
 
 import * as DELETETokenParamsSchema from "../schemas/tokens/DELETE/params.json";
 import { DELETETokensTokenParams } from "../types/tokens/DELETE/params";
@@ -12,8 +10,6 @@ import { DELETETokensTokenParams } from "../types/tokens/DELETE/params";
 interface TokensPluginOpts {
   passphrases: string[];
 }
-
-const TOKENS = "tokens";
 
 const tokensPlugin: FastifyPluginCallback<TokensPluginOpts> = async (
   fastify,
@@ -33,23 +29,23 @@ const tokensPlugin: FastifyPluginCallback<TokensPluginOpts> = async (
   fastify.after(() => {
     fastify.addHook("onRequest", fastify.basicAuth);
 
-    fastify.post<{ Body: POSTTokensBody }>("/", {
+    fastify.put<{ Params: POSTTokensParams }>("/:id", {
       schema: {
-        body: {
-          data: POSTTokensBodySchema,
+        params: {
+          data: POSTTokensParamsSchema,
         },
       },
 
       async handler(request, reply) {
-        const { projectId } = request.body;
+        const { id } = request.params;
 
-        const token = await fastify.tokens.create({ projectId });
+        const token = await fastify.tokens.create(id);
 
         reply.status(201).send(token);
       },
     });
 
-    fastify.delete<{ Params: DELETETokensTokenParams }>("/:token", {
+    fastify.delete<{ Params: DELETETokensTokenParams }>("/:id", {
       schema: {
         params: {
           data: DELETETokenParamsSchema,
@@ -57,8 +53,12 @@ const tokensPlugin: FastifyPluginCallback<TokensPluginOpts> = async (
       },
 
       async handler(request, reply) {
-        const success = await fastify.tokens.delete(request.params.token);
-        reply.status(success ? 200 : 404);
+        const success = await fastify.tokens.delete(request.params.id);
+        if (success) {
+          reply.status(204);
+        } else {
+          reply.status(404).send("Not Found");
+        }
       },
     });
   });
