@@ -32,6 +32,7 @@
     "fastify-plugin": "^2.3.3",
     "parse-duration": "^0.4.4",
     "redis": "^3.0.2",
+    "secure-webhooks": "^0.2.0",
     "uuid": "^8.3.0"
   }
 }

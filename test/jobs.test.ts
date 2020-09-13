@@ -43,7 +43,7 @@ describe("jobs", () => {
 
     await delay(300);
 
-    expect(lastBody).toEqual({ foo: "bar" });
+    expect(lastBody).toEqual('{"foo":"bar"}');
   });
 
   test("post a delayed job", async () => {
@@ -57,10 +57,10 @@ describe("jobs", () => {
 
     await delay(150);
 
-    expect(lastBody).not.toEqual({ lol: "lel" });
+    expect(lastBody).not.toEqual('{"lol":"lel"}');
 
     await delay(200);
 
-    expect(lastBody).toEqual({ lol: "lel" });
+    expect(lastBody).toEqual('{"lol":"lel"}');
   });
 });

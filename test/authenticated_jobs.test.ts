@@ -3,6 +3,7 @@ import { run } from "./runQuirrel";
 import fastify, { FastifyInstance } from "fastify";
 import delay from "delay";
 import * as findFreePort from "find-free-port";
+import { verify } from "secure-webhooks";
 
 const passphrase = "hello";
 
@@ -13,6 +14,7 @@ describe("authenticated jobs", () => {
   let server: FastifyInstance;
   let endpoint: string;
   let lastBody: any;
+  let lastSignature: any;
 
   beforeAll(async (done) => {
     const res = await run([passphrase]);
@@ -22,6 +24,7 @@ describe("authenticated jobs", () => {
     const server = fastify();
     server.post("/", (request, reply) => {
       lastBody = request.body;
+      lastSignature = request.headers["x-quirrel-signature"];
       reply.status(200).send("OK");
     });
 
@@ -72,7 +75,9 @@ describe("authenticated jobs", () => {
 
     await delay(300);
 
-    expect(lastBody).toEqual({ foo: "bar" });
+    expect(lastBody).toEqual('{"foo":"bar"}');
+    expect(lastSignature).toMatch(/v=(\d+),d=([\da-f]+)/);
+    expect(verify(lastBody, token, lastSignature)).toBe(true);
 
     const { status: statusOnRevokeNonExistantToken } = await client.delete(
       "/tokens/non-existant",

@@ -22,7 +22,6 @@ const tokensPlugin: FastifyPluginCallback = async (
 
     async handler(request, reply) {
       const { id } = request.params;
-
       const token = await fastify.tokens.create(id);
 
       reply.status(201).send(token);
@@ -37,7 +36,7 @@ const tokensPlugin: FastifyPluginCallback = async (
     },
 
     async handler(request, reply) {
-      const success = await fastify.tokens.delete(request.params.id);
+      const success = await fastify.tokens.revoke(request.params.id);
       if (success) {
         reply.status(204);
       } else {
