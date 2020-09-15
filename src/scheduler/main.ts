@@ -1,6 +1,6 @@
 import { createServer } from ".";
 
-const { PORT = 3000, REDIS_URL, HOST, PASSPHRASES } = process.env;
+const { PORT = 9181, REDIS_URL, HOST, PASSPHRASES } = process.env;
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);

@@ -18,7 +18,7 @@ export interface QuirrelServerConfig {
 }
 
 export async function createServer({
-  port = 3000,
+  port = 9181,
   host = "0.0.0.0",
   redis,
   passphrases,

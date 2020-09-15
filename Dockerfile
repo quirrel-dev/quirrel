@@ -10,5 +10,5 @@ COPY . .
 
 RUN npm run-script build
 
-EXPOSE 3000
+EXPOSE 9181
 CMD node dist/src/main.js
