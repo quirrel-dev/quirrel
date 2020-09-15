@@ -1,6 +1,6 @@
 import { createWorker } from ".";
 
-const { REDIS_URL, ENABLE_USAGE_METERING } = process.env;
+const { REDIS_URL, ENABLE_USAGE_METERING, RUNNING_IN_DOCKER } = process.env;
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
@@ -10,7 +10,8 @@ process.on("unhandledRejection", (reason, promise) => {
 async function main() {
   const worker = await createWorker({
     redis: !!REDIS_URL ? REDIS_URL : undefined,
-    enableUsageMetering: Boolean(ENABLE_USAGE_METERING)
+    enableUsageMetering: Boolean(ENABLE_USAGE_METERING),
+    runningInDocker: Boolean(RUNNING_IN_DOCKER),
   });
 
   async function teardown(signal: string) {

@@ -6,14 +6,28 @@ import * as redis from "redis";
 import { TokenRepo } from "../shared/token-repo";
 import { sign } from "secure-webhooks";
 
+export function replaceLocalhostWithDockerHost(url: string): string {
+  if (url.startsWith("http://localhost")) {
+    return url.replace("http://localhost", "http://host.docker.internal");
+  }
+
+  if (url.startsWith("https://localhost")) {
+    return url.replace("https://localhost", "https://host.docker.internal");
+  }
+
+  return url;
+}
+
 export interface QuirrelWorkerConfig {
   redis?: redis.ClientOpts | string;
   enableUsageMetering?: boolean;
+  runningInDocker?: boolean;
 }
 
 export async function createWorker({
   redis: redisOpts,
   enableUsageMetering,
+  runningInDocker,
 }: QuirrelWorkerConfig) {
   const jobsQueue = new Queue(HTTP_JOB_QUEUE, {
     redis: redisOpts as any,
@@ -30,7 +44,7 @@ export async function createWorker({
   }
 
   jobsQueue.process(async (job) => {
-    const { endpoint, body, tokenId } = job.data as HttpJob;
+    let { endpoint, body, tokenId } = job.data as HttpJob;
 
     console.log("Sending ", body, " to ", endpoint);
 
@@ -46,6 +60,10 @@ export async function createWorker({
         const signature = sign(input, token);
         headers["x-quirrel-signature"] = signature;
       }
+    }
+
+    if (runningInDocker) {
+      endpoint = replaceLocalhostWithDockerHost(endpoint);
     }
 
     await axios.post(endpoint, input, {

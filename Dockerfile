@@ -10,6 +10,7 @@ COPY . .
 
 RUN npm run-script build
 
+ENV RUNNING_IN_DOCKER true
+
 EXPOSE 9181
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 CMD node dist/src/main.js
