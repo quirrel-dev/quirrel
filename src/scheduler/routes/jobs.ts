@@ -50,9 +50,9 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
           return;
         }
       }
-      const { endpoint, body, runAt } = request.body;
+      
+      let { endpoint, body, runAt, delay } = request.body;
 
-      let delay: number | undefined = undefined;
       if (runAt) {
         delay = Number(new Date(runAt)) - Date.now();
       }
