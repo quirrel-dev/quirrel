@@ -1,5 +1,5 @@
 import { FastifyPluginCallback } from "fastify";
-import * as Queue from "bee-queue";
+import { Queue, QueueScheduler } from "bullmq";
 
 import * as POSTJobsBodySchema from "../schemas/jobs/POST/body.json";
 import { POSTJobsBody } from "../types/jobs/POST/body";
@@ -24,13 +24,11 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
     return tokenId ?? undefined;
   }
 
-  const jobs = new Queue(HTTP_JOB_QUEUE, {
-    redis: app.redis as any,
-    isWorker: false,
-    getEvents: false,
-    sendEvents: false,
-    storeJobs: false,
-    activateDelayedJobs: true,
+  const jobsScheduler = new QueueScheduler(HTTP_JOB_QUEUE, {
+    connection: app.redis,
+  });
+  const jobs = new Queue<HttpJob>(HTTP_JOB_QUEUE, {
+    connection: app.redis,
   });
 
   app.post<{ Body: POSTJobsBody }>("/", {
@@ -54,13 +52,22 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
       }
       const { endpoint, body, runAt } = request.body;
 
-      let job = jobs.createJob<HttpJob>({ endpoint, body, tokenId });
-
+      let delay: number | undefined = undefined;
       if (runAt) {
-        job = job.delayUntil(new Date(runAt));
+        delay = Number(new Date(runAt)) - Date.now();
       }
 
-      await job.save();
+      await jobs.add(
+        "default",
+        {
+          endpoint,
+          body,
+          tokenId,
+        },
+        {
+          delay,
+        }
+      );
 
       reply.status(200);
       reply.send("OK");
@@ -68,7 +75,7 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
   });
 
   app.addHook("onClose", async (instance, done) => {
-    await jobs.close();
+    await Promise.all([jobs.close(), jobsScheduler.close()]);
     done();
   });
 

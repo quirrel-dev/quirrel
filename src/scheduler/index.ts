@@ -5,15 +5,15 @@ import tokensRoute from "./routes/tokens";
 import health from "./routes/health";
 import jobs from "./routes/jobs";
 import usageRoute from "./routes/usage";
-import type * as redis from "redis";
 import * as oas from "fastify-oas";
 import * as pack from "../../package.json";
 import basicAuthPlugin from "./basic-auth";
+import type { RedisOptions } from "ioredis";
 
 export interface QuirrelServerConfig {
   port?: number;
   host?: string;
-  redis?: redis.ClientOpts | string;
+  redis?: RedisOptions | string;
   passphrases?: string[];
 }
 
