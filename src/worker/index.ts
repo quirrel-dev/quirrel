@@ -1,10 +1,10 @@
-import * as Queue from "bee-queue";
+import { Worker } from "bullmq";
 import { HttpJob, HTTP_JOB_QUEUE } from "../shared/http-job";
 import { UsageMeter } from "../shared/usage-meter";
 import axios from "axios";
-import * as redis from "redis";
 import { TokenRepo } from "../shared/token-repo";
 import { sign } from "secure-webhooks";
+import * as Redis from "ioredis";
 
 export function replaceLocalhostWithDockerHost(url: string): string {
   if (url.startsWith("http://localhost")) {
@@ -19,7 +19,7 @@ export function replaceLocalhostWithDockerHost(url: string): string {
 }
 
 export interface QuirrelWorkerConfig {
-  redis?: redis.ClientOpts | string;
+  redis?: Redis.RedisOptions | string;
   enableUsageMetering?: boolean;
   runningInDocker?: boolean;
 }
@@ -29,12 +29,7 @@ export async function createWorker({
   enableUsageMetering,
   runningInDocker,
 }: QuirrelWorkerConfig) {
-  const jobsQueue = new Queue(HTTP_JOB_QUEUE, {
-    redis: redisOpts as any,
-    isWorker: true,
-  });
-
-  const redisClient = redis.createClient(redisOpts as any);
+  const redisClient = new Redis(redisOpts as any);
 
   const tokenRepo = new TokenRepo(redisClient);
 
@@ -43,45 +38,50 @@ export async function createWorker({
     usageMeter = new UsageMeter(redisClient);
   }
 
-  jobsQueue.process(async (job) => {
-    let { endpoint, body, tokenId } = job.data as HttpJob;
+  const worker = new Worker<HttpJob>(
+    HTTP_JOB_QUEUE,
+    async (job) => {
+      let { endpoint, body, tokenId } = job.data as HttpJob;
 
-    console.log("Sending ", body, " to ", endpoint);
+      console.log("Sending ", body, " to ", endpoint);
 
-    const input = JSON.stringify(body);
+      const input = JSON.stringify(body);
 
-    const headers: Record<string, string> = {
-      "Content-Type": "text/plain",
-    };
+      const headers: Record<string, string> = {
+        "Content-Type": "text/plain",
+      };
 
-    if (tokenId) {
-      const token = await tokenRepo.getById(tokenId);
-      if (token) {
-        const signature = sign(input, token);
-        headers["x-quirrel-signature"] = signature;
+      if (tokenId) {
+        const token = await tokenRepo.getById(tokenId);
+        if (token) {
+          const signature = sign(input, token);
+          headers["x-quirrel-signature"] = signature;
+        }
       }
-    }
 
-    if (runningInDocker) {
-      endpoint = replaceLocalhostWithDockerHost(endpoint);
-    }
+      if (runningInDocker) {
+        endpoint = replaceLocalhostWithDockerHost(endpoint);
+      }
 
-    await axios.post(endpoint, input, {
-      headers,
-    });
+      await axios.post(endpoint, input, {
+        headers,
+      });
 
-    if (tokenId) {
-      await usageMeter?.record(tokenId);
+      if (tokenId) {
+        await usageMeter?.record(tokenId);
+      }
+    },
+    {
+      connection: redisClient
     }
-  });
+  );
 
   async function close() {
-    await jobsQueue.close();
-    redisClient.quit();
+    await worker.close();
+    await redisClient.quit();
   }
 
   return {
     close,
-    healthCheck: () => jobsQueue.checkHealth(),
   };
 }

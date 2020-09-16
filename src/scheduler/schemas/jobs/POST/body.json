@@ -11,6 +11,10 @@
     "runAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "delay": { "type": "number" },
+    "jobId": {
+      "type": "string"
     }
   },
   "required": ["endpoint"],

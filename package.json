@@ -20,18 +20,18 @@
     "npm-run-all": "^4.1.5",
     "testcontainers": "^3.4.0",
     "ts-jest": "^26.3.0",
-    "typescript": "^4.0.2"
+    "typescript": "^4.0.2",
+    "delay": "^4.4.0"
   },
   "dependencies": {
     "axios": "^0.20.0",
-    "bee-queue": "^1.2.3",
-    "delay": "^4.4.0",
+    "bullmq": "^1.9.0",
     "fastify": "^3.3.0",
     "fastify-basic-auth": "^1.0.1",
     "fastify-oas": "^3.0.3",
     "fastify-plugin": "^2.3.3",
+    "ioredis": "^4.17.3",
     "parse-duration": "^0.4.4",
-    "redis": "^3.0.2",
     "secure-webhooks": "^0.2.0",
     "uuid": "^8.3.0"
   }
