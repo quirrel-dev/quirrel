@@ -65,7 +65,7 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
         return;
       }
 
-      let { endpoint, body, runAt, delay } = request.body;
+      let { endpoint, body, runAt, delay, jobId } = request.body;
 
       if (runAt) {
         delay = Number(new Date(runAt)) - Date.now();
@@ -80,12 +80,13 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
         },
         {
           delay,
+          jobId,
         }
       );
 
       reply.status(200);
       reply.send({
-        id: job.id,
+        jobId: job.id,
       });
     },
   });

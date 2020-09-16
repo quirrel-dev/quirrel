@@ -12,7 +12,10 @@
       "type": "string",
       "format": "date-time"
     },
-    "delay": { "type": "number" }
+    "delay": { "type": "number" },
+    "jobId": {
+      "type": "string"
+    }
   },
   "required": ["endpoint"],
   "additionalProperties": false

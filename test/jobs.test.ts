@@ -10,7 +10,8 @@ describe("jobs", () => {
 
   let server: FastifyInstance;
   let endpoint: string;
-  let lastBody: any;
+  let bodies: any[] = [];
+  let lastBody: any = undefined;
 
   beforeAll(async (done) => {
     const res = await run();
@@ -20,6 +21,7 @@ describe("jobs", () => {
     const server = fastify();
     server.post("/", (request, reply) => {
       lastBody = request.body;
+      bodies.push(lastBody);
       reply.status(200).send("OK");
     });
 
@@ -27,6 +29,11 @@ describe("jobs", () => {
     endpoint = await server.listen(port);
 
     done();
+  });
+
+  beforeEach(() => {
+    bodies = [];
+    lastBody = undefined;
   });
 
   afterAll(async () => {
@@ -80,5 +87,30 @@ describe("jobs", () => {
     await delay(500);
 
     expect(lastBody).not.toEqual('{"iWill":"beDeleted"}');
+  });
+
+  test("idempotent jobs", async () => {
+    const jobId = "sameIdAcrossBothJobs";
+    const { data: resultOfFirstJob } = await client.post("/jobs", {
+      endpoint,
+      body: { iAm: "theFirstJob" },
+      runAt: new Date(Date.now() + 300).toISOString(),
+      jobId,
+    });
+
+    expect(resultOfFirstJob.jobId).toBe(jobId);
+
+    const { data: resultOfSecondJob } = await client.post("/jobs", {
+      endpoint,
+      body: { iAm: "theSecondJob" },
+      runAt: new Date(Date.now() + 300).toISOString(),
+      jobId,
+    });
+
+    expect(resultOfSecondJob.jobId).toBe(jobId);
+
+    await delay(400);
+
+    expect(bodies).toEqual(['{"iAm":"theFirstJob"}']);
   });
 });
