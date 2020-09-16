@@ -5,7 +5,6 @@ import axios from "axios";
 import { TokenRepo } from "../shared/token-repo";
 import { sign } from "secure-webhooks";
 import * as Redis from "ioredis";
-import redis from "../scheduler/redis";
 
 export function replaceLocalhostWithDockerHost(url: string): string {
   if (url.startsWith("http://localhost")) {
