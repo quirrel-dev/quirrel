@@ -1,6 +1,8 @@
-import { FastifyPluginCallback } from "fastify";
-import { Queue, QueueScheduler } from "bullmq";
+import { FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
+import { Job, Queue, QueueScheduler } from "bullmq";
 
+import * as DELETEJobsParamsSchema from "../schemas/jobs/DELETE/params.json";
+import { DELETEJobsIdParams } from "../types/jobs/DELETE/params";
 import * as POSTJobsBodySchema from "../schemas/jobs/POST/body.json";
 import { POSTJobsBody } from "../types/jobs/POST/body";
 import { HttpJob, HTTP_JOB_QUEUE } from "../../shared/http-job";
@@ -31,6 +33,25 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
     connection: app.redis,
   });
 
+  async function authenticate(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<[tokenId: string | undefined, done: boolean]> {
+    if (opts.auth) {
+      const { authorization } = request.headers;
+      const tokenId = await getTokenID(authorization);
+
+      if (!tokenId) {
+        reply.status(401).send("Unauthorized");
+        return [undefined, true];
+      }
+
+      return [tokenId, false];
+    }
+
+    return [undefined, false];
+  }
+
   app.post<{ Body: POSTJobsBody }>("/", {
     schema: {
       body: {
@@ -39,25 +60,18 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
     },
 
     async handler(request, reply) {
-      let tokenId: string | undefined;
-
-      if (opts.auth) {
-        const { authorization } = request.headers;
-        tokenId = await getTokenID(authorization);
-
-        if (!tokenId) {
-          reply.status(401).send("Unauthorized");
-          return;
-        }
+      const [tokenId, done] = await authenticate(request, reply);
+      if (done) {
+        return;
       }
-      
+
       let { endpoint, body, runAt, delay } = request.body;
 
       if (runAt) {
         delay = Number(new Date(runAt)) - Date.now();
       }
 
-      await jobs.add(
+      const job: Job<HttpJob> = await jobs.add(
         "default",
         {
           endpoint,
@@ -70,7 +84,34 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
       );
 
       reply.status(200);
-      reply.send("OK");
+      reply.send({
+        id: job.id,
+      });
+    },
+  });
+
+  app.delete<{ Params: DELETEJobsIdParams }>("/:id", {
+    schema: {
+      params: {
+        data: DELETEJobsParamsSchema,
+      },
+    },
+
+    async handler(request, reply) {
+      const [tokenId, done] = await authenticate(request, reply);
+      if (done) {
+        return;
+      }
+
+      let { id } = request.params;
+
+      const job: Job<HttpJob> | undefined = await jobs.getJob(id);
+      if (job && job.data.tokenId === tokenId) {
+        await job.remove();
+        reply.status(204);
+      } else {
+        reply.status(404);
+      }
     },
   });
 
