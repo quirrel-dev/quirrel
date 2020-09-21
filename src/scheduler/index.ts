@@ -9,6 +9,7 @@ import * as oas from "fastify-oas";
 import * as pack from "../../package.json";
 import basicAuthPlugin from "./basic-auth";
 import type { RedisOptions } from "ioredis";
+import type { AddressInfo } from "net"
 
 export interface QuirrelServerConfig {
   port?: number;
@@ -64,7 +65,8 @@ export async function createServer({
   });
 
   return {
-    port,
+    server: app.server,
+    port: (app.server.address() as AddressInfo).port,
     async close() {
       app.log.info("Closing.");
       await app.close();

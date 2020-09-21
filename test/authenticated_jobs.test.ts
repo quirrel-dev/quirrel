@@ -1,14 +1,14 @@
-import { AxiosInstance } from "axios";
 import { run } from "./runQuirrel";
 import fastify, { FastifyInstance } from "fastify";
 import delay from "delay";
-import * as findFreePort from "find-free-port";
 import { verify } from "secure-webhooks";
+import type * as http from "http";
+import * as request from "supertest";
 
 const passphrase = "hello";
 
 describe("authenticated jobs", () => {
-  let client: AxiosInstance;
+  let quirrel: http.Server;
   let teardown: () => Promise<void>;
 
   let server: FastifyInstance;
@@ -16,9 +16,9 @@ describe("authenticated jobs", () => {
   let lastBody: any;
   let lastSignature: any;
 
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     const res = await run([passphrase]);
-    client = res.client;
+    quirrel = res.server;
     teardown = res.teardown;
 
     const server = fastify();
@@ -28,10 +28,7 @@ describe("authenticated jobs", () => {
       reply.status(200).send("OK");
     });
 
-    const [port] = await findFreePort(3000);
-    endpoint = await server.listen(port);
-
-    done();
+    endpoint = await server.listen(0);
   });
 
   afterAll(async () => {
@@ -39,39 +36,27 @@ describe("authenticated jobs", () => {
   });
 
   test("post a job", async () => {
-    const { data: token } = await client.put(
-      "/tokens/testproject",
-      {},
-      { auth: { username: "ignored", password: passphrase } }
-    );
+    const { text: token } = await request(quirrel)
+      .put("/tokens/testproject")
+      .auth("ignored", passphrase)
+      .expect(201);
 
-    const { status: statusWithoutAuth } = await client.post(
-      "/jobs",
-      {
+    await request(quirrel)
+      .post("/jobs")
+      .send({
         endpoint,
         body: { foo: "bar" },
-      },
-      {
-        validateStatus: () => true,
-      }
-    );
+      })
+      .expect(401);
 
-    expect(statusWithoutAuth).toBe(401);
-
-    const { status } = await client.post(
-      "/jobs",
-      {
+    await request(quirrel)
+      .post("/jobs")
+      .auth(token, { type: "bearer" })
+      .send({
         endpoint,
         body: { foo: "bar" },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    expect(status).toBe(200);
+      })
+      .expect(200);
 
     await delay(300);
 
@@ -79,51 +64,35 @@ describe("authenticated jobs", () => {
     expect(lastSignature).toMatch(/v=(\d+),d=([\da-f]+)/);
     expect(verify(lastBody, token, lastSignature)).toBe(true);
 
-    const { status: statusOnRevokeNonExistantToken } = await client.delete(
-      "/tokens/non-existant",
-      {
-        auth: { username: "ignored", password: passphrase },
-        validateStatus: () => true,
-      }
-    );
+    await request(quirrel)
+      .delete("/tokens/non-existant")
+      .auth("ignored", passphrase)
+      .expect(404);
 
-    expect(statusOnRevokeNonExistantToken).toBe(404);
+    await request(quirrel)
+      .delete("/tokens/testproject")
+      .auth("ignored", passphrase)
+      .expect(204);
 
-    const { status: statusOnRevokeToken } = await client.delete(
-      "/tokens/testproject",
-      {
-        auth: { username: "ignored", password: passphrase },
-      }
-    );
-
-    expect(statusOnRevokeToken).toBe(204);
-
-    const { status: statusOnPostWithRevokedToken } = await client.post(
-      "/jobs",
-      {
+    await request(quirrel)
+      .post("/jobs")
+      .auth(token, { type: "bearer" })
+      .send({
         endpoint,
         body: { foo: "bar" },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        validateStatus: () => true,
-      }
-    );
+      })
+      .expect(401);
 
-    expect(statusOnPostWithRevokedToken).toBe(401);
+    await request(quirrel)
+      .delete("/usage")
+      .auth("ignored", passphrase)
+      .expect(200, {
+        testproject: 1,
+      });
 
-    const { data: usage } = await client.delete("/usage/", {
-      auth: { username: "ignored", password: passphrase },
-    });
-    expect(usage).toEqual({
-      testproject: 1,
-    });
-
-    const { data: clearedUsage } = await client.delete("/usage/", {
-      auth: { username: "ignored", password: passphrase },
-    });
-    expect(clearedUsage).toEqual({});
+    await request(quirrel)
+      .delete("/usage")
+      .auth("ignored", passphrase)
+      .expect(200, {});
   });
 });

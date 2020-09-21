@@ -1,11 +1,11 @@
-import { AxiosInstance } from "axios";
 import { run } from "./runQuirrel";
 import fastify, { FastifyInstance } from "fastify";
 import delay from "delay";
-import * as findFreePort from "find-free-port";
+import type * as http from "http";
+import * as request from "supertest";
 
 describe("jobs", () => {
-  let client: AxiosInstance;
+  let quirrel: http.Server;
   let teardown: () => Promise<void>;
 
   let server: FastifyInstance;
@@ -13,10 +13,12 @@ describe("jobs", () => {
   let bodies: any[] = [];
   let lastBody: any = undefined;
 
-  beforeAll(async (done) => {
-    const res = await run();
-    client = res.client;
-    teardown = res.teardown;
+  beforeAll(async () => {
+    const result = await run();
+    quirrel = result.server;
+    teardown = result.teardown;
+
+    await result.redis.flushall();
 
     const server = fastify();
     server.post("/", (request, reply) => {
@@ -25,10 +27,9 @@ describe("jobs", () => {
       reply.status(200).send("OK");
     });
 
-    const [port] = await findFreePort(3000);
-    endpoint = await server.listen(port);
+    endpoint = await server.listen(0);
 
-    done();
+    
   });
 
   beforeEach(() => {
@@ -41,12 +42,10 @@ describe("jobs", () => {
   });
 
   test("post a job", async () => {
-    const { status } = await client.post("/jobs", {
-      endpoint,
-      body: { foo: "bar" },
-    });
-
-    expect(status).toBe(200);
+    await request(quirrel)
+      .post("/jobs")
+      .send({ endpoint, body: { foo: "bar" } })
+      .expect(200);
 
     await delay(300);
 
@@ -54,35 +53,37 @@ describe("jobs", () => {
   });
 
   test("post a delayed job", async () => {
-    const { status } = await client.post("/jobs", {
-      endpoint,
-      body: { lol: "lel" },
-      runAt: new Date(Date.now() + 300).toISOString(),
-    });
-
-    expect(status).toBe(200);
+    await request(quirrel)
+      .post("/jobs")
+      .send({
+        endpoint,
+        body: { lol: "lel" },
+        runAt: new Date(Date.now() + 300).toISOString(),
+      })
+      .expect(200);
 
     await delay(150);
 
     expect(lastBody).not.toEqual('{"lol":"lel"}');
 
-    await delay(200);
+    await delay(300);
 
     expect(lastBody).toEqual('{"lol":"lel"}');
   });
 
   test("delete a job before it's executed", async () => {
-    const { data } = await client.post("/jobs", {
-      endpoint,
-      body: { iWill: "beDeleted" },
-      runAt: new Date(Date.now() + 300).toISOString(),
-    });
+    const { body } = await request(quirrel)
+      .post("/jobs")
+      .send({
+        endpoint,
+        body: { iWill: "beDeleted" },
+        runAt: new Date(Date.now() + 300).toISOString(),
+      })
+      .expect(200);
 
-    expect(typeof data.id).toBe("string");
+    expect(typeof body.jobId).toBe("string");
 
-    const { status } = await client.delete(`/jobs/${data.id}`);
-
-    expect(status).toBe(204);
+    await request(quirrel).delete(`/jobs/${body.jobId}`).expect(204);
 
     await delay(500);
 
@@ -91,27 +92,26 @@ describe("jobs", () => {
 
   test("idempotent jobs", async () => {
     const jobId = "sameIdAcrossBothJobs";
-    const { data: resultOfFirstJob } = await client.post("/jobs", {
-      endpoint,
-      body: { iAm: "theFirstJob" },
-      runAt: new Date(Date.now() + 300).toISOString(),
-      jobId,
-    });
 
-    expect(resultOfFirstJob.jobId).toBe(
-      encodeURIComponent(endpoint) + ":" + jobId
-    );
+    await request(quirrel)
+      .post("/jobs")
+      .send({
+        endpoint,
+        body: { iAm: "theFirstJob" },
+        runAt: new Date(Date.now() + 300).toISOString(),
+        jobId,
+      })
+      .expect(200, { jobId: encodeURIComponent(endpoint) + ":" + jobId });
 
-    const { data: resultOfSecondJob } = await client.post("/jobs", {
-      endpoint,
-      body: { iAm: "theSecondJob" },
-      runAt: new Date(Date.now() + 300).toISOString(),
-      jobId,
-    });
-
-    expect(resultOfSecondJob.jobId).toBe(
-      encodeURIComponent(endpoint) + ":" + jobId
-    );
+    await request(quirrel)
+      .post("/jobs")
+      .send({
+        endpoint,
+        body: { iAm: "theSecondJob" },
+        runAt: new Date(Date.now() + 300).toISOString(),
+        jobId,
+      })
+      .expect(200, { jobId: encodeURIComponent(endpoint) + ":" + jobId });
 
     await delay(400);
 

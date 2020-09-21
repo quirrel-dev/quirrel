@@ -1,24 +1,22 @@
-import { AxiosInstance } from "axios"
-import { run } from "./runQuirrel"
+import * as request from "supertest";
+import { run } from "./runQuirrel";
+import type * as http from "http";
 
 describe("health", () => {
-    let client: AxiosInstance;
-    let teardown: () => Promise<void>;
-    
-    beforeAll(async () => {
-        const res = await run()
-        client = res.client;
-        teardown = res.teardown;
-    })
+  let quirrel: http.Server;
+  let teardown: () => Promise<void>;
 
-    afterAll(async () => {
-        await teardown()
-    })
+  beforeAll(async () => {
+    const res = await run();
+    quirrel = res.server;
+    teardown = res.teardown;
+  });
 
-    test("health", async () => {
-        const { data, status } = await client.get("/health")
+  afterAll(async () => {
+    await teardown();
+  });
 
-        expect(status).toBe(200);
-        expect(data).toEqual({ redis: "up" });
-    })
-})
+  test("health", async () => {
+    await request(quirrel).get("/health").expect(200, { redis: "up" });
+  });
+});
