@@ -1,5 +1,9 @@
 import { Worker } from "bullmq";
-import { HttpJob, HTTP_JOB_QUEUE } from "../shared/http-job";
+import {
+  decodeInternalJobId,
+  HttpJob,
+  HTTP_JOB_QUEUE,
+} from "../shared/http-job";
 import { UsageMeter } from "../shared/usage-meter";
 import axios from "axios";
 import { TokenRepo } from "../shared/token-repo";
@@ -41,7 +45,8 @@ export async function createWorker({
   const worker = new Worker<HttpJob>(
     HTTP_JOB_QUEUE,
     async (job) => {
-      let { endpoint, body, tokenId } = job.data as HttpJob;
+      let { tokenId, endpoint } = decodeInternalJobId(job.id!);
+      let { body } = job.data as HttpJob;
 
       console.log("Sending ", body, " to ", endpoint);
 
@@ -67,12 +72,10 @@ export async function createWorker({
         headers,
       });
 
-      if (tokenId) {
-        await usageMeter?.record(tokenId);
-      }
+      await usageMeter?.record(tokenId);
     },
     {
-      connection: redisClient
+      connection: redisClient,
     }
   );
 

@@ -98,7 +98,9 @@ describe("jobs", () => {
       jobId,
     });
 
-    expect(resultOfFirstJob.jobId).toBe(jobId);
+    expect(resultOfFirstJob.jobId).toBe(
+      encodeURIComponent(endpoint) + ":" + jobId
+    );
 
     const { data: resultOfSecondJob } = await client.post("/jobs", {
       endpoint,
@@ -107,7 +109,9 @@ describe("jobs", () => {
       jobId,
     });
 
-    expect(resultOfSecondJob.jobId).toBe(jobId);
+    expect(resultOfSecondJob.jobId).toBe(
+      encodeURIComponent(endpoint) + ":" + jobId
+    );
 
     await delay(400);
 
