@@ -5,7 +5,15 @@ import * as DELETEJobsParamsSchema from "../schemas/jobs/DELETE/params.json";
 import { DELETEJobsIdParams } from "../types/jobs/DELETE/params";
 import * as POSTJobsBodySchema from "../schemas/jobs/POST/body.json";
 import { POSTJobsBody } from "../types/jobs/POST/body";
-import { HttpJob, HTTP_JOB_QUEUE } from "../../shared/http-job";
+import {
+  encodeExternalJobId,
+  encodeInternalJobId,
+  decodeExternalJobId,
+  HttpJob,
+  HTTP_JOB_QUEUE,
+} from "../../shared/http-job";
+
+import * as uuid from "uuid";
 
 interface JobsPluginOpts {
   auth: boolean;
@@ -36,20 +44,20 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
   async function authenticate(
     request: FastifyRequest,
     reply: FastifyReply
-  ): Promise<[tokenId: string | undefined, done: boolean]> {
+  ): Promise<[tokenId: string, done: boolean]> {
     if (opts.auth) {
       const { authorization } = request.headers;
       const tokenId = await getTokenID(authorization);
 
       if (!tokenId) {
         reply.status(401).send("Unauthorized");
-        return [undefined, true];
+        return ["unauthorized", true];
       }
 
       return [tokenId, false];
     }
 
-    return [undefined, false];
+    return ["anonymous", false];
   }
 
   app.post<{ Body: POSTJobsBody }>("/", {
@@ -67,26 +75,28 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
 
       let { endpoint, body, runAt, delay, jobId } = request.body;
 
+      if (typeof jobId === "undefined") {
+        jobId = uuid.v4();
+      }
+
       if (runAt) {
         delay = Number(new Date(runAt)) - Date.now();
       }
 
-      const job: Job<HttpJob> = await jobs.add(
+      await jobs.add(
         "default",
         {
-          endpoint,
           body,
-          tokenId,
         },
         {
           delay,
-          jobId,
+          jobId: encodeInternalJobId(tokenId, endpoint, jobId),
         }
       );
 
       reply.status(200);
       reply.send({
-        jobId: job.id,
+        jobId: encodeExternalJobId(endpoint, jobId),
       });
     },
   });
@@ -104,14 +114,19 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
         return;
       }
 
-      let { id } = request.params;
+      const { url = "" } = request.raw;
 
-      const job: Job<HttpJob> | undefined = await jobs.getJob(id);
-      if (job && job.data.tokenId === tokenId) {
+      const id = url.slice(url.lastIndexOf("/") + 1);
+
+      const { endpoint, customId } = decodeExternalJobId(id);
+      const internalId = encodeInternalJobId(tokenId, endpoint, customId);
+
+      const job: Job<HttpJob> | undefined = await jobs.getJob(internalId);
+      if (job) {
         await job.remove();
         reply.status(204);
       } else {
-        reply.status(404);
+        reply.status(404).send("Not Found");
       }
     },
   });

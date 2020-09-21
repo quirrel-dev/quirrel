@@ -101,7 +101,7 @@ describe("jobs", () => {
         runAt: new Date(Date.now() + 300).toISOString(),
         jobId,
       })
-      .expect(200, { jobId });
+      .expect(200, { jobId: encodeURIComponent(endpoint) + ":" + jobId });
 
     await request(quirrel)
       .post("/jobs")
@@ -111,7 +111,7 @@ describe("jobs", () => {
         runAt: new Date(Date.now() + 300).toISOString(),
         jobId,
       })
-      .expect(200, { jobId });
+      .expect(200, { jobId: encodeURIComponent(endpoint) + ":" + jobId });
 
     await delay(400);
 

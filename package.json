@@ -5,7 +5,7 @@
   },
   "scripts": {
     "start": "node dist/src/main.js",
-    "test": "jest",
+    "test": "jest --runInBand --forceExit",
     "build": "run-s build:schemas build:tsc",
     "build:schemas": "json2ts -i src/scheduler/schemas/ -o src/scheduler/types/",
     "build:tsc": "tsc"
