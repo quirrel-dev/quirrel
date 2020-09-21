@@ -28,8 +28,6 @@ describe("jobs", () => {
     });
 
     endpoint = await server.listen(0);
-
-    
   });
 
   beforeEach(() => {
@@ -116,5 +114,19 @@ describe("jobs", () => {
     await delay(400);
 
     expect(bodies).toEqual(['{"iAm":"theFirstJob"}']);
+
+    await request(quirrel)
+      .post("/jobs")
+      .send({
+        endpoint,
+        body: { iAm: "theSecondJob" },
+        runAt: new Date(Date.now() + 300).toISOString(),
+        jobId,
+      })
+      .expect(200, { jobId: encodeURIComponent(endpoint) + ":" + jobId });
+
+    await delay(400);
+
+    expect(bodies).toEqual(['{"iAm":"theFirstJob"}', '{"iAm":"theSecondJob"}']);
   });
 });

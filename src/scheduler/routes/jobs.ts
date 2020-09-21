@@ -39,6 +39,9 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
   });
   const jobs = new Queue<HttpJob>(HTTP_JOB_QUEUE, {
     connection: app.redis,
+    defaultJobOptions: {
+      removeOnComplete: true
+    }
   });
 
   async function authenticate(
