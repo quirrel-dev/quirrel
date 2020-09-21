@@ -44,9 +44,7 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
   async function authenticate(
     request: FastifyRequest,
     reply: FastifyReply
-  ): Promise<
-    [tokenId: string, done: boolean]
-  > {
+  ): Promise<[tokenId: string, done: boolean]> {
     if (opts.auth) {
       const { authorization } = request.headers;
       const tokenId = await getTokenID(authorization);
@@ -116,7 +114,9 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
         return;
       }
 
-      let { id } = request.params;
+      const { url = "" } = request.raw;
+
+      const id = url.slice(url.lastIndexOf("/") + 1);
 
       const { endpoint, customId } = decodeExternalJobId(id);
       const internalId = encodeInternalJobId(tokenId, endpoint, customId);
@@ -126,7 +126,7 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
         await job.remove();
         reply.status(204);
       } else {
-        reply.status(404);
+        reply.status(404).send("Not Found");
       }
     },
   });
