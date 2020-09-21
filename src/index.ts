@@ -12,6 +12,9 @@ export async function runQuirrel(config: QuirrelConfig) {
   });
 
   return {
+    server,
+    worker,
+    httpServer: server.server,
     async close() {
       await Promise.all([server.close(), worker.close()]);
     },
