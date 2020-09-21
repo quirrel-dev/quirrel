@@ -13,10 +13,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [12.x]
+    container: node:12
 
     services:
       redis:
@@ -27,11 +24,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 6379:6379
     
     env:
-      REDIS_URL: redis://localhost:6379
+      REDIS_URL: redis://redis:6379
 
     steps:
     - uses: actions/checkout@v2
@@ -40,5 +35,5 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+    - run: npm run build
+    - run: npm test -- --forceExit
