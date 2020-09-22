@@ -13,7 +13,6 @@ if (process.env.NODE_ENV === "production" && !defaultToken) {
 
 interface JobDTO {
   id: string;
-  endpoint: string;
   body: unknown;
   runAt: string;
 }
@@ -62,12 +61,12 @@ export class QuirrelClient {
     }
   }
 
-  private toJob(dto: JobDTO): Job {
+  private toJob(dto: JobDTO, endpoint: string): Job {
     return {
       ...dto,
       runAt: new Date(dto.runAt),
       delete: async () => {
-        await this.delete(dto.endpoint, dto.id);
+        await this.delete(endpoint, dto.id);
       },
     };
   }
@@ -92,7 +91,7 @@ export class QuirrelClient {
       throw new Error(`Unexpected status: ${201}`);
     }
 
-    return this.toJob(JSON.parse(body));
+    return this.toJob(JSON.parse(body), endpoint);
   }
 
   get(endpoint: string): AsyncIterator<Job[]> {
@@ -117,7 +116,7 @@ export class QuirrelClient {
         cursor = newCursor;
 
         return {
-          value: jobs.map((dto) => this.toJob(dto)),
+          value: jobs.map((dto) => this.toJob(dto, endpoint)),
           done: cursor === null,
         };
       },
@@ -136,7 +135,7 @@ export class QuirrelClient {
     }
 
     if (status === 200) {
-      return this.toJob(JSON.parse(body));
+      return this.toJob(JSON.parse(body), endpoint);
     }
 
     throw new Error("Unexpected response: " + status);
@@ -154,7 +153,7 @@ export class QuirrelClient {
     }
 
     if (status === 200) {
-      return this.toJob(JSON.parse(body));
+      return this.toJob(JSON.parse(body), endpoint);
     }
 
     throw new Error("Unexpected response: " + status);

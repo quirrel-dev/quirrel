@@ -85,8 +85,6 @@ describe("jobs", () => {
 
       expect(jobsWithoutRunAt).toContainEqual({
         id: jobId1,
-        idempotencyKey: jobId1.split(":")[1],
-        endpoint: decodeURIComponent(endpoint),
         body: {
           nr: 1,
           this: "willBeRetrieved",
@@ -94,8 +92,6 @@ describe("jobs", () => {
       });
       expect(jobsWithoutRunAt).toContainEqual({
         id: jobId2,
-        idempotencyKey: jobId2.split(":")[1],
-        endpoint: decodeURIComponent(endpoint),
         body: {
           nr: 2,
           this: "willBeRetrieved",
@@ -126,8 +122,6 @@ describe("jobs", () => {
 
       expect(restOfJob).toEqual({
         id,
-        idempotencyKey: id.split(":")[1],
-        endpoint: decodeURIComponent(endpoint),
         body: { this: "willBeRetrieved" },
       });
 
@@ -219,7 +213,7 @@ describe("jobs", () => {
 
     expect(jobId3).toEqual(id);
 
-    await delay(400);
+    await delay(500);
 
     expect(bodies).toEqual(['{"iAm":"theFirstJob"}', '{"iAm":"theSecondJob"}']);
   });

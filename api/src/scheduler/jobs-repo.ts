@@ -18,7 +18,6 @@ interface PaginationOpts {
 
 interface JobDTO {
   id: string;
-  endpoint: string;
   body: unknown;
   runAt: string;
 }
@@ -40,11 +39,10 @@ export class JobsRepo {
   }
 
   private static toJobDTO(job: Job<HttpJob>): JobDTO {
-    const { endpoint, jobId } = decodeJobDescriptor(job.id!);
+    const { jobId } = decodeJobDescriptor(job.id!);
 
     return {
       id: jobId,
-      endpoint,
       body: job.data.body,
       runAt: new Date(Date.now() + (job.opts.delay ?? 0)).toISOString(),
     };
