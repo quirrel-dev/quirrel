@@ -127,9 +127,9 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
       const job: Job<HttpJob> | undefined = await jobs.getJob(internalId);
       if (job) {
         reply.status(200).send({
-          id,
+          jobId: id,
           data: job.data,
-          delay: job.timestamp
+          plannedExecution: job.timestamp
         });
       } else {
         reply.status(404).send("Not Found");

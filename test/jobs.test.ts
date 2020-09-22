@@ -50,6 +50,63 @@ describe("jobs", () => {
     expect(lastBody).toEqual('{"foo":"bar"}');
   });
 
+  describe("retrieve delayed jobs", () => {
+    test("all", async () => {
+      const {
+        body: { jobId: jobId1 },
+      } = await request(quirrel)
+        .post("/jobs")
+        .send({
+          endpoint,
+          body: { this: "willBeRetrieved", nr: 1 },
+          runAt: new Date(Date.now() + 300).toISOString(),
+        })
+        .expect(200);
+
+      const {
+        body: { jobId: jobId2 },
+      } = await request(quirrel)
+        .post("/jobs")
+        .send({
+          endpoint,
+          body: { this: "willBeRetrieved", nr: 2 },
+          runAt: new Date(Date.now() + 300).toISOString(),
+        })
+        .expect(200);
+
+      await request(quirrel).get(`/jobs`).expect(200, [
+        {
+          id: jobId1,
+        },
+        {
+          id: jobId2
+        }
+      ]);
+
+      await request(quirrel).delete(`/jobs/${jobId1}`).expect(204);
+      await request(quirrel).delete(`/jobs/${jobId2}`).expect(204);
+    });
+
+    test("by id", async () => {
+      const {
+        body: { jobId },
+      } = await request(quirrel)
+        .post("/jobs")
+        .send({
+          endpoint,
+          body: { this: "willBeRetrieved" },
+          runAt: new Date(Date.now() + 300).toISOString(),
+        })
+        .expect(200);
+
+      await request(quirrel).get(`/jobs/${jobId}`).expect(200, {
+        jobId,
+      });
+
+      await request(quirrel).delete(`/jobs/${jobId}`).expect(204);
+    });
+  });
+
   test("post a delayed job", async () => {
     await request(quirrel)
       .post("/jobs")
