@@ -2,7 +2,10 @@
   "name": "@quirrel/client",
   "version": "0.1.0",
   "description": "Quirrel Client",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "build": "tsc"
   },
