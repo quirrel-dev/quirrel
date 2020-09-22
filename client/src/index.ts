@@ -21,14 +21,14 @@ interface JobDTO {
   runAt: string;
 }
 
-interface EnqueueJobOpts {
+export interface EnqueueJobOpts {
   body?: any;
   runAt?: Date;
   delay?: number;
   id?: string;
 }
 
-interface Job extends Omit<JobDTO, "runAt"> {
+export interface Job extends Omit<JobDTO, "runAt"> {
   runAt: Date;
   delete(): Promise<void>;
 }
