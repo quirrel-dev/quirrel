@@ -1,17 +1,30 @@
 const defaultEndpoint = process.env.QUIRREL_API ?? "https://api.quirrel.dev";
 const defaultToken = process.env.QUIRREL_TOKEN;
 
-type JobDTO = any;
+interface JobDTO {
+  id: string;
+  endpoint: string;
+  body: unknown;
+  runAt: string;
+}
 
-interface Job extends JobDTO {
+interface EnqueueJobOpts {
+  body?: any;
+  runAt?: Date;
+  delay?: number;
+  id?: string;
+}
+
+interface Job extends Omit<JobDTO, "runAt"> {
+  runAt: Date;
   delete(): Promise<void>;
 }
 
 interface HttpRequest {
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   url: string;
-  headers: Record<string, string>;
-  body: string;
+  headers?: Record<string, string>;
+  body?: string;
 }
 
 interface HttpResponse {
@@ -22,36 +35,119 @@ interface HttpResponse {
 
 type HttpFetcher = (req: HttpRequest) => Promise<HttpResponse>;
 
-class QuirrelClient {
+export class QuirrelClient {
   constructor(
     private readonly fetcher: HttpFetcher,
     private readonly endpoint = defaultEndpoint,
     private readonly token = defaultToken
   ) {}
 
-  async enqueue(): Promise<Job> {
-    // ...
-  }
-
-  get(): AsyncIterator<Job> {
-    let cursor = 0
-    return {
-      async next(): Promise<IteratorResult<Job[]>> {
-        cursor = cursor + 1
-        return {
-          value: [],
-          done: cursor === null
-        }
-      }
+  private getAuthHeaders(): Record<string, string> {
+    if (this.token) {
+      return {
+        Authorization: `Bearer ${this.token}`,
+      };
+    } else {
+      return {};
     }
   }
 
+  private toJob(dto: JobDTO): Job {
+    return {
+      ...dto,
+      runAt: new Date(dto.runAt),
+      delete: async () => {
+        await this.delete(dto.id);
+      },
+    };
+  }
+
+  async enqueue(endpoint: string, opts: EnqueueJobOpts): Promise<Job> {
+    const { body, status } = await this.fetcher({
+      url: this.endpoint + "/jobs",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+      body: JSON.stringify({
+        endpoint,
+        body: opts.body,
+        runAt: opts.runAt,
+        delay: opts.delay,
+        jobId: opts.id,
+      }),
+    });
+
+    if (status !== 201) {
+      throw new Error(`Unexpected status: ${201}`);
+    }
+
+    return this.toJob(JSON.parse(body));
+  }
+
+  get(): AsyncIterator<Job[]> {
+    let cursor: number | null = 0;
+    return {
+      next: async () => {
+        if (cursor === null) {
+          throw new Error("Iterator is already done.");
+        }
+
+        const { body } = await this.fetcher({
+          url: this.endpoint + "/jobs",
+          method: "GET",
+          headers: this.getAuthHeaders(),
+        });
+
+        const { cursor: newCursor, jobs } = JSON.parse(body) as {
+          cursor: number | null;
+          jobs: JobDTO[];
+        };
+
+        cursor = newCursor;
+
+        return {
+          value: jobs.map((dto) => this.toJob(dto)),
+          done: cursor === null,
+        };
+      },
+    };
+  }
+
   async getById(id: string): Promise<Job | null> {
-    // ...
-    return null
+    const { body, status } = await this.fetcher({
+      url: this.endpoint + "/jobs/" + id,
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    });
+
+    if (status === 404) {
+      return null;
+    }
+
+    if (status === 200) {
+      return this.toJob(JSON.parse(body));
+    }
+
+    throw new Error("Unexpected response: " + status);
   }
 
   async delete(id: string): Promise<Job | null> {
-    // ...
+    const { status, body } = await this.fetcher({
+      url: this.endpoint + "/jobs/" + id,
+      method: "DELETE",
+      headers: this.getAuthHeaders(),
+    });
+
+    if (status === 404) {
+      return null;
+    }
+
+    if (status === 200) {
+      return this.toJob(JSON.parse(body));
+    }
+
+    throw new Error("Unexpected response: " + status);
   }
 }
