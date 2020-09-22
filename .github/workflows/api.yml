@@ -53,6 +53,7 @@ jobs:
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v1
         with:
+          path: api
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
