@@ -1,4 +1,4 @@
-import { Worker } from "bullmq";
+import { Worker } from "@quirrel/bullmq";
 import {
   decodeInternalJobId,
   HttpJob,

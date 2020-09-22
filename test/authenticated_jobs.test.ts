@@ -56,7 +56,7 @@ describe("authenticated jobs", () => {
         endpoint,
         body: { foo: "bar" },
       })
-      .expect(200);
+      .expect(201);
 
     await delay(300);
 
