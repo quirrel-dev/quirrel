@@ -47,8 +47,8 @@ type HttpFetcher = (req: HttpRequest) => Promise<HttpResponse>;
 export class QuirrelClient {
   constructor(
     private readonly fetcher: HttpFetcher,
-    private readonly baseUrl = defaultBaseUrl,
-    private readonly token = defaultToken
+    readonly baseUrl = defaultBaseUrl,
+    readonly token = defaultToken
   ) {}
 
   private getAuthHeaders(): Record<string, string> {
@@ -83,7 +83,7 @@ export class QuirrelClient {
         body: opts.body,
         runAt: opts.runAt?.toISOString(),
         delay: opts.delay,
-        jobId: opts.id,
+        id: opts.id,
       }),
     });
 
