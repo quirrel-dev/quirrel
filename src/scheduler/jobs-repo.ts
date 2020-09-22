@@ -1,6 +1,6 @@
 import type { Redis } from "ioredis";
 
-import { Job, Queue, QueueScheduler } from "bullmq";
+import { Job, Queue, QueueScheduler } from "@quirrel/bullmq";
 import { POSTJobsBody } from "./types/jobs/POST/body";
 import {
   encodeExternalJobId,
