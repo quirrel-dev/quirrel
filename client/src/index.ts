@@ -1,5 +1,18 @@
-const defaultEndpoint = process.env.QUIRREL_API ?? "https://api.quirrel.dev";
+let defaultEndpoint = process.env.QUIRREL_URL;
+
+if (!defaultEndpoint) {
+  if (process.env.NODE_ENV === "production") {
+    defaultEndpoint = "https://api.quirrel.dev";
+  } else {
+    defaultEndpoint = "http://localhost:9181";
+  }
+}
+
 const defaultToken = process.env.QUIRREL_TOKEN;
+
+if (process.env.NODE_ENV === "production" && !defaultToken) {
+  throw new Error("Make sure to provide QUIRREL_TOKEN env var.");
+}
 
 interface JobDTO {
   id: string;
