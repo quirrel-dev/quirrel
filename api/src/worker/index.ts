@@ -1,6 +1,6 @@
 import { Worker } from "@quirrel/bullmq";
 import {
-  decodeInternalJobId,
+  decodeJobDescriptor,
   HttpJob,
   HTTP_JOB_QUEUE,
 } from "../shared/http-job";
@@ -45,7 +45,7 @@ export async function createWorker({
   const worker = new Worker<HttpJob>(
     HTTP_JOB_QUEUE,
     async (job) => {
-      let { tokenId, endpoint } = decodeInternalJobId(job.id!);
+      let { tokenId, endpoint } = decodeJobDescriptor(job.id!);
       let { body } = job.data as HttpJob;
 
       console.log("Sending ", body, " to ", endpoint);

@@ -1,12 +1,16 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "DELETE /jobs/:id params",
+  "title": "/queues/:endpoint/:id params",
   "type": "object",
   "properties": {
     "id": {
       "type": "string"
+    },
+    "endpoint": {
+      "type": "string",
+      "format": "uri"
     }
   },
-  "required": ["id"],
+  "required": ["id", "endpoint"],
   "additionalProperties": false
 }

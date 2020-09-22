@@ -1,12 +1,9 @@
-let defaultEndpoint = process.env.QUIRREL_URL;
+const fallbackEndpoint =
+  process.env.NODE_ENV === "production"
+    ? "https://api.quirrel.dev"
+    : "http://localhost:9181";
 
-if (!defaultEndpoint) {
-  if (process.env.NODE_ENV === "production") {
-    defaultEndpoint = "https://api.quirrel.dev";
-  } else {
-    defaultEndpoint = "http://localhost:9181";
-  }
-}
+const defaultBaseUrl = process.env.QUIRREL_URL ?? fallbackEndpoint;
 
 const defaultToken = process.env.QUIRREL_TOKEN;
 
@@ -51,7 +48,7 @@ type HttpFetcher = (req: HttpRequest) => Promise<HttpResponse>;
 export class QuirrelClient {
   constructor(
     private readonly fetcher: HttpFetcher,
-    private readonly endpoint = defaultEndpoint,
+    private readonly baseUrl = defaultBaseUrl,
     private readonly token = defaultToken
   ) {}
 
@@ -70,23 +67,22 @@ export class QuirrelClient {
       ...dto,
       runAt: new Date(dto.runAt),
       delete: async () => {
-        await this.delete(dto.id);
+        await this.delete(dto.endpoint, dto.id);
       },
     };
   }
 
   async enqueue(endpoint: string, opts: EnqueueJobOpts): Promise<Job> {
     const { body, status } = await this.fetcher({
-      url: this.endpoint + "/jobs",
+      url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint),
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeaders(),
       },
       body: JSON.stringify({
-        endpoint,
         body: opts.body,
-        runAt: opts.runAt,
+        runAt: opts.runAt?.toISOString(),
         delay: opts.delay,
         jobId: opts.id,
       }),
@@ -99,7 +95,7 @@ export class QuirrelClient {
     return this.toJob(JSON.parse(body));
   }
 
-  get(): AsyncIterator<Job[]> {
+  get(endpoint: string): AsyncIterator<Job[]> {
     let cursor: number | null = 0;
     return {
       next: async () => {
@@ -108,7 +104,7 @@ export class QuirrelClient {
         }
 
         const { body } = await this.fetcher({
-          url: this.endpoint + "/jobs",
+          url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint),
           method: "GET",
           headers: this.getAuthHeaders(),
         });
@@ -128,9 +124,9 @@ export class QuirrelClient {
     };
   }
 
-  async getById(id: string): Promise<Job | null> {
+  async getById(endpoint: string, id: string): Promise<Job | null> {
     const { body, status } = await this.fetcher({
-      url: this.endpoint + "/jobs/" + id,
+      url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       method: "GET",
       headers: this.getAuthHeaders(),
     });
@@ -146,9 +142,9 @@ export class QuirrelClient {
     throw new Error("Unexpected response: " + status);
   }
 
-  async delete(id: string): Promise<Job | null> {
-    const { status, body } = await this.fetcher({
-      url: this.endpoint + "/jobs/" + id,
+  async delete(endpoint: string, id: string): Promise<Job | null> {
+    const { status, body } = await this.fetcher({
+      url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       method: "DELETE",
       headers: this.getAuthHeaders(),
     });

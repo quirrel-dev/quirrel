@@ -27,7 +27,7 @@ describe("jobs", () => {
       reply.status(200).send("OK");
     });
 
-    endpoint = await server.listen(0);
+    endpoint = encodeURIComponent(await server.listen(0));
   });
 
   beforeEach(() => {
@@ -41,8 +41,8 @@ describe("jobs", () => {
 
   test("post a job", async () => {
     await request(quirrel)
-      .post("/jobs")
-      .send({ endpoint, body: { foo: "bar" } })
+      .post("/queues/" + endpoint)
+      .send({ body: { foo: "bar" } })
       .expect(201);
 
     await delay(300);
@@ -55,9 +55,8 @@ describe("jobs", () => {
       const {
         body: { id: jobId1 },
       } = await request(quirrel)
-        .post("/jobs")
+        .post("/queues/" + endpoint)
         .send({
-          endpoint,
           body: { this: "willBeRetrieved", nr: 1 },
           runAt: new Date(Date.now() + 300).toISOString(),
         })
@@ -66,9 +65,8 @@ describe("jobs", () => {
       const {
         body: { id: jobId2 },
       } = await request(quirrel)
-        .post("/jobs")
+        .post("/queues/" + endpoint)
         .send({
-          endpoint,
           body: { this: "willBeRetrieved", nr: 2 },
           runAt: new Date(Date.now() + 300).toISOString(),
         })
@@ -76,7 +74,7 @@ describe("jobs", () => {
 
       const {
         body: { cursor, jobs },
-      } = await request(quirrel).get(`/jobs`).expect(200);
+      } = await request(quirrel).get(`/queues/${endpoint}`).expect(200);
 
       expect(cursor).toBe(null);
       const jobsWithoutRunAt = jobs.map(
@@ -88,7 +86,7 @@ describe("jobs", () => {
       expect(jobsWithoutRunAt).toContainEqual({
         id: jobId1,
         idempotencyKey: jobId1.split(":")[1],
-        endpoint,
+        endpoint: decodeURIComponent(endpoint),
         body: {
           nr: 1,
           this: "willBeRetrieved",
@@ -97,15 +95,15 @@ describe("jobs", () => {
       expect(jobsWithoutRunAt).toContainEqual({
         id: jobId2,
         idempotencyKey: jobId2.split(":")[1],
-        endpoint,
+        endpoint: decodeURIComponent(endpoint),
         body: {
           nr: 2,
           this: "willBeRetrieved",
         },
       });
 
-      await request(quirrel).delete(`/jobs/${jobId1}`).expect(200);
-      await request(quirrel).delete(`/jobs/${jobId2}`).expect(200);
+      await request(quirrel).delete(`/queues/${endpoint}/${jobId1}`).expect(200);
+      await request(quirrel).delete(`/queues/${endpoint}/${jobId2}`).expect(200);
     });
 
     test("by id", async () => {
@@ -113,16 +111,15 @@ describe("jobs", () => {
       const {
         body: { id },
       } = await request(quirrel)
-        .post("/jobs")
+        .post("/queues/" + endpoint)
         .send({
-          endpoint,
           body: { this: "willBeRetrieved" },
           runAt,
         })
         .expect(201);
 
       const { body: job } = await request(quirrel)
-        .get(`/jobs/${id}`)
+        .get(`/queues/${endpoint}/${id}`)
         .expect(200);
 
       const { runAt: jobRunAt, ...restOfJob } = job;
@@ -130,21 +127,20 @@ describe("jobs", () => {
       expect(restOfJob).toEqual({
         id,
         idempotencyKey: id.split(":")[1],
-        endpoint,
+        endpoint: decodeURIComponent(endpoint),
         body: { this: "willBeRetrieved" },
       });
 
       expect(+new Date(jobRunAt)).toBeCloseTo(+new Date(runAt), -2);
 
-      await request(quirrel).delete(`/jobs/${id}`).expect(200);
+      await request(quirrel).delete(`/queues/${endpoint}/${id}`).expect(200);
     });
   });
 
   test("post a delayed job", async () => {
     await request(quirrel)
-      .post("/jobs")
+      .post("/queues/" + endpoint)
       .send({
-        endpoint,
         body: { lol: "lel" },
         runAt: new Date(Date.now() + 300).toISOString(),
       })
@@ -161,9 +157,8 @@ describe("jobs", () => {
 
   test("delete a job before it's executed", async () => {
     const { body } = await request(quirrel)
-      .post("/jobs")
+      .post("/queues/" + endpoint)
       .send({
-        endpoint,
         body: { iWill: "beDeleted" },
         runAt: new Date(Date.now() + 300).toISOString(),
       })
@@ -171,7 +166,7 @@ describe("jobs", () => {
 
     expect(typeof body.id).toBe("string");
 
-    await request(quirrel).delete(`/jobs/${body.id}`).expect(200);
+    await request(quirrel).delete(`/queues/${endpoint}/${body.id}`).expect(200);
 
     await delay(500);
 
@@ -179,35 +174,33 @@ describe("jobs", () => {
   });
 
   test("idempotent jobs", async () => {
-    const jobId = "sameIdAcrossBothJobs";
+    const id = "sameIdAcrossBothJobs";
 
     const {
       body: { id: jobId1 },
     } = await request(quirrel)
-      .post("/jobs")
+      .post("/queues/" + endpoint)
       .send({
-        endpoint,
         body: { iAm: "theFirstJob" },
         runAt: new Date(Date.now() + 300).toISOString(),
-        jobId,
+        id,
       })
       .expect(201);
 
-    expect(jobId1).toEqual(encodeURIComponent(endpoint) + ":" + jobId);
+    expect(jobId1).toEqual(id);
 
     const {
       body: { id: jobId2 },
     } = await request(quirrel)
-      .post("/jobs")
+      .post("/queues/" + endpoint)
       .send({
-        endpoint,
         body: { iAm: "theSecondJob" },
         runAt: new Date(Date.now() + 300).toISOString(),
-        jobId,
+        id,
       })
       .expect(201);
 
-    expect(jobId2).toEqual(encodeURIComponent(endpoint) + ":" + jobId);
+    expect(jobId2).toEqual(id);
 
     await delay(400);
 
@@ -216,16 +209,15 @@ describe("jobs", () => {
     const {
       body: { id: jobId3 },
     } = await request(quirrel)
-      .post("/jobs")
+      .post("/queues/" + endpoint)
       .send({
-        endpoint,
         body: { iAm: "theSecondJob" },
         runAt: new Date(Date.now() + 300).toISOString(),
-        jobId,
+        id,
       })
       .expect(201);
 
-    expect(jobId3).toEqual(encodeURIComponent(endpoint) + ":" + jobId);
+    expect(jobId3).toEqual(id);
 
     await delay(400);
 

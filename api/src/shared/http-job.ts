@@ -4,35 +4,22 @@ export interface HttpJob {
   body: any;
 }
 
-export function encodeInternalJobId(
+export function encodeJobDescriptor(
   tokenId: string,
   endpoint: string,
-  idempotencyKey: string
+  jobId: string
 ) {
-  return [tokenId, endpoint, idempotencyKey].map(encodeURIComponent).join(":");
+  return [tokenId, endpoint, jobId].map(encodeURIComponent).join(":");
 }
 
-export function decodeInternalJobId(jobId: string) {
-  const [tokenId, endpoint, idempotencyKey] = jobId
+export function decodeJobDescriptor(id: string) {
+  const [tokenId, endpoint, jobId] = id
     .split(":")
     .map(decodeURIComponent);
 
   return {
     tokenId,
     endpoint,
-    idempotencyKey,
-  };
-}
-
-export function encodeExternalJobId(endpoint: string, idempotencyKey: string) {
-  return [endpoint, idempotencyKey].map(encodeURIComponent).join(":");
-}
-
-export function decodeExternalJobId(jobId: string) {
-  const [endpoint, idempotencyKey] = jobId.split(":").map(decodeURIComponent);
-
-  return {
-    endpoint,
-    idempotencyKey,
+    jobId,
   };
 }

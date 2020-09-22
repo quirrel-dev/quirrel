@@ -1,12 +1,10 @@
 import type { Redis } from "ioredis";
 
 import { Job, Queue, QueueScheduler } from "@quirrel/bullmq";
-import { POSTJobsBody } from "./types/jobs/POST/body";
+import { POSTQueuesEndpointBody } from "./types/queues/POST/body";
 import {
-  encodeExternalJobId,
-  encodeInternalJobId,
-  decodeExternalJobId,
-  decodeInternalJobId,
+  encodeJobDescriptor,
+  decodeJobDescriptor,
   HttpJob,
   HTTP_JOB_QUEUE,
 } from "../shared/http-job";
@@ -20,7 +18,6 @@ interface PaginationOpts {
 
 interface JobDTO {
   id: string;
-  idempotencyKey: string;
   endpoint: string;
   body: unknown;
   runAt: string;
@@ -43,11 +40,10 @@ export class JobsRepo {
   }
 
   private static toJobDTO(job: Job<HttpJob>): JobDTO {
-    const { endpoint, idempotencyKey } = decodeInternalJobId(job.id!);
+    const { endpoint, jobId } = decodeJobDescriptor(job.id!);
 
     return {
-      id: encodeExternalJobId(endpoint, idempotencyKey),
-      idempotencyKey,
+      id: jobId,
       endpoint,
       body: job.data.body,
       runAt: new Date(Date.now() + (job.opts.delay ?? 0)).toISOString(),
@@ -58,9 +54,9 @@ export class JobsRepo {
     await Promise.all([this.jobsScheduler.close(), this.jobsQueue.close()]);
   }
 
-  public async find(byTokenId: string, { count, cursor }: PaginationOpts = {}) {
+  public async find(byTokenId: string, endpoint: string, { count, cursor }: PaginationOpts = {}) {
     const { newCursor, jobs } = await this.jobsQueue.getJobFromIdPattern(
-      encodeInternalJobId(byTokenId, "*", "*"),
+      encodeJobDescriptor(byTokenId, endpoint, "*"),
       cursor,
       count
     );
@@ -71,9 +67,8 @@ export class JobsRepo {
     };
   }
 
-  public async findById(tokenId: string, externalId: string) {
-    const { endpoint, idempotencyKey } = decodeExternalJobId(externalId);
-    const internalId = encodeInternalJobId(tokenId, endpoint, idempotencyKey);
+  public async findById(tokenId: string, endpoint: string, id: string) {
+    const internalId = encodeJobDescriptor(tokenId, endpoint, id);
 
     const job: Job<HttpJob> | undefined = await this.jobsQueue.getJob(
       internalId
@@ -81,9 +76,8 @@ export class JobsRepo {
     return job ? JobsRepo.toJobDTO(job) : undefined;
   }
 
-  public async delete(tokenId: string, externalId: string) {
-    const { endpoint, idempotencyKey } = decodeExternalJobId(externalId);
-    const internalId = encodeInternalJobId(tokenId, endpoint, idempotencyKey);
+  public async delete(tokenId: string, endpoint: string, id: string) {
+    const internalId = encodeJobDescriptor(tokenId, endpoint, id);
 
     const job: Job<HttpJob> | undefined = await this.jobsQueue.getJob(
       internalId
@@ -100,14 +94,11 @@ export class JobsRepo {
 
   public async enqueue(
     tokenId: string,
-    { endpoint, body, runAt, jobId, delay, idempotencyKey }: POSTJobsBody
+    endpoint: string,
+    { body, runAt, id, delay }: POSTQueuesEndpointBody
   ) {
-    if (!idempotencyKey) {
-      idempotencyKey = jobId;
-    }
-
-    if (typeof jobId === "undefined") {
-      jobId = uuid.v4();
+    if (typeof id === "undefined") {
+      id = uuid.v4();
     }
 
     if (runAt) {
@@ -121,7 +112,7 @@ export class JobsRepo {
       },
       {
         delay,
-        jobId: encodeInternalJobId(tokenId, endpoint, jobId),
+        jobId: encodeJobDescriptor(tokenId, endpoint, id),
       }
     );
 

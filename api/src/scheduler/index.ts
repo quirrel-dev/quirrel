@@ -3,7 +3,7 @@ import redisPlugin from "./redis";
 import tokensPlugin from "./tokens";
 import tokensRoute from "./routes/tokens";
 import health from "./routes/health";
-import jobs from "./routes/jobs";
+import queues from "./routes/queues";
 import usageRoute from "./routes/usage";
 import * as oas from "fastify-oas";
 import * as pack from "../../package.json";
@@ -56,7 +56,7 @@ export async function createServer({
   }
 
   app.register(health, { prefix: "/health" });
-  app.register(jobs, { prefix: "/jobs", auth: !!passphrases?.length });
+  app.register(queues, { prefix: "/queues", auth: !!passphrases?.length });
 
   await app.listen(port, host);
 

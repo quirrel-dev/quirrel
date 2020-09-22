@@ -28,7 +28,7 @@ describe("authenticated jobs", () => {
       reply.status(200).send("OK");
     });
 
-    endpoint = await server.listen(0);
+    endpoint = encodeURIComponent(await server.listen(0));
   });
 
   afterAll(async () => {
@@ -42,18 +42,16 @@ describe("authenticated jobs", () => {
       .expect(201);
 
     await request(quirrel)
-      .post("/jobs")
+      .post("/queues/" + endpoint)
       .send({
-        endpoint,
         body: { foo: "bar" },
       })
       .expect(401);
 
     await request(quirrel)
-      .post("/jobs")
+      .post("/queues/" + endpoint)
       .auth(token, { type: "bearer" })
       .send({
-        endpoint,
         body: { foo: "bar" },
       })
       .expect(201);
@@ -75,10 +73,9 @@ describe("authenticated jobs", () => {
       .expect(204);
 
     await request(quirrel)
-      .post("/jobs")
+      .post("/queues/" + endpoint)
       .auth(token, { type: "bearer" })
       .send({
-        endpoint,
         body: { foo: "bar" },
       })
       .expect(401);

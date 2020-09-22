@@ -1,22 +1,15 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "POST /jobs body",
+  "title": "POST /queues/:endpoint body",
   "type": "object",
   "properties": {
-    "endpoint": {
-      "type": "string",
-      "format": "uri"
-    },
     "body": {},
     "runAt": {
       "type": "string",
       "format": "date-time"
     },
     "delay": { "type": "number" },
-    "jobId": {
-      "type": "string"
-    },
-    "idempotencyKey": {
+    "id": {
       "type": "string"
     }
   },

@@ -1,11 +1,13 @@
 import { FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
 
-import * as DELETEJobsParamsSchema from "../schemas/jobs/DELETE/params.json";
-import { DELETEJobsIdParams } from "../types/jobs/DELETE/params";
-import * as POSTJobsBodySchema from "../schemas/jobs/POST/body.json";
-import { POSTJobsBody } from "../types/jobs/POST/body";
+import * as EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
+import * as EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
+import * as POSTQueuesEndpointBodySchema from "../schemas/queues/POST/body.json";
+import { POSTQueuesEndpointBody } from "../types/queues/POST/body";
 
 import { JobsRepo } from "../jobs-repo";
+import { QueuesEndpointParams } from "../types/queues/endpoint-params";
+import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 
 interface JobsPluginOpts {
   auth: boolean;
@@ -47,33 +49,51 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
     return ["anonymous", false];
   }
 
-  app.post<{ Body: POSTJobsBody }>("/", {
+  app.post<{ Body: POSTQueuesEndpointBody; Params: QueuesEndpointParams }>(
+    "/:endpoint",
+    {
+      schema: {
+        body: {
+          data: POSTQueuesEndpointBodySchema,
+        },
+        params: {
+          data: EndpointParamsSchema,
+        },
+      },
+
+      async handler(request, reply) {
+        const [tokenId, done] = await authenticate(request, reply);
+        if (done) {
+          return;
+        }
+
+        const job = await jobsRepo.enqueue(
+          tokenId,
+          request.params.endpoint,
+          request.body
+        );
+
+        reply.status(201).send(job);
+      },
+    }
+  );
+
+  app.get<{ Params: QueuesEndpointParams }>("/:endpoint", {
     schema: {
-      body: {
-        data: POSTJobsBodySchema,
+      params: {
+        data: EndpointParamsSchema,
       },
     },
-
     async handler(request, reply) {
       const [tokenId, done] = await authenticate(request, reply);
       if (done) {
         return;
       }
 
-      const job = await jobsRepo.enqueue(tokenId, request.body);
-
-      reply.status(201).send(job);
-    },
-  });
-
-  app.get("/", {
-    async handler(request, reply) {
-      const [tokenId, done] = await authenticate(request, reply);
-      if (done) {
-        return;
-      }
-
-      const { cursor, jobs } = await jobsRepo.find(tokenId);
+      const { cursor, jobs } = await jobsRepo.find(
+        tokenId,
+        request.params.endpoint
+      );
 
       reply.status(200).send({
         cursor,
@@ -82,10 +102,10 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
     },
   });
 
-  app.get<{ Params: DELETEJobsIdParams }>("/:id", {
+  app.get<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
       params: {
-        data: DELETEJobsParamsSchema,
+        data: EndpointJobIDParamsSchema,
       },
     },
 
@@ -95,11 +115,9 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
         return;
       }
 
-      const { url = "" } = request.raw;
+      const { endpoint, id } = request.params;
 
-      const externalId = url.slice(url.lastIndexOf("/") + 1);
-
-      const job = await jobsRepo.findById(tokenId, externalId);
+      const job = await jobsRepo.findById(tokenId, endpoint, id);
       if (job) {
         reply.status(200).send(job);
       } else {
@@ -108,10 +126,10 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
     },
   });
 
-  app.delete<{ Params: DELETEJobsIdParams }>("/:id", {
+  app.delete<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
       params: {
-        data: DELETEJobsParamsSchema,
+        data: EndpointJobIDParamsSchema,
       },
     },
 
@@ -121,11 +139,9 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
         return;
       }
 
-      const { url = "" } = request.raw;
+      const { endpoint, id } = request.params;
 
-      const externalId = url.slice(url.lastIndexOf("/") + 1);
-
-      const deletedJob = await jobsRepo.delete(tokenId, externalId);
+      const deletedJob = await jobsRepo.delete(tokenId, endpoint, id);
 
       if (deletedJob) {
         reply.status(200).send(deletedJob);
