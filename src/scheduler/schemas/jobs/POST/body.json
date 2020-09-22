@@ -15,6 +15,9 @@
     "delay": { "type": "number" },
     "jobId": {
       "type": "string"
+    },
+    "idempotencyKey": {
+      "type": "string"
     }
   },
   "required": ["endpoint"],

@@ -50,7 +50,7 @@ export class JobsRepo {
       idempotencyKey,
       endpoint,
       body: job.data.body,
-      runAt: new Date(Date.now() + (job.opts.delay ?? 0)).toISOString()
+      runAt: new Date(Date.now() + (job.opts.delay ?? 0)).toISOString(),
     };
   }
 
@@ -100,8 +100,12 @@ export class JobsRepo {
 
   public async enqueue(
     tokenId: string,
-    { endpoint, body, runAt, jobId, delay }: POSTJobsBody
+    { endpoint, body, runAt, jobId, delay, idempotencyKey }: POSTJobsBody
   ) {
+    if (!idempotencyKey) {
+      idempotencyKey = jobId;
+    }
+
     if (typeof jobId === "undefined") {
       jobId = uuid.v4();
     }

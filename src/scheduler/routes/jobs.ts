@@ -1,17 +1,9 @@
 import { FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
-import { Job, Queue, QueueScheduler } from "bullmq";
 
 import * as DELETEJobsParamsSchema from "../schemas/jobs/DELETE/params.json";
 import { DELETEJobsIdParams } from "../types/jobs/DELETE/params";
 import * as POSTJobsBodySchema from "../schemas/jobs/POST/body.json";
 import { POSTJobsBody } from "../types/jobs/POST/body";
-import {
-  encodeExternalJobId,
-  encodeInternalJobId,
-  decodeExternalJobId,
-  HttpJob,
-  HTTP_JOB_QUEUE,
-} from "../../shared/http-job";
 
 import { JobsRepo } from "../jobs-repo";
 
