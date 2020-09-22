@@ -80,7 +80,7 @@ describe("jobs", () => {
         .get(`/jobs`)
         .expect(200);
 
-      expect(cursor).toBe(0);
+      expect(cursor).toBe(null);
       const jobsWithoutRunAt = jobs.map(
         ({ runAt, ...restOfJob }: { runAt: string }) => restOfJob
       );
