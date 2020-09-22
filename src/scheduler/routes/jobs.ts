@@ -104,6 +104,22 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
     },
   });
 
+  app.get("/", {
+    async handler(request, reply) {
+      const [tokenId, done] = await authenticate(request, reply);
+      if (done) {
+        return;
+      }
+
+      const { newCursor, jobs: resultJobs } = await jobs.getJobFromIdPattern(encodeInternalJobId(tokenId, "*", "*"));
+
+      reply.status(200).send({
+        newCursor,
+        jobs: resultJobs
+      })
+    },
+  });
+
   app.get<{ Params: DELETEJobsIdParams }>("/:id", {
     schema: {
       params: {
