@@ -104,6 +104,39 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
     },
   });
 
+  app.get<{ Params: DELETEJobsIdParams }>("/:id", {
+    schema: {
+      params: {
+        data: DELETEJobsParamsSchema,
+      },
+    },
+
+    async handler(request, reply) {
+      const [tokenId, done] = await authenticate(request, reply);
+      if (done) {
+        return;
+      }
+
+      const { url = "" } = request.raw;
+
+      const id = url.slice(url.lastIndexOf("/") + 1);
+
+      const { endpoint, customId } = decodeExternalJobId(id);
+      const internalId = encodeInternalJobId(tokenId, endpoint, customId);
+
+      const job: Job<HttpJob> | undefined = await jobs.getJob(internalId);
+      if (job) {
+        reply.status(200).send({
+          id,
+          data: job.data,
+          delay: job.timestamp
+        });
+      } else {
+        reply.status(404).send("Not Found");
+      }
+    },
+  });
+
   app.delete<{ Params: DELETEJobsIdParams }>("/:id", {
     schema: {
       params: {
