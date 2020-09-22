@@ -76,35 +76,33 @@ describe("jobs", () => {
 
       const {
         body: { cursor, jobs },
-      } = await request(quirrel)
-        .get(`/jobs`)
-        .expect(200);
+      } = await request(quirrel).get(`/jobs`).expect(200);
 
       expect(cursor).toBe(null);
       const jobsWithoutRunAt = jobs.map(
         ({ runAt, ...restOfJob }: { runAt: string }) => restOfJob
       );
 
-      expect(jobsWithoutRunAt).toEqual([
-        {
-          id: jobId1,
-          idempotencyKey: jobId1.split(":")[1],
-          endpoint,
-          body: {
-            nr: 1,
-            this: "willBeRetrieved"
-          }
+      expect(jobsWithoutRunAt).toHaveLength(2);
+
+      expect(jobsWithoutRunAt).toContainEqual({
+        id: jobId1,
+        idempotencyKey: jobId1.split(":")[1],
+        endpoint,
+        body: {
+          nr: 1,
+          this: "willBeRetrieved",
         },
-        {
-          id: jobId2,
-          idempotencyKey: jobId2.split(":")[1],
-          endpoint,
-          body: {
-            nr: 2,
-            this: "willBeRetrieved"
-          }
-        }
-      ])
+      });
+      expect(jobsWithoutRunAt).toContainEqual({
+        id: jobId2,
+        idempotencyKey: jobId2.split(":")[1],
+        endpoint,
+        body: {
+          nr: 2,
+          this: "willBeRetrieved",
+        },
+      });
 
       await request(quirrel).delete(`/jobs/${jobId1}`).expect(200);
       await request(quirrel).delete(`/jobs/${jobId2}`).expect(200);
