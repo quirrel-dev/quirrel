@@ -7,32 +7,32 @@ export interface HttpJob {
 export function encodeInternalJobId(
   tokenId: string,
   endpoint: string,
-  customId: string
+  idempotencyKey: string
 ) {
-  return [tokenId, endpoint, customId].map(encodeURIComponent).join(":");
+  return [tokenId, endpoint, idempotencyKey].map(encodeURIComponent).join(":");
 }
 
 export function decodeInternalJobId(jobId: string) {
-  const [tokenId, endpoint, customId] = jobId
+  const [tokenId, endpoint, idempotencyKey] = jobId
     .split(":")
     .map(decodeURIComponent);
 
   return {
     tokenId,
     endpoint,
-    customId,
+    idempotencyKey,
   };
 }
 
-export function encodeExternalJobId(endpoint: string, customId: string) {
-  return [endpoint, customId].map(encodeURIComponent).join(":");
+export function encodeExternalJobId(endpoint: string, idempotencyKey: string) {
+  return [endpoint, idempotencyKey].map(encodeURIComponent).join(":");
 }
 
 export function decodeExternalJobId(jobId: string) {
-  const [endpoint, customId] = jobId.split(":").map(decodeURIComponent);
+  const [endpoint, idempotencyKey] = jobId.split(":").map(decodeURIComponent);
 
   return {
     endpoint,
-    customId,
+    idempotencyKey,
   };
 }

@@ -1,19 +1,11 @@
 import { FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
-import { Job, Queue, QueueScheduler } from "bullmq";
 
 import * as DELETEJobsParamsSchema from "../schemas/jobs/DELETE/params.json";
 import { DELETEJobsIdParams } from "../types/jobs/DELETE/params";
 import * as POSTJobsBodySchema from "../schemas/jobs/POST/body.json";
 import { POSTJobsBody } from "../types/jobs/POST/body";
-import {
-  encodeExternalJobId,
-  encodeInternalJobId,
-  decodeExternalJobId,
-  HttpJob,
-  HTTP_JOB_QUEUE,
-} from "../../shared/http-job";
 
-import * as uuid from "uuid";
+import { JobsRepo } from "../jobs-repo";
 
 interface JobsPluginOpts {
   auth: boolean;
@@ -34,15 +26,7 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
     return tokenId ?? undefined;
   }
 
-  const jobsScheduler = new QueueScheduler(HTTP_JOB_QUEUE, {
-    connection: app.redis,
-  });
-  const jobs = new Queue<HttpJob>(HTTP_JOB_QUEUE, {
-    connection: app.redis,
-    defaultJobOptions: {
-      removeOnComplete: true
-    }
-  });
+  const jobsRepo = new JobsRepo(app.redis);
 
   async function authenticate(
     request: FastifyRequest,
@@ -76,31 +60,51 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
         return;
       }
 
-      let { endpoint, body, runAt, delay, jobId } = request.body;
+      const job = await jobsRepo.enqueue(tokenId, request.body);
 
-      if (typeof jobId === "undefined") {
-        jobId = uuid.v4();
+      reply.status(201).send(job);
+    },
+  });
+
+  app.get("/", {
+    async handler(request, reply) {
+      const [tokenId, done] = await authenticate(request, reply);
+      if (done) {
+        return;
       }
 
-      if (runAt) {
-        delay = Number(new Date(runAt)) - Date.now();
-      }
+      const { cursor, jobs } = await jobsRepo.find(tokenId);
 
-      await jobs.add(
-        "default",
-        {
-          body,
-        },
-        {
-          delay,
-          jobId: encodeInternalJobId(tokenId, endpoint, jobId),
-        }
-      );
-
-      reply.status(200);
-      reply.send({
-        jobId: encodeExternalJobId(endpoint, jobId),
+      reply.status(200).send({
+        cursor,
+        jobs,
       });
+    },
+  });
+
+  app.get<{ Params: DELETEJobsIdParams }>("/:id", {
+    schema: {
+      params: {
+        data: DELETEJobsParamsSchema,
+      },
+    },
+
+    async handler(request, reply) {
+      const [tokenId, done] = await authenticate(request, reply);
+      if (done) {
+        return;
+      }
+
+      const { url = "" } = request.raw;
+
+      const externalId = url.slice(url.lastIndexOf("/") + 1);
+
+      const job = await jobsRepo.findById(tokenId, externalId);
+      if (job) {
+        reply.status(200).send(job);
+      } else {
+        reply.status(404).send("Not Found");
+      }
     },
   });
 
@@ -119,24 +123,20 @@ const jobs: FastifyPluginCallback<JobsPluginOpts> = (app, opts, done) => {
 
       const { url = "" } = request.raw;
 
-      const id = url.slice(url.lastIndexOf("/") + 1);
+      const externalId = url.slice(url.lastIndexOf("/") + 1);
 
-      const { endpoint, customId } = decodeExternalJobId(id);
-      const internalId = encodeInternalJobId(tokenId, endpoint, customId);
+      const deletedJob = await jobsRepo.delete(tokenId, externalId);
 
-      const job: Job<HttpJob> | undefined = await jobs.getJob(internalId);
-      if (job) {
-        await job.remove();
-        reply.status(204);
+      if (deletedJob) {
+        reply.status(200).send(deletedJob);
       } else {
         reply.status(404).send("Not Found");
       }
     },
   });
 
-  app.addHook("onClose", async (instance, done) => {
-    await Promise.all([jobs.close(), jobsScheduler.close()]);
-    done();
+  app.addHook("onClose", async () => {
+    await jobsRepo.close();
   });
 
   done();
