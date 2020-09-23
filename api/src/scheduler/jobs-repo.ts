@@ -32,7 +32,7 @@ export class JobsRepo {
       connection: redis,
     });
     this.jobsEvents = new QueueEvents(HTTP_JOB_QUEUE, {
-      connection: redis,
+      connection: redis.duplicate(),
     });
     this.jobsQueue = new Queue<HttpJob>(HTTP_JOB_QUEUE, {
       connection: redis,
