@@ -15,24 +15,30 @@
     "@types/redis": "^2.8.27",
     "@types/supertest": "^2.0.10",
     "@types/uuid": "^8.3.0",
+    "@types/websocket": "^1.0.1",
+    "@types/ws": "^7.2.6",
     "delay": "^4.4.0",
     "jest": "^26.4.2",
     "json-schema-to-typescript": "^9.1.1",
     "npm-run-all": "^4.1.5",
     "supertest": "^4.0.2",
     "ts-jest": "^26.3.0",
-    "typescript": "^4.0.2"
+    "typescript": "^4.0.2",
+    "websocket": "^1.0.32"
   },
   "dependencies": {
     "@quirrel/bullmq": "^1.9.0-1",
     "axios": "^0.20.0",
     "fastify": "^3.3.0",
     "fastify-basic-auth": "^1.0.1",
+    "fastify-blipp": "^3.0.0",
     "fastify-oas": "^3.0.3",
     "fastify-plugin": "^2.3.3",
+    "fastify-websocket": "^2.0.7",
     "ioredis": "^4.17.3",
     "parse-duration": "^0.4.4",
     "secure-webhooks": "^0.2.0",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.0",
+    "ws": "^7.3.1"
   }
 }

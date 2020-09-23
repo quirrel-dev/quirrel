@@ -1,6 +1,6 @@
 import type { Redis } from "ioredis";
 
-import { Job, Queue, QueueScheduler } from "@quirrel/bullmq";
+import { Job, Queue, QueueEvents, QueueScheduler } from "@quirrel/bullmq";
 import { POSTQueuesEndpointBody } from "./types/queues/POST/body";
 import {
   encodeJobDescriptor,
@@ -25,9 +25,13 @@ interface JobDTO {
 export class JobsRepo {
   private jobsScheduler;
   private jobsQueue;
+  private jobsEvents;
 
   constructor(redis: Redis) {
     this.jobsScheduler = new QueueScheduler(HTTP_JOB_QUEUE, {
+      connection: redis,
+    });
+    this.jobsEvents = new QueueEvents(HTTP_JOB_QUEUE, {
       connection: redis,
     });
     this.jobsQueue = new Queue<HttpJob>(HTTP_JOB_QUEUE, {
@@ -49,10 +53,18 @@ export class JobsRepo {
   }
 
   public async close() {
-    await Promise.all([this.jobsScheduler.close(), this.jobsQueue.close()]);
+    await Promise.all([
+      this.jobsScheduler.close(),
+      this.jobsQueue.close(),
+      this.jobsEvents.close(),
+    ]);
   }
 
-  public async find(byTokenId: string, endpoint: string, { count, cursor }: PaginationOpts = {}) {
+  public async find(
+    byTokenId: string,
+    endpoint: string,
+    { count, cursor }: PaginationOpts = {}
+  ) {
     const { newCursor, jobs } = await this.jobsQueue.getJobFromIdPattern(
       encodeJobDescriptor(byTokenId, endpoint, "*"),
       cursor,

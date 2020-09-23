@@ -9,7 +9,10 @@ import * as oas from "fastify-oas";
 import * as pack from "../../package.json";
 import basicAuthPlugin from "./basic-auth";
 import type { RedisOptions } from "ioredis";
-import type { AddressInfo } from "net"
+import type { AddressInfo } from "net";
+import tokenAuthPlugin from "./token-auth";
+import activityPlugin from "./routes/activity";
+import blipp from "fastify-blipp";
 
 export interface QuirrelServerConfig {
   port?: number;
@@ -27,6 +30,8 @@ export async function createServer({
   const app = fastify({
     logger: true,
   });
+
+  app.register(blipp);
 
   app.register(oas, {
     routePrefix: "/documentation",
@@ -46,7 +51,11 @@ export async function createServer({
     exposeRoute: true,
   });
 
+  const enableAuth = !!passphrases?.length;
+
   app.register(redisPlugin, { opts: redis });
+
+  app.register(tokenAuthPlugin, { auth: enableAuth });
 
   if (passphrases) {
     app.register(basicAuthPlugin, { passphrases });
@@ -56,13 +65,19 @@ export async function createServer({
   }
 
   app.register(health, { prefix: "/health" });
-  app.register(queues, { prefix: "/queues", auth: !!passphrases?.length });
-
-  await app.listen(port, host);
+  app.register(queues, { prefix: "/queues" });
+  app.register(activityPlugin, { prefix: "/activity" });
 
   app.ready(async () => {
+    const debug = false;
+    if (debug) {
+      app.blipp();
+    }
+
     await app.oas();
   });
+
+  await app.listen(port, host);
 
   return {
     server: app.server,
