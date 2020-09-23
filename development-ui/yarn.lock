@@ -1043,10 +1043,10 @@
   resolved "https://registry.yarnpkg.com/@next/react-refresh-utils/-/react-refresh-utils-9.5.3.tgz#a14fb6489d412b201b98aa44716fb8727ca4c6ae"
   integrity sha512-W3VKOqbg+4Kw+k6M/SODf+WIzwcx60nAemGV1nNPa/yrDtAS2YcJfqiswrJ3+2nJHzqefAFWn4XOfM0fy8ww2Q==
 
-"@quirrel/client@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@quirrel/client/-/client-0.2.0.tgz#e1a82ef69e79f375531e0ec9a104ceda617d5195"
-  integrity sha512-vxS2svyTPgglayeRUSkAeswEOlkQc01g0ObrPh7ZMq9FCrdBnyXuSyLJV+TvSYbslIelrGQ5W5zxvXxOirUbnA==
+"@quirrel/client@0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@quirrel/client/-/client-0.3.0.tgz#1e8e380c5356bf4d9da08ef4f23ea1ef2fda87c5"
+  integrity sha512-tMpF72CTU+3KowBfRdrsu9IdRbrmD2CWjQ5XWfrrZGsoxz5YRISn45cBkGs9yzWQGVVRioivUjM/sFm5U2PUyw==
 
 "@tailwindui/react@^0.1.1":
   version "0.1.1"
