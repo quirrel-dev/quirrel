@@ -68,7 +68,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   const [{ activity, pending }, dispatchActivity] = useReducer(
     (
       prevState: Pick<Quirrel.ContextValue, "activity" | "pending">,
-      action: Quirrel.Activity | { type: "dump", payload: Job[] }
+      action: Quirrel.Activity | { type: "dump"; payload: Job[] }
     ) => {
       switch (action.type) {
         case "dump": {
@@ -111,9 +111,9 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
   const invoke = useCallback(
     async (job: Quirrel.JobDescriptor) => {
-      alert("Hello World");
+      await client.invoke(job.endpoint, job.id);
     },
-    [credentials]
+    [client]
   );
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         activity,
         pending,
         invoke,
-        client
+        client,
       }}
     >
       {isConnected ? (

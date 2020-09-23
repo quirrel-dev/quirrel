@@ -122,6 +122,33 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     },
   });
 
+  fastify.post<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
+    schema: {
+      params: {
+        data: EndpointJobIDParamsSchema,
+      },
+    },
+
+    async handler(request, reply) {
+      const [tokenId, done] = await fastify.tokenAuth.authenticate(
+        request,
+        reply
+      );
+      if (done) {
+        return;
+      }
+
+      const { endpoint, id } = request.params;
+
+      const job = await jobsRepo.invoke(tokenId, endpoint, id);
+      if (job) {
+        reply.status(200).send(job);
+      } else {
+        reply.status(404).send("Not Found");
+      }
+    },
+  });
+
   fastify.delete<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
       params: {

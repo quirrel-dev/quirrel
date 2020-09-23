@@ -27,7 +27,8 @@ export interface EnqueueJobOpts {
 
 export interface Job extends Omit<JobDTO, "runAt"> {
   runAt: Date;
-  delete(): Promise<void>;
+  delete(): Promise<Job | null>;
+  invoke(): Promise<Job | null>;
 }
 
 interface HttpRequest {
@@ -66,9 +67,8 @@ export class QuirrelClient {
     return {
       ...dto,
       runAt: new Date(dto.runAt),
-      delete: async () => {
-        await this.delete(dto.endpoint, dto.id);
-      },
+      delete: () => this.delete(dto.endpoint, dto.id),
+      invoke: () => this.invoke(dto.endpoint, dto.id),
     };
   }
 
@@ -123,6 +123,24 @@ export class QuirrelClient {
     const { body, status } = await this.fetcher({
       url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       method: "GET",
+      headers: this.getAuthHeaders(),
+    });
+
+    if (status === 404) {
+      return null;
+    }
+
+    if (status === 200) {
+      return this.toJob(JSON.parse(body));
+    }
+
+    throw new Error("Unexpected response: " + status);
+  }
+
+  async invoke(endpoint: string, id: string): Promise<Job | null> {
+    const { status, body } = await this.fetcher({
+      url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
+      method: "POST",
       headers: this.getAuthHeaders(),
     });
 

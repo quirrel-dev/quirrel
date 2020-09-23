@@ -88,6 +88,22 @@ export class JobsRepo {
     return job ? JobsRepo.toJobDTO(job) : undefined;
   }
 
+  public async invoke(tokenId: string, endpoint: string, id: string) {
+    const internalId = encodeJobDescriptor(tokenId, endpoint, id);
+
+    const job: Job<HttpJob> | undefined = await this.jobsQueue.getJob(
+      internalId
+    );
+
+    if (!job) {
+      return undefined;
+    }
+
+    await job.promote()
+
+    return JobsRepo.toJobDTO(job);
+  }
+
   public async delete(tokenId: string, endpoint: string, id: string) {
     const internalId = encodeJobDescriptor(tokenId, endpoint, id);
 
