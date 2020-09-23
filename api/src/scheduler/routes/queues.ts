@@ -1,4 +1,4 @@
-import { FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
+import { FastifyPluginCallback } from "fastify";
 
 import * as EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
 import * as EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
@@ -43,6 +43,30 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       },
     }
   );
+
+  fastify.get<{ Params: QueuesEndpointParams }>("/", {
+    schema: {
+      params: {
+        data: EndpointParamsSchema,
+      },
+    },
+    async handler(request, reply) {
+      const [tokenId, done] = await fastify.tokenAuth.authenticate(
+        request,
+        reply
+      );
+      if (done) {
+        return;
+      }
+
+      const { cursor, jobs } = await jobsRepo.find(tokenId);
+
+      reply.status(200).send({
+        cursor,
+        jobs,
+      });
+    },
+  });
 
   fastify.get<{ Params: QueuesEndpointParams }>("/:endpoint", {
     schema: {

@@ -18,6 +18,7 @@ interface PaginationOpts {
 
 interface JobDTO {
   id: string;
+  endpoint: string;
   body: unknown;
   runAt: string;
 }
@@ -43,10 +44,11 @@ export class JobsRepo {
   }
 
   private static toJobDTO(job: Job<HttpJob>): JobDTO {
-    const { jobId } = decodeJobDescriptor(job.id!);
+    const { jobId, endpoint } = decodeJobDescriptor(job.id!);
 
     return {
       id: jobId,
+      endpoint,
       body: job.data.body,
       runAt: new Date(Date.now() + (job.opts.delay ?? 0)).toISOString(),
     };
@@ -62,11 +64,11 @@ export class JobsRepo {
 
   public async find(
     byTokenId: string,
-    endpoint: string,
+    endpoint?: string,
     { count, cursor }: PaginationOpts = {}
   ) {
     const { newCursor, jobs } = await this.jobsQueue.getJobFromIdPattern(
-      encodeJobDescriptor(byTokenId, endpoint, "*"),
+      encodeJobDescriptor(byTokenId, endpoint ?? "*", "*"),
       cursor,
       count
     );

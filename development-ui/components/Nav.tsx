@@ -24,7 +24,7 @@ export function Nav(props: NavProps) {
           </div>
           <div className="flex items-center">
             <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
+              <div className="flex items-baseline space-x-4">
                 <Link href="/activity">
                   <a
                     className={clsx(

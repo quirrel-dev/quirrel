@@ -13,6 +13,7 @@ import type { AddressInfo } from "net";
 import tokenAuthPlugin from "./token-auth";
 import activityPlugin from "./routes/activity";
 import blipp from "fastify-blipp";
+import cors from "fastify-cors";
 
 export interface QuirrelServerConfig {
   port?: number;
@@ -32,6 +33,10 @@ export async function createServer({
   });
 
   app.register(blipp);
+
+  app.register(cors, {
+    origin: "*",
+  })
 
   app.register(oas, {
     routePrefix: "/documentation",

@@ -7,21 +7,40 @@ import React, {
   useState,
 } from "react";
 import { BaseLayout } from "../layouts/BaseLayout";
+import { QuirrelClient } from "@quirrel/client";
 
 namespace Quirrel {
   export interface ContextValue {
     activity: Quirrel.Activity[];
     pending: Quirrel.JobDescriptor[];
     invoke(job: Quirrel.JobDescriptor): Promise<void>;
+    client: QuirrelClient;
   }
 
   export namespace Activity {
-    export type Delayed = ["delayed", JobDescriptor];
-    export type Waiting = ["waiting", JobDescriptor];
-    export type Completed = ["completed", JobDescriptor];
+    export interface Delayed {
+      type: "delayed";
+      payload: JobDescriptor;
+    }
+    export interface Waiting {
+      type: "waiting";
+      payload: JobDescriptor;
+    }
+    export interface Completed {
+      type: "completed";
+      payload: JobDescriptor;
+    }
+    export interface Dump {
+      type: "dump";
+      payload: JobDescriptor[];
+    }
   }
 
-  export type Activity = Activity.Delayed | Activity.Completed;
+  export type Activity =
+    | Activity.Delayed
+    | Activity.Completed
+    | Activity.Dump
+    | Activity.Waiting;
 
   export interface JobDescriptor {
     id: string;
@@ -33,6 +52,7 @@ const mockCtxValue: Quirrel.ContextValue = {
   activity: [],
   pending: [],
   invoke: async () => {},
+  client: null as any,
 };
 
 const QuirrelCtx = React.createContext<Quirrel.ContextValue>(mockCtxValue);
@@ -48,17 +68,24 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
     token?: string;
   }>();
 
+  const [client, setClient] = useState<QuirrelClient>();
+
   const [{ activity, pending }, dispatchActivity] = useReducer(
     (
       prevState: Pick<Quirrel.ContextValue, "activity" | "pending">,
       action: Quirrel.Activity
     ) => {
-      const [type, payload] = action;
-      switch (type) {
+      switch (action.type) {
+        case "dump": {
+          return {
+            activity: prevState.activity,
+            pending: [...action.payload, ...prevState.pending],
+          };
+        }
         case "delayed": {
           return {
             activity: [action, ...prevState.activity],
-            pending: [payload, ...prevState.pending],
+            pending: [action.payload, ...prevState.pending],
           };
         }
         case "completed": {
@@ -66,7 +93,10 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
             activity: [action, ...prevState.activity],
             pending: prevState.pending.filter(
               (job) =>
-                !(job.id === payload.id && job.endpoint === payload.endpoint)
+                !(
+                  job.id === action.payload.id &&
+                  job.endpoint === action.payload.endpoint
+                )
             ),
           };
         }
@@ -81,7 +111,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   );
 
   useEffect(() => {
-    setCredentials({ baseUrl: "localhost:9181", token: undefined });
+    setCredentials({ baseUrl: "http://localhost:9181", token: undefined });
   }, [setCredentials]);
 
   const invoke = useCallback(
@@ -96,7 +126,33 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       return;
     }
 
-    const socket = new WebSocket(`ws://${credentials.baseUrl}/activity`);
+    let { baseUrl } = credentials;
+    if (!(baseUrl.startsWith("https://") || baseUrl.startsWith("http://"))) {
+      baseUrl = "https://" + baseUrl;
+    }
+
+    const client = new QuirrelClient(async (req) => {
+      const res = await fetch(req.url, req);
+      return {
+        status: res.status,
+        body: await res.text(),
+        headers: res.headers as any,
+      };
+    }, baseUrl);
+
+    setClient(client);
+
+    (async () => {
+      for await (const jobs of client.get("")) {
+        dispatchActivity({ type: "dump", payload: jobs });
+      }
+    })();
+
+    const isSecure = baseUrl.startsWith("https://");
+    const baseUrlWithoutProtocol = baseUrl.slice(isSecure ? 8 : 7);
+    const socket = new WebSocket(
+      `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`
+    );
     socket.onopen = () => {
       console.log("Connected successfully.");
       setIsConnected(true);
@@ -121,6 +177,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         activity,
         pending,
         invoke,
+        client
       }}
     >
       {isConnected ? (
