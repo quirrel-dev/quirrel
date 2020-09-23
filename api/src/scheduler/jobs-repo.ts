@@ -128,4 +128,67 @@ export class JobsRepo {
 
     return JobsRepo.toJobDTO(job);
   }
+
+  public onEvent(
+    requesterTokenId: string,
+    cb: (
+      event: string,
+      job: { endpoint: string; id: string; reason?: string }
+    ) => void
+  ) {
+    function onDelayed({ jobId }: { jobId: string; delay: number }) {
+      const { tokenId, endpoint, jobId: id } = decodeJobDescriptor(jobId);
+      if (tokenId === requesterTokenId) {
+        cb("delayed", { endpoint, id });
+      }
+    }
+
+    function onCompleted({ jobId }: { jobId: string }) {
+      const { tokenId, endpoint, jobId: id } = decodeJobDescriptor(jobId);
+      if (tokenId === requesterTokenId) {
+        cb("completed", { endpoint, id });
+      }
+    }
+
+    function onFailed({
+      jobId,
+      failedReason,
+    }: {
+      jobId: string;
+      failedReason: string;
+    }) {
+      const { tokenId, endpoint, jobId: id } = decodeJobDescriptor(jobId);
+      if (tokenId === requesterTokenId) {
+        cb("failed", { endpoint, id, reason: failedReason });
+      }
+    }
+
+    function onWaiting({ jobId }: { jobId: string }) {
+      const { tokenId, endpoint, jobId: id } = decodeJobDescriptor(jobId);
+      if (tokenId === requesterTokenId) {
+        cb("waiting", { endpoint, id });
+      }
+    }
+
+    function onRemoved({ jobId }: { jobId: string }) {
+      const { tokenId, endpoint, jobId: id } = decodeJobDescriptor(jobId);
+      if (tokenId === requesterTokenId) {
+        cb("removed", { endpoint, id });
+      }
+    }
+
+    this.jobsEvents.on("completed", onCompleted);
+    this.jobsEvents.on("delayed", onDelayed);
+    this.jobsEvents.on("waiting", onWaiting);
+    this.jobsEvents.on("removed", onRemoved);
+    this.jobsEvents.on("failed", onFailed);
+
+    return () => {
+      this.jobsEvents.removeListener("completed", onCompleted);
+      this.jobsEvents.removeListener("delayed", onDelayed);
+      this.jobsEvents.removeListener("waiting", onWaiting);
+      this.jobsEvents.removeListener("removed", onRemoved);
+      this.jobsEvents.removeListener("failed", onFailed);
+    };
+  }
 }
