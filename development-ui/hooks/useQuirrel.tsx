@@ -106,7 +106,9 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   );
 
   useEffect(() => {
-    setCredentials({ baseUrl: "http://localhost:9181", token: undefined });
+    const baseUrl = "http://localhost:9181";
+    const token = undefined;
+    setCredentials({ baseUrl, token });
   }, [setCredentials]);
 
   const invoke = useCallback(
@@ -121,19 +123,23 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       return;
     }
 
-    let { baseUrl } = credentials;
+    let { baseUrl, token } = credentials;
     if (!(baseUrl.startsWith("https://") || baseUrl.startsWith("http://"))) {
       baseUrl = "https://" + baseUrl;
     }
 
-    const client = new QuirrelClient(async (req) => {
-      const res = await fetch(req.url, req);
-      return {
-        status: res.status,
-        body: await res.text(),
-        headers: res.headers as any,
-      };
-    }, baseUrl);
+    const client = new QuirrelClient(
+      async (req) => {
+        const res = await fetch(req.url, req);
+        return {
+          status: res.status,
+          body: await res.text(),
+          headers: res.headers as any,
+        };
+      },
+      baseUrl,
+      token
+    );
 
     setClient(client);
 
@@ -192,7 +198,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
                 cy="12"
                 r="10"
                 stroke="currentColor"
-                stroke-width="4"
+                strokeWidth="4"
               ></circle>
               <path
                 className="opacity-75"
