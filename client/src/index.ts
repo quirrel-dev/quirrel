@@ -13,6 +13,7 @@ if (process.env.NODE_ENV === "production" && !defaultToken) {
 
 interface JobDTO {
   id: string;
+  endpoint: string;
   body: unknown;
   runAt: string;
 }
@@ -26,7 +27,8 @@ export interface EnqueueJobOpts {
 
 export interface Job extends Omit<JobDTO, "runAt"> {
   runAt: Date;
-  delete(): Promise<void>;
+  delete(): Promise<Job | null>;
+  invoke(): Promise<Job | null>;
 }
 
 interface HttpRequest {
@@ -61,13 +63,12 @@ export class QuirrelClient {
     }
   }
 
-  private toJob(dto: JobDTO, endpoint: string): Job {
+  private toJob(dto: JobDTO): Job {
     return {
       ...dto,
       runAt: new Date(dto.runAt),
-      delete: async () => {
-        await this.delete(endpoint, dto.id);
-      },
+      delete: () => this.delete(dto.endpoint, dto.id),
+      invoke: () => this.invoke(dto.endpoint, dto.id),
     };
   }
 
@@ -88,39 +89,34 @@ export class QuirrelClient {
     });
 
     if (status !== 201) {
-      throw new Error(`Unexpected status: ${201}`);
+      throw new Error(`Unexpected status: ${status}`);
     }
 
-    return this.toJob(JSON.parse(body), endpoint);
+    return this.toJob(JSON.parse(body));
   }
 
-  get(endpoint: string): AsyncIterator<Job[]> {
+  async *get(endpoint?: string) {
     let cursor: number | null = 0;
-    return {
-      next: async () => {
-        if (cursor === null) {
-          throw new Error("Iterator is already done.");
-        }
 
-        const { body } = await this.fetcher({
-          url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint),
-          method: "GET",
-          headers: this.getAuthHeaders(),
-        });
+    while (cursor !== null) {
+      const { body } = await this.fetcher({
+        url:
+          this.baseUrl +
+          "/queues/" +
+          (!!endpoint ? encodeURIComponent(endpoint!) : ""),
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      });
 
-        const { cursor: newCursor, jobs } = JSON.parse(body) as {
-          cursor: number | null;
-          jobs: JobDTO[];
-        };
+      const { cursor: newCursor, jobs } = JSON.parse(body) as {
+        cursor: number | null;
+        jobs: JobDTO[];
+      };
 
-        cursor = newCursor;
+      cursor = newCursor;
 
-        return {
-          value: jobs.map((dto) => this.toJob(dto, endpoint)),
-          done: cursor === null,
-        };
-      },
-    };
+      yield jobs.map((dto) => this.toJob(dto));
+    }
   }
 
   async getById(endpoint: string, id: string): Promise<Job | null> {
@@ -135,7 +131,25 @@ export class QuirrelClient {
     }
 
     if (status === 200) {
-      return this.toJob(JSON.parse(body), endpoint);
+      return this.toJob(JSON.parse(body));
+    }
+
+    throw new Error("Unexpected response: " + status);
+  }
+
+  async invoke(endpoint: string, id: string): Promise<Job | null> {
+    const { status, body } = await this.fetcher({
+      url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
+      method: "POST",
+      headers: this.getAuthHeaders(),
+    });
+
+    if (status === 404) {
+      return null;
+    }
+
+    if (status === 200) {
+      return this.toJob(JSON.parse(body));
     }
 
     throw new Error("Unexpected response: " + status);
@@ -153,7 +167,7 @@ export class QuirrelClient {
     }
 
     if (status === 200) {
-      return this.toJob(JSON.parse(body), endpoint);
+      return this.toJob(JSON.parse(body));
     }
 
     throw new Error("Unexpected response: " + status);
