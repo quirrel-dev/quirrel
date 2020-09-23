@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@quirrel/client": "0.3.0",
+    "@quirrel/client": "0.3.1",
     "@tailwindui/react": "^0.1.1",
     "clsx": "^1.1.1",
     "next": "9.5.3",
