@@ -6,7 +6,7 @@ interface TableRow<T> {
 interface TableProps<T> {
   items: T[];
   columns: TableRow<T>[];
-  endOfRow: (v: T) => React.ReactChild;
+  endOfRow?: (v: T) => React.ReactChild;
 }
 
 export function Table<T>(props: TableProps<T>) {
@@ -24,7 +24,7 @@ export function Table<T>(props: TableProps<T>) {
                       {title}
                     </th>
                   ))}
-                  <th className="px-6 py-3 bg-gray-50"></th>
+                  {endOfRow && <th className="px-6 py-3 bg-gray-50"></th>}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -48,9 +48,11 @@ export function Table<T>(props: TableProps<T>) {
                       );
                     })}
 
-                    <td className="px-6 py-4 whitespace-no-wrap text-right text-sm leading-5 font-medium">
-                      {endOfRow(item)}
-                    </td>
+                    {endOfRow && (
+                      <td className="px-6 py-4 whitespace-no-wrap text-right text-sm leading-5 font-medium">
+                        {endOfRow(item)}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

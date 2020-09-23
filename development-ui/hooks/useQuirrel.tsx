@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { BaseLayout } from "../layouts/BaseLayout";
-import { QuirrelClient } from "@quirrel/client";
+import { Job, QuirrelClient } from "@quirrel/client";
 
 namespace Quirrel {
   export interface ContextValue {
@@ -30,16 +30,11 @@ namespace Quirrel {
       type: "completed";
       payload: JobDescriptor;
     }
-    export interface Dump {
-      type: "dump";
-      payload: JobDescriptor[];
-    }
   }
 
   export type Activity =
     | Activity.Delayed
     | Activity.Completed
-    | Activity.Dump
     | Activity.Waiting;
 
   export interface JobDescriptor {
@@ -73,7 +68,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   const [{ activity, pending }, dispatchActivity] = useReducer(
     (
       prevState: Pick<Quirrel.ContextValue, "activity" | "pending">,
-      action: Quirrel.Activity
+      action: Quirrel.Activity | { type: "dump", payload: Job[] }
     ) => {
       switch (action.type) {
         case "dump": {
@@ -163,7 +158,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
     socket.onmessage = (evt) => {
       const data = JSON.parse(evt.data);
-      dispatchActivity(data);
+      dispatchActivity({ type: data[0], payload: data[1] });
     };
 
     return () => {
