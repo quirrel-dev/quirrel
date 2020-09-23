@@ -89,6 +89,7 @@ describe("jobs", () => {
           nr: 1,
           this: "willBeRetrieved",
         },
+        endpoint: decodeURIComponent(endpoint),
       });
       expect(jobsWithoutRunAt).toContainEqual({
         id: jobId2,
@@ -96,10 +97,15 @@ describe("jobs", () => {
           nr: 2,
           this: "willBeRetrieved",
         },
+        endpoint: decodeURIComponent(endpoint),
       });
 
-      await request(quirrel).delete(`/queues/${endpoint}/${jobId1}`).expect(200);
-      await request(quirrel).delete(`/queues/${endpoint}/${jobId2}`).expect(200);
+      await request(quirrel)
+        .delete(`/queues/${endpoint}/${jobId1}`)
+        .expect(200);
+      await request(quirrel)
+        .delete(`/queues/${endpoint}/${jobId2}`)
+        .expect(200);
     });
 
     test("by id", async () => {
@@ -123,6 +129,7 @@ describe("jobs", () => {
       expect(restOfJob).toEqual({
         id,
         body: { this: "willBeRetrieved" },
+        endpoint: decodeURIComponent(endpoint),
       });
 
       expect(+new Date(jobRunAt)).toBeCloseTo(+new Date(runAt), -2);
