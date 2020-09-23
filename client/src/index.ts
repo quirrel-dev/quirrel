@@ -7,10 +7,6 @@ const defaultBaseUrl = process.env.QUIRREL_URL ?? fallbackEndpoint;
 
 const defaultToken = process.env.QUIRREL_TOKEN;
 
-if (process.env.NODE_ENV === "production" && !defaultToken) {
-  throw new Error("Make sure to provide QUIRREL_TOKEN env var.");
-}
-
 interface JobDTO {
   id: string;
   endpoint: string;
