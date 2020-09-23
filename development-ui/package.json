@@ -8,11 +8,16 @@
     "start": "next start"
   },
   "dependencies": {
+    "@tailwindui/react": "^0.1.1",
+    "clsx": "^1.1.1",
     "next": "9.5.3",
     "react": "16.13.1",
     "react-dom": "16.13.1"
   },
   "devDependencies": {
-    "tailwindcss": "^1.8.10"
+    "@types/node": "^14.11.2",
+    "@types/react": "^16.9.49",
+    "tailwindcss": "^1.8.10",
+    "typescript": "^4.0.3"
   }
 }
