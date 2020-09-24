@@ -144,7 +144,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
     setClient(client);
 
     (async () => {
-      for await (const jobs of client.get("")) {
+      for await (const jobs of client.get()) {
         dispatchActivity({ type: "dump", payload: jobs });
       }
     })();
