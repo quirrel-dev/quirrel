@@ -5,7 +5,11 @@ module.exports = {
   },
   purge: ["./**/*.[tj]s?(x)"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        white: "#fffdf8",
+      }
+    },
   },
   variants: {},
   plugins: [],
