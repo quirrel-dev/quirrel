@@ -1,6 +1,7 @@
 import { FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
 import * as fp from "fastify-plugin";
 import { IncomingMessage } from "http";
+import { UsageMeter } from "../shared/usage-meter";
 
 interface TokenAuthService {
   authenticate(
@@ -24,6 +25,8 @@ const tokenAuthPlugin: FastifyPluginCallback<TokenAuthPluginOpts> = async (
   opts,
   done
 ) => {
+  const usageMeter = new UsageMeter(fastify.redis);
+
   async function getTokenID(authorizationHeader?: string) {
     if (!authorizationHeader) {
       return undefined;
@@ -51,6 +54,8 @@ const tokenAuthPlugin: FastifyPluginCallback<TokenAuthPluginOpts> = async (
 
         return ["unauthorized", true];
       }
+
+      usageMeter.record(tokenId);
 
       return [tokenId, false];
     }
