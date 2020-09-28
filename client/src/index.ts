@@ -14,12 +14,20 @@ interface JobDTO {
   runAt: string;
 }
 
-export interface EnqueueJobOpts {
+interface BaseEnqueueJobOpts {
   body?: any;
-  runAt?: Date;
-  delay?: number;
   id?: string;
 }
+
+interface DelayedEnqueueJobOpts extends BaseEnqueueJobOpts {
+  delay?: number;
+}
+
+interface ScheduledEnqueueJobOpts extends BaseEnqueueJobOpts {
+  runAt?: Date;
+}
+
+export type EnqueueJobOpts = DelayedEnqueueJobOpts | ScheduledEnqueueJobOpts;
 
 export interface Job extends Omit<JobDTO, "runAt"> {
   runAt: Date;
@@ -69,6 +77,16 @@ export class QuirrelClient {
   }
 
   async enqueue(endpoint: string, opts: EnqueueJobOpts): Promise<Job> {
+    let delay: number | undefined = undefined;
+
+    if ("delay" in opts && opts.delay) {
+      delay = opts.delay;
+    }
+
+    if ("runAt" in opts && opts.runAt) {
+      delay = +opts.runAt - Date.now();
+    }
+
     const { body, status } = await this.fetcher({
       url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint),
       method: "POST",
@@ -78,8 +96,7 @@ export class QuirrelClient {
       },
       body: JSON.stringify({
         body: opts.body,
-        runAt: opts.runAt?.toISOString(),
-        delay: opts.delay,
+        delay,
         id: opts.id,
       }),
     });
