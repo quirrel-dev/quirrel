@@ -60,7 +60,6 @@ export function Nav(props: NavProps) {
               className="h-10 w-auto"
               src="/img/horn_transparent.png"
               alt="Quirrel Logo"
-              style={{ transform: "rotate(-4deg)" }}
             />
           </div>
           <div className="flex items-center">

@@ -4,13 +4,7 @@ module.exports = {
     purgeLayersByDefault: true,
   },
   purge: ["./**/*.[tj]s?(x)"],
-  theme: {
-    extend: {
-      colors: {
-        white: "#fffdf8",
-      }
-    },
-  },
+  theme: {},
   variants: {},
   plugins: [],
 };
