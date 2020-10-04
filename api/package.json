@@ -27,7 +27,7 @@
     "websocket": "^1.0.32"
   },
   "dependencies": {
-    "@quirrel/bullmq": "^1.9.0-2",
+    "@quirrel/bullmq": "^1.9.0-3",
     "axios": "^0.20.0",
     "fastify": "^3.3.0",
     "fastify-basic-auth": "^1.0.1",
