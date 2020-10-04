@@ -7,12 +7,13 @@ import {
   decodeJobDescriptor,
   HttpJob,
   HTTP_JOB_QUEUE,
+  encodeQueueDescriptor
 } from "../shared/http-job";
 
 import * as uuid from "uuid";
 
 interface PaginationOpts {
-  cursor?: number;
+  cursor: number;
   count?: number;
 }
 
@@ -64,11 +65,27 @@ export class JobsRepo {
 
   public async find(
     byTokenId: string,
-    endpoint?: string,
-    { count, cursor }: PaginationOpts = {}
+    endpoint: string,
+    { count, cursor }: PaginationOpts
   ) {
-    const { newCursor, jobs } = await this.jobsQueue.getJobFromIdPattern(
-      encodeJobDescriptor(byTokenId, endpoint ?? "*", "*"),
+    const { newCursor, jobs } = await this.jobsQueue.getJobsByName(
+      encodeQueueDescriptor(byTokenId, endpoint),
+      cursor,
+      count
+    );
+
+    return {
+      cursor: newCursor,
+      jobs: jobs.map(JobsRepo.toJobDTO),
+    };
+  }
+
+  public async findByTokenId(
+    byTokenId: string,
+    { count, cursor }: PaginationOpts
+  ) {
+    const { newCursor, jobs } = await this.jobsQueue.getJobsFromIdPattern(
+      encodeJobDescriptor(byTokenId, "*", "*"),
       cursor,
       count
     );
@@ -134,7 +151,7 @@ export class JobsRepo {
     }
 
     const job = await this.jobsQueue.add(
-      "default",
+      encodeQueueDescriptor(tokenId, endpoint),
       {
         body,
       },

@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "SCAN querystring params",
+    "type": "object",
+    "properties": {
+      "cursor": {
+        "type": "number",
+        "default": 0
+      }
+    },
+    "required": [],
+    "additionalProperties": false
+  }
+  

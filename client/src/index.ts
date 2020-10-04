@@ -116,7 +116,8 @@ export class QuirrelClient {
         url:
           this.baseUrl +
           "/queues/" +
-          (!!endpoint ? encodeURIComponent(endpoint!) : ""),
+          (!!endpoint ? encodeURIComponent(endpoint!) : "") +
+          "?cursor=" + cursor,
         method: "GET",
         headers: this.getAuthHeaders(),
       });

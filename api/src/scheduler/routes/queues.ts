@@ -1,13 +1,15 @@
 import { FastifyPluginCallback } from "fastify";
 
 import * as EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
+import * as SCANQueryStringSchema from "../schemas/queues/scan-querystring.json";
 import * as EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
 import * as POSTQueuesEndpointBodySchema from "../schemas/queues/POST/body.json";
 import { POSTQueuesEndpointBody } from "../types/queues/POST/body";
-
-import { JobsRepo } from "../jobs-repo";
+import { SCANQuerystringParams } from "../types/queues/scan-querystring";
 import { QueuesEndpointParams } from "../types/queues/endpoint-params";
 import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
+
+import { JobsRepo } from "../jobs-repo";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = new JobsRepo(fastify.redis);
@@ -44,11 +46,14 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     }
   );
 
-  fastify.get<{ Params: QueuesEndpointParams }>("/", {
+  fastify.get<{ Params: QueuesEndpointParams, Querystring: SCANQuerystringParams }>("/", {
     schema: {
       params: {
         data: EndpointParamsSchema,
       },
+      querystring: {
+        data: SCANQueryStringSchema
+      }
     },
     async handler(request, reply) {
       const [tokenId, done] = await fastify.tokenAuth.authenticate(
@@ -59,7 +64,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         return;
       }
 
-      const { cursor, jobs } = await jobsRepo.find(tokenId);
+      const { cursor, jobs } = await jobsRepo.findByTokenId(tokenId, { cursor: request.query.cursor ?? 0});
 
       reply.status(200).send({
         cursor,
@@ -68,11 +73,14 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     },
   });
 
-  fastify.get<{ Params: QueuesEndpointParams }>("/:endpoint", {
+  fastify.get<{ Params: QueuesEndpointParams, Querystring: SCANQuerystringParams }>("/:endpoint", {
     schema: {
       params: {
         data: EndpointParamsSchema,
       },
+      querystring: {
+        data: SCANQueryStringSchema
+      }
     },
     async handler(request, reply) {
       const [tokenId, done] = await fastify.tokenAuth.authenticate(
@@ -85,7 +93,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const { cursor, jobs } = await jobsRepo.find(
         tokenId,
-        request.params.endpoint
+        request.params.endpoint,
+        {
+          cursor: request.query.cursor ?? 0
+        }
       );
 
       reply.status(200).send({

@@ -23,3 +23,21 @@ export function decodeJobDescriptor(id: string) {
     jobId,
   };
 }
+
+export function encodeQueueDescriptor(
+  tokenId: string,
+  endpoint: string,
+) {
+  return [tokenId, endpoint].map(encodeURIComponent).join(":");
+}
+
+export function decodeQueueDescriptor(id: string) {
+  const [tokenId, endpoint] = id
+    .split(":")
+    .map(decodeURIComponent);
+
+  return {
+    tokenId,
+    endpoint,
+  };
+}
