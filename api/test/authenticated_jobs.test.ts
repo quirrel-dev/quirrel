@@ -84,7 +84,7 @@ describe("authenticated jobs", () => {
       .delete("/usage")
       .auth("ignored", passphrase)
       .expect(200, {
-        testproject: 1,
+        testproject: 2, // one for the initial call, one for execution
       });
 
     await request(quirrel)

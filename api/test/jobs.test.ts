@@ -3,12 +3,14 @@ import fastify, { FastifyInstance } from "fastify";
 import delay from "delay";
 import type * as http from "http";
 import * as request from "supertest";
+import { Redis } from "ioredis";
 
 describe("jobs", () => {
   let quirrel: http.Server;
   let teardown: () => Promise<void>;
 
   let server: FastifyInstance;
+  let redis: Redis;
   let endpoint: string;
   let bodies: any[] = [];
   let lastBody: any = undefined;
@@ -17,6 +19,7 @@ describe("jobs", () => {
     const result = await run();
     quirrel = result.server;
     teardown = result.teardown;
+    redis = result.redis;
 
     await result.redis.flushall();
 
@@ -30,9 +33,10 @@ describe("jobs", () => {
     endpoint = encodeURIComponent(await server.listen(0));
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     bodies = [];
     lastBody = undefined;
+    await redis.flushall();
   });
 
   afterAll(async () => {
@@ -132,7 +136,7 @@ describe("jobs", () => {
         endpoint: decodeURIComponent(endpoint),
       });
 
-      expect(+new Date(jobRunAt)).toBeCloseTo(+new Date(runAt), -2);
+      expect(+new Date(jobRunAt)).toBeCloseTo(+new Date(runAt), -3);
 
       await request(quirrel).delete(`/queues/${endpoint}/${id}`).expect(200);
     });
