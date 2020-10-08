@@ -54,9 +54,9 @@ jobs:
         uses: docker/build-push-action@v1
         with:
           path: api
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
+          username: skn0tt
+          password: ${{ secrets.GHCR_PAT }}
+          registry: ghcr.io
           repository: quirrel-dev/quirrel/quirrel
           add_git_labels: true
           tag_with_ref: true
