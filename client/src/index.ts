@@ -1,3 +1,6 @@
+import Encryptor from "secure-e2ee";
+import { verify } from "secure-webhooks";
+
 const fallbackEndpoint =
   process.env.NODE_ENV === "production"
     ? "https://api.quirrel.dev"
@@ -6,6 +9,11 @@ const fallbackEndpoint =
 const defaultBaseUrl = process.env.QUIRREL_URL ?? fallbackEndpoint;
 
 const defaultToken = process.env.QUIRREL_TOKEN;
+
+const defaultEncryptionSecret = process.env.QUIRREL_ENCRYPTION_SECRET;
+const defaultOldSecrets: string[] | null = JSON.parse(
+  process.env.QUIRREL_OLD_SECRETS ?? "null"
+);
 
 interface JobDTO {
   id: string;
@@ -50,12 +58,52 @@ interface HttpResponse {
 
 type HttpFetcher = (req: HttpRequest) => Promise<HttpResponse>;
 
+type SignatureCheckResult<T> =
+  | { isValid: true; body: T }
+  | {
+      isValid: false;
+      body: null;
+    };
+
+interface QuirrelClientOpts {
+  fetcher: HttpFetcher;
+  baseUrl?: string;
+  token?: string;
+  encryptionSecret?: string;
+  oldSecrets?: string[];
+}
+
 export class QuirrelClient {
-  constructor(
-    private readonly fetcher: HttpFetcher,
-    readonly baseUrl = defaultBaseUrl,
-    readonly token = defaultToken
-  ) {}
+  private readonly encryptor: Encryptor | undefined;
+
+  private readonly token;
+  private readonly baseUrl;
+  private readonly fetcher;
+
+  constructor(opts: QuirrelClientOpts) {
+    const enrichedOpts: QuirrelClientOpts = {
+      baseUrl: defaultBaseUrl,
+      token: defaultToken,
+      encryptionSecret: defaultEncryptionSecret,
+      oldSecrets: defaultOldSecrets ?? undefined,
+      ...opts,
+    };
+    if (enrichedOpts.encryptionSecret) {
+      const decryptionSecrets = [enrichedOpts.encryptionSecret];
+      if (enrichedOpts.oldSecrets) {
+        decryptionSecrets.push(...enrichedOpts.oldSecrets);
+      }
+
+      this.encryptor = new Encryptor(
+        enrichedOpts.encryptionSecret,
+        decryptionSecrets
+      );
+    }
+
+    this.token = enrichedOpts.token;
+    this.baseUrl = enrichedOpts.baseUrl;
+    this.fetcher = enrichedOpts.fetcher;
+  }
 
   private getAuthHeaders(): Record<string, string> {
     if (this.token) {
@@ -85,6 +133,10 @@ export class QuirrelClient {
 
     if ("runAt" in opts && opts.runAt) {
       delay = +opts.runAt - Date.now();
+    }
+
+    if (this.encryptor) {
+      opts.body = this.encryptor.encrypt(JSON.stringify(opts.body));
     }
 
     const { body, status } = await this.fetcher({
@@ -117,7 +169,8 @@ export class QuirrelClient {
           this.baseUrl +
           "/queues/" +
           (!!endpoint ? encodeURIComponent(endpoint!) : "") +
-          "?cursor=" + cursor,
+          "?cursor=" +
+          cursor,
         method: "GET",
         headers: this.getAuthHeaders(),
       });
@@ -185,5 +238,39 @@ export class QuirrelClient {
     }
 
     throw new Error("Unexpected response: " + status);
+  }
+
+  verifyRequestSignature<T = any>(
+    headers: { "x-quirrel-signature": string },
+    body: string
+  ): SignatureCheckResult<T> {
+    if (process.env.NODE_ENV === "production") {
+      if (!this.token) {
+        throw new Error("No token specified.");
+      }
+
+      const valid = verify(body, this.token, headers["x-quirrel-signature"]);
+      if (!valid) {
+        return {
+          isValid: false,
+          body: null,
+        };
+      }
+    }
+
+    const decryptedBody = this.decryptBody(body);
+    return {
+      isValid: true,
+      body: JSON.parse(decryptedBody),
+    };
+  }
+
+  decryptBody(body: string) {
+    const parsedBody = JSON.parse(body);
+    if (!this.encryptor) {
+      return parsedBody;
+    }
+
+    return this.encryptor.decrypt(parsedBody);
   }
 }
