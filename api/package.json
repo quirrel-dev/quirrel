@@ -5,6 +5,10 @@
     "email": "simon@quirrel.dev",
     "url": "https://quirrel.dev"
   },
+  "license": "MIT",
+  "files": [
+    "dist/src"
+  ],
   "version": "0.4.0",
   "engines": {
     "node": "12"
@@ -18,7 +22,8 @@
     "test": "jest --runInBand --forceExit",
     "build": "run-s build:schemas build:tsc",
     "build:schemas": "json2ts -i src/scheduler/schemas/ -o src/scheduler/types/",
-    "build:tsc": "tsc"
+    "build:tsc": "tsc",
+    "prepack": "npm run build"
   },
   "devDependencies": {
     "@types/jest": "^26.0.13",
