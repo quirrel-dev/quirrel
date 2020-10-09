@@ -3,6 +3,10 @@
   "engines": {
     "node": "12"
   },
+  "bin": {
+    "quirrel": "./dist/src/cli.js",
+    "🐿": "./dist/src/cli.js"
+  },
   "scripts": {
     "start": "node dist/src/main.js",
     "test": "jest --runInBand --forceExit",

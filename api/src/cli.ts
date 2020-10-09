@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { program } from "commander";
 import * as pack from "../package.json";
 import * as open from "open";
