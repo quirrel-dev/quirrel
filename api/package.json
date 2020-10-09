@@ -10,14 +10,11 @@
     "dist/src",
     "dist/package.json"
   ],
-  "version": "0.4.0-test-bin-2",
+  "version": "0.4.0-test-bin-3",
   "engines": {
     "node": "12"
   },
-  "bin": {
-    "quirrel": "./dist/src/cli.js",
-    "🐿": "./dist/src/cli.js"
-  },
+  "bin": "./dist/src/cli.js",
   "scripts": {
     "start": "node dist/src/main.js",
     "test": "jest --runInBand --forceExit",
