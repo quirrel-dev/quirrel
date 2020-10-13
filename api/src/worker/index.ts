@@ -27,12 +27,14 @@ export interface QuirrelWorkerConfig {
   redis?: Redis.RedisOptions | string;
   enableUsageMetering?: boolean;
   runningInDocker?: boolean;
+  concurrency?: number;
 }
 
 export async function createWorker({
   redis: redisOpts,
   enableUsageMetering,
   runningInDocker,
+  concurrency = 100,
 }: QuirrelWorkerConfig) {
   const redisClient = new Redis(redisOpts as any);
 
@@ -78,11 +80,12 @@ export async function createWorker({
       await usageMeter?.record(tokenId);
 
       process.nextTick(() => {
-        jobsRepo.reenqueue(job)
-      })
+        jobsRepo.reenqueue(job);
+      });
     },
     {
       connection: redisClient,
+      concurrency,
     }
   );
 
