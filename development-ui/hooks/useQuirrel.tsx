@@ -128,8 +128,8 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       baseUrl = "https://" + baseUrl;
     }
 
-    const client = new QuirrelClient(
-      async (req) => {
+    const client = new QuirrelClient({
+      async fetcher(req) {
         const res = await fetch(req.url, req);
         return {
           status: res.status,
@@ -138,8 +138,8 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         };
       },
       baseUrl,
-      token
-    );
+      token,
+    });
 
     setClient(client);
 

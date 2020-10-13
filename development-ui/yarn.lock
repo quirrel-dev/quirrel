@@ -1043,10 +1043,13 @@
   resolved "https://registry.yarnpkg.com/@next/react-refresh-utils/-/react-refresh-utils-9.5.3.tgz#a14fb6489d412b201b98aa44716fb8727ca4c6ae"
   integrity sha512-W3VKOqbg+4Kw+k6M/SODf+WIzwcx60nAemGV1nNPa/yrDtAS2YcJfqiswrJ3+2nJHzqefAFWn4XOfM0fy8ww2Q==
 
-"@quirrel/client@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@quirrel/client/-/client-0.3.3.tgz#2ba7bd2450bdf99e98f314fa3c496a889d3468eb"
-  integrity sha512-Q8U1w7hY4NNQ9esrR9Dquun+ofpU2HjyZp4dnq2Wxai1NIH1QeJ4Y6NUx/ViaM5uwMfIjs8df1qmdscDZ629cw==
+"@quirrel/client@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@quirrel/client/-/client-0.6.0.tgz#192bd22633c42fa94fb02d7c73f017784c49e9d1"
+  integrity sha512-WvzUt7zymrOF2XsfszpZoJ3dbB2WyviuLTUiGcnBPLzBICPdb34ONkMsDAlU+NkI9NiorW3hxb8bSj7CSktl7A==
+  dependencies:
+    secure-e2ee "^0.1.1"
+    secure-webhooks "^0.2.0"
 
 "@tailwindui/react@^0.1.1":
   version "0.1.1"
@@ -4425,6 +4428,16 @@ schema-utils@^2.6.1, schema-utils@^2.6.6:
     "@types/json-schema" "^7.0.5"
     ajv "^6.12.4"
     ajv-keywords "^3.5.2"
+
+secure-e2ee@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/secure-e2ee/-/secure-e2ee-0.1.1.tgz#3984dc45f332831c04281f3ff631e481c8c67c8f"
+  integrity sha512-UsCQG0xejQtUGTqWjYLTmestWorEaDla4DiMAKQbF91Pai977H5Ggf0Z6rhPEavG/7C1N2IEjXqfp8LY5Vhuug==
+
+secure-webhooks@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/secure-webhooks/-/secure-webhooks-0.2.0.tgz#d0630058d63374c98c0e79ab4864778538eec0ad"
+  integrity sha512-vMjvjaZKZHzbcNKAv4e/E7g3FFyx1gCCzhjMA2yzk2jTrKhIR0HNcGmYBWs9KrSWhg7o8xtXbCaorq4kSs0fBg==
 
 semver@7.0.0:
   version "7.0.0"
