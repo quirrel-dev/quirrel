@@ -20,11 +20,20 @@ interface JobDTO {
   endpoint: string;
   body: unknown;
   runAt: string;
+  repeat?: {
+    every: number;
+    times: number;
+    count: number;
+  };
 }
 
 interface BaseEnqueueJobOpts {
   body?: any;
   id?: string;
+  repeat?: {
+    every: number;
+    times: number;
+  };
 }
 
 interface DelayedEnqueueJobOpts extends BaseEnqueueJobOpts {
@@ -150,6 +159,7 @@ export class QuirrelClient {
         body: opts.body,
         delay,
         id: opts.id,
+        repeat: opts.repeat,
       }),
     });
 
