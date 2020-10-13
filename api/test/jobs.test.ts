@@ -228,4 +228,110 @@ describe("jobs", () => {
 
     expect(bodies).toEqual(['{"iAm":"theFirstJob"}', '{"iAm":"theSecondJob"}']);
   });
+
+  describe("repeated jobs", () => {
+    test("work", async () => {
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: "repeat!",
+          repeat: {
+            every: 200,
+            limit: 3,
+          },
+        })
+        .expect(201);
+
+      await delay(700);
+
+      expect(bodies).toEqual(['"repeat!"', '"repeat!"', '"repeat!"']);
+    });
+
+    it("can be stacked", async () => {
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: "repeat!",
+          repeat: {
+            every: 200,
+            limit: 3,
+          },
+        })
+        .expect(201);
+
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: "repeat 2!",
+          repeat: {
+            every: 200,
+            limit: 4,
+          },
+        })
+        .expect(201);
+
+      await delay(1500);
+
+      expect(bodies.filter((v) => v === '"repeat!"')).toHaveLength(3);
+      expect(bodies.filter((v) => v === '"repeat 2!"')).toHaveLength(4);
+    });
+
+    it("works with idempotency IDs", async () => {
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: "repeat!",
+          repeat: {
+            every: 200,
+            limit: 3,
+          },
+          id: "sameId",
+        })
+        .expect(201);
+
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: "repeat 2!",
+          repeat: {
+            every: 200,
+            limit: 4,
+          },
+          id: "sameId",
+        })
+        .expect(201);
+
+      await delay(1500);
+
+      expect(bodies).toEqual(['"repeat!"', '"repeat!"', '"repeat!"']);
+    });
+
+    it("supports deletion", async () => {
+      const {
+        body: { id: jobId },
+      } = await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: "repeat!",
+          repeat: {
+            every: 500,
+            limit: 5,
+          },
+          id: "sameId",
+        })
+        .expect(201);
+
+      await delay(500);
+
+      const numberOfExecutedJobsBeforeDeletion = bodies.length;
+
+      await request(quirrel).delete(`/queues/${endpoint}/${jobId}`).expect(200);
+
+      await delay(2000);
+
+      const jobsExecutedAfterDeletion = bodies.length - numberOfExecutedJobsBeforeDeletion;
+
+      expect(jobsExecutedAfterDeletion < 2).toBe(true);
+    });
+  });
 });

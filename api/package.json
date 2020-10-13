@@ -40,7 +40,8 @@
     "websocket": "^1.0.32"
   },
   "dependencies": {
-    "@quirrel/bullmq": "^1.9.0-5",
+    "@quirrel/bullmq": "^1.9.0-6",
+    "@types/ioredis": "^4.17.5",
     "axios": "^0.20.0",
     "commander": "^6.1.0",
     "fastify": "^3.3.0",

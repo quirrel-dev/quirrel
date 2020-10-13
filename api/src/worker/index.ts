@@ -1,6 +1,6 @@
 import { Worker } from "@quirrel/bullmq";
 import {
-  decodeJobDescriptor,
+  decodeQueueDescriptor,
   HttpJob,
   HTTP_JOB_QUEUE,
 } from "../shared/http-job";
@@ -45,7 +45,7 @@ export async function createWorker({
   const worker = new Worker<HttpJob>(
     HTTP_JOB_QUEUE,
     async (job) => {
-      let { tokenId, endpoint } = decodeJobDescriptor(job.id!);
+      let { tokenId, endpoint } = decodeQueueDescriptor(job.name);
       let { body } = job.data as HttpJob;
 
       console.log("Sending ", body, " to ", endpoint);
@@ -75,7 +75,7 @@ export async function createWorker({
       await usageMeter?.record(tokenId);
     },
     {
-      connection: redisClient,
+      connection: redisClient as any,
     }
   );
 

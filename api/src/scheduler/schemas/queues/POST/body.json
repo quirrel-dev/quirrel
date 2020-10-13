@@ -6,11 +6,27 @@
     "body": {},
     "runAt": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "@deprecated. Use `delay` instead."
     },
-    "delay": { "type": "number" },
+    "delay": { "type": "number", "minimum": 0 },
     "id": {
       "type": "string"
+    },
+    "repeat": {
+      "type": "object",
+      "properties": {
+        "every": {
+          "type": "number",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": ["every", "limit"],
+      "additionalProperties": false
     }
   },
   "required": ["endpoint"],
