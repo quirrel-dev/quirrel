@@ -57,7 +57,7 @@ jobs:
           username: skn0tt
           password: ${{ secrets.GHCR_PAT }}
           registry: ghcr.io
-          repository: quirrel-dev/quirrel/quirrel
+          repository: quirrel-dev/quirrel
           add_git_labels: true
           tag_with_ref: true
           tag_with_sha: true
