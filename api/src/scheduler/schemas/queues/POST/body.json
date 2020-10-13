@@ -20,12 +20,12 @@
           "type": "number",
           "minimum": 0
         },
-        "limit": {
+        "times": {
           "type": "number",
-          "minimum": 0
+          "minimum": 1
         }
       },
-      "required": ["every", "limit"],
+      "required": ["every", "times"],
       "additionalProperties": false
     }
   },

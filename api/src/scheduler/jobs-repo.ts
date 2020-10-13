@@ -11,7 +11,6 @@ import {
 } from "../shared/http-job";
 
 import * as uuid from "uuid";
-import { RepeatableRegistry } from "./repeatable-registry";
 
 interface PaginationOpts {
   cursor: number;
@@ -25,31 +24,21 @@ interface JobDTO {
   runAt: string;
   repeat?: {
     every: number;
-    limit: number;
+    times: number;
     count: number;
   };
 }
 
-export class JobsRepo {
-  private jobsScheduler;
-  private jobsQueue;
-  private jobsEvents;
-  private repeatableRegistry;
+export class BaseJobsRepo {
+  protected jobsQueue;
 
   constructor(redis: Redis) {
-    this.jobsScheduler = new QueueScheduler(HTTP_JOB_QUEUE, {
-      connection: redis,
-    });
-    this.jobsEvents = new QueueEvents(HTTP_JOB_QUEUE, {
-      connection: redis.duplicate(),
-    });
     this.jobsQueue = new Queue<HttpJob>(HTTP_JOB_QUEUE, {
       connection: redis,
       defaultJobOptions: {
         removeOnComplete: true,
       },
     });
-    this.repeatableRegistry = new RepeatableRegistry(redis);
   }
 
   private static toJobDTO(job: Job<HttpJob>): JobDTO {
@@ -60,22 +49,12 @@ export class JobsRepo {
       endpoint,
       body: job.data.body,
       runAt: new Date(job.timestamp + (job.opts.delay ?? 0)).toISOString(),
-      repeat: job.opts.repeat
-        ? {
-            count: job.opts.repeat.count!,
-            every: job.opts.repeat.every!,
-            limit: job.opts.repeat.limit!,
-          }
-        : undefined,
+      repeat: job.data.repeat
     };
   }
 
   public async close() {
-    await Promise.all([
-      this.jobsScheduler.close(),
-      this.jobsQueue.close(),
-      this.jobsEvents.close(),
-    ]);
+    await this.jobsQueue.close();
   }
 
   public async find(
@@ -91,7 +70,7 @@ export class JobsRepo {
 
     return {
       cursor: newCursor,
-      jobs: jobs.map(JobsRepo.toJobDTO),
+      jobs: jobs.map(BaseJobsRepo.toJobDTO),
     };
   }
 
@@ -107,7 +86,7 @@ export class JobsRepo {
 
     return {
       cursor: newCursor,
-      jobs: jobs.map(JobsRepo.toJobDTO),
+      jobs: jobs.map(BaseJobsRepo.toJobDTO),
     };
   }
 
@@ -117,7 +96,7 @@ export class JobsRepo {
     const job: Job<HttpJob> | undefined = await this.jobsQueue.getJob(
       internalId
     );
-    return job ? JobsRepo.toJobDTO(job) : undefined;
+    return job ? BaseJobsRepo.toJobDTO(job) : undefined;
   }
 
   public async invoke(tokenId: string, endpoint: string, id: string) {
@@ -133,36 +112,26 @@ export class JobsRepo {
 
     await job.promote();
 
-    return JobsRepo.toJobDTO(job);
+    return BaseJobsRepo.toJobDTO(job);
   }
 
-  public async delete(tokenId: string, endpoint: string, id: string): Promise<JobDTO | null> {
+  public async delete(
+    tokenId: string,
+    endpoint: string,
+    id: string
+  ): Promise<JobDTO | null> {
     const jobDescriptor = encodeJobDescriptor(tokenId, endpoint, id);
 
-    let job: Job<HttpJob> | undefined;
-
-    job = await this.jobsQueue.getJob(jobDescriptor);
-    if (job) {
-      await job.remove();
-
-      return JobsRepo.toJobDTO(job);
-    } else {
-      // it could be a repeatable job
-
-      const repeatableJobKey = await this.repeatableRegistry.get(jobDescriptor);
-
-      if (repeatableJobKey) {
-        const result = await this.jobsQueue.removeRepeatableByKey(
-          repeatableJobKey
-        );
-
-        return {
-          id: "lel"
-        } as any
-      }
+    const job: Job<HttpJob> | undefined = await this.jobsQueue.getJob(
+      jobDescriptor
+    );
+    if (!job) {
+      return null;
     }
 
-    return null;
+    await job.remove();
+
+    return BaseJobsRepo.toJobDTO(job);
   }
 
   public async enqueue(
@@ -185,25 +154,69 @@ export class JobsRepo {
       queueDescriptor,
       {
         body,
+        repeat: !!repeat
+          ? {
+              every: repeat.every,
+              times: repeat.times,
+              count: 1,
+            }
+          : undefined,
       },
       {
         delay,
-        repeat: !!repeat ? {
-          ...repeat,
-          jobId: jobDescriptor,
-          tz: "UTC",
-        } : undefined,
         jobId: jobDescriptor,
       }
     );
 
-    if (repeat) {
-      const [ ,, repeatKeyB64 ] = job.id!.split(":");
-      const repeatKey = Buffer.from(repeatKeyB64, "base64").toString();
-      await this.repeatableRegistry.register(jobDescriptor, repeatKey, repeat);
+    return BaseJobsRepo.toJobDTO(job);
+  }
+
+  public async reenqueue(
+    job: Job<HttpJob>,
+  ) {
+    const { repeat } = job.data
+    if (!repeat) {
+      return;
     }
 
-    return JobsRepo.toJobDTO(job);
+    const isFinished = repeat.count >= repeat.times;
+    if (isFinished) {
+      return;
+    }
+
+    await this.jobsQueue.add(job.name, {
+      ...job.data,
+      repeat: {
+        ...repeat,
+        count: repeat.count + 1
+      }
+    }, {
+      delay: repeat.every,
+      jobId: job.id!
+    })
+  }
+}
+
+export class JobsRepo extends BaseJobsRepo {
+  protected jobsScheduler;
+  protected jobsEvents;
+
+  constructor(redis: Redis) {
+    super(redis);
+    this.jobsScheduler = new QueueScheduler(HTTP_JOB_QUEUE, {
+      connection: redis,
+    });
+    this.jobsEvents = new QueueEvents(HTTP_JOB_QUEUE, {
+      connection: redis.duplicate(),
+    });
+  }
+
+  public async close() {
+    await Promise.all([
+      this.jobsScheduler.close(),
+      this.jobsQueue.close(),
+      this.jobsEvents.close(),
+    ]);
   }
 
   public onEvent(

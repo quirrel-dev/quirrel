@@ -237,7 +237,7 @@ describe("jobs", () => {
           body: "repeat!",
           repeat: {
             every: 200,
-            limit: 3,
+            times: 3,
           },
         })
         .expect(201);
@@ -254,7 +254,7 @@ describe("jobs", () => {
           body: "repeat!",
           repeat: {
             every: 200,
-            limit: 3,
+            times: 3,
           },
         })
         .expect(201);
@@ -265,7 +265,7 @@ describe("jobs", () => {
           body: "repeat 2!",
           repeat: {
             every: 200,
-            limit: 4,
+            times: 4,
           },
         })
         .expect(201);
@@ -283,7 +283,7 @@ describe("jobs", () => {
           body: "repeat!",
           repeat: {
             every: 200,
-            limit: 3,
+            times: 3,
           },
           id: "sameId",
         })
@@ -295,7 +295,7 @@ describe("jobs", () => {
           body: "repeat 2!",
           repeat: {
             every: 200,
-            limit: 4,
+            times: 4,
           },
           id: "sameId",
         })
@@ -315,7 +315,7 @@ describe("jobs", () => {
           body: "repeat!",
           repeat: {
             every: 500,
-            limit: 5,
+            times: 5,
           },
           id: "sameId",
         })

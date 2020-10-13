@@ -2,8 +2,15 @@ export const HTTP_JOB_QUEUE = "http";
 
 const delimiter = ";";
 
+interface RepeatOptions {
+  every: number;
+  times: number;
+  count: number;
+}
+
 export interface HttpJob {
   body: any;
+  repeat?: RepeatOptions;
 }
 
 export function encodeJobDescriptor(
@@ -15,23 +22,11 @@ export function encodeJobDescriptor(
 }
 
 export function decodeJobDescriptor(descriptor: string) {
-  let repeatable = false;
-
-  if (descriptor.startsWith("repeat:")) {
-    const [repeat, queueDescriptor, b64Meta, lastTimestamp] = descriptor.split(
-      ":"
-    );
-    const meta = Buffer.from(b64Meta, "base64").toString();
-    descriptor = meta.split(":")[1];
-    repeatable = true;
-  }
-
   const [tokenId, endpoint, jobId] = descriptor.split(delimiter).map(decodeURIComponent);
   return {
     tokenId,
     endpoint,
     jobId,
-    repeatable,
   };
 }
 

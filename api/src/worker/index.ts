@@ -9,6 +9,7 @@ import axios from "axios";
 import { TokenRepo } from "../shared/token-repo";
 import { sign } from "secure-webhooks";
 import * as Redis from "ioredis";
+import { BaseJobsRepo } from "../scheduler/jobs-repo";
 
 export function replaceLocalhostWithDockerHost(url: string): string {
   if (url.startsWith("http://localhost")) {
@@ -42,6 +43,8 @@ export async function createWorker({
     usageMeter = new UsageMeter(redisClient);
   }
 
+  const jobsRepo = new BaseJobsRepo(redisClient);
+
   const worker = new Worker<HttpJob>(
     HTTP_JOB_QUEUE,
     async (job) => {
@@ -73,15 +76,20 @@ export async function createWorker({
       });
 
       await usageMeter?.record(tokenId);
+
+      process.nextTick(() => {
+        jobsRepo.reenqueue(job)
+      })
     },
     {
-      connection: redisClient as any,
+      connection: redisClient,
     }
   );
 
   async function close() {
     await worker.close();
     await redisClient.quit();
+    await jobsRepo.close();
   }
 
   return {
