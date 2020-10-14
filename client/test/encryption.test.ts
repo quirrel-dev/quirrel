@@ -13,6 +13,7 @@ function getAddress(server: http.Server): string {
 test("encryption", async () => {
   const server = await runQuirrel({
     port: 0,
+    redis: process.env.REDIS_URL
   });
 
   const quirrel = new QuirrelClient({
