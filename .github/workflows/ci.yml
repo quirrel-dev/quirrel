@@ -43,7 +43,7 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: quirrel Integration
-        base-path: api
+      working-directory: api
     - run: npm ci
       working-directory: client
     - run: npm run build
@@ -55,7 +55,7 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: "@quirrel/client Integration"
-        base-path: client
+      working-directory: client
   
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
