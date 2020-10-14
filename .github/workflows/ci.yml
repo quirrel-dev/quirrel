@@ -42,8 +42,8 @@ jobs:
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-      flag-name: quirrel Integration
-      base-path: api
+        flag-name: quirrel Integration
+        base-path: api
     - run: npm ci
       working-directory: client
     - run: npm run build
@@ -54,8 +54,8 @@ jobs:
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-      flag-name: "@quirrel/client Integration"
-      base-path: client
+        flag-name: "@quirrel/client Integration"
+        base-path: client
   
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
