@@ -62,6 +62,7 @@ export async function createWorker({
       if (tokenId) {
         const token = await tokenRepo.getById(tokenId);
         if (token) {
+          console.log({ body })
           const signature = sign(body ?? "", token);
           headers["x-quirrel-signature"] = signature;
         }

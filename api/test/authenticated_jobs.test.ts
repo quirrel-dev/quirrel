@@ -44,7 +44,7 @@ describe("authenticated jobs", () => {
     await request(quirrel)
       .post("/queues/" + endpoint)
       .send({
-        body: { foo: "bar" },
+        body: JSON.stringify({ foo: "bar" }),
       })
       .expect(401);
 
@@ -52,7 +52,7 @@ describe("authenticated jobs", () => {
       .post("/queues/" + endpoint)
       .auth(token, { type: "bearer" })
       .send({
-        body: { foo: "bar" },
+        body: JSON.stringify({ foo: "bar" }),
       })
       .expect(201);
 
@@ -60,6 +60,7 @@ describe("authenticated jobs", () => {
 
     expect(lastBody).toEqual('{"foo":"bar"}');
     expect(lastSignature).toMatch(/v=(\d+),d=([\da-f]+)/);
+    console.log({ lastBody, token, lastSignature })
     expect(verify(lastBody, token, lastSignature)).toBe(true);
 
     await request(quirrel)
@@ -76,7 +77,7 @@ describe("authenticated jobs", () => {
       .post("/queues/" + endpoint)
       .auth(token, { type: "bearer" })
       .send({
-        body: { foo: "bar" },
+        body: JSON.stringify({ foo: "bar" }),
       })
       .expect(401);
 

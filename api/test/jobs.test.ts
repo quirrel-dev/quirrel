@@ -46,7 +46,7 @@ describe("jobs", () => {
   test("post a job", async () => {
     await request(quirrel)
       .post("/queues/" + endpoint)
-      .send({ body: { foo: "bar" } })
+      .send({ body: JSON.stringify({ foo: "bar" }) })
       .expect(201);
 
     await delay(300);
@@ -61,7 +61,7 @@ describe("jobs", () => {
       } = await request(quirrel)
         .post("/queues/" + endpoint)
         .send({
-          body: { this: "willBeRetrieved", nr: 1 },
+          body: JSON.stringify({ this: "willBeRetrieved", nr: 1 }),
           runAt: new Date(Date.now() + 300).toISOString(),
         })
         .expect(201);
@@ -71,7 +71,7 @@ describe("jobs", () => {
       } = await request(quirrel)
         .post("/queues/" + endpoint)
         .send({
-          body: { this: "willBeRetrieved", nr: 2 },
+          body: JSON.stringify({ this: "willBeRetrieved", nr: 2 }),
           runAt: new Date(Date.now() + 300).toISOString(),
         })
         .expect(201);
@@ -89,18 +89,18 @@ describe("jobs", () => {
 
       expect(jobsWithoutRunAt).toContainEqual({
         id: jobId1,
-        body: {
-          nr: 1,
+        body: JSON.stringify({
           this: "willBeRetrieved",
-        },
+          nr: 1,
+        }),
         endpoint: decodeURIComponent(endpoint),
       });
       expect(jobsWithoutRunAt).toContainEqual({
         id: jobId2,
-        body: {
-          nr: 2,
+        body: JSON.stringify({
           this: "willBeRetrieved",
-        },
+          nr: 2,
+        }),
         endpoint: decodeURIComponent(endpoint),
       });
 
@@ -119,7 +119,7 @@ describe("jobs", () => {
       } = await request(quirrel)
         .post("/queues/" + endpoint)
         .send({
-          body: { this: "willBeRetrieved" },
+          body: JSON.stringify({ this: "willBeRetrieved" }),
           runAt,
         })
         .expect(201);
@@ -132,7 +132,7 @@ describe("jobs", () => {
 
       expect(restOfJob).toEqual({
         id,
-        body: { this: "willBeRetrieved" },
+        body: JSON.stringify({ this: "willBeRetrieved" }),
         endpoint: decodeURIComponent(endpoint),
       });
 
@@ -146,7 +146,7 @@ describe("jobs", () => {
     await request(quirrel)
       .post("/queues/" + endpoint)
       .send({
-        body: { lol: "lel" },
+        body: JSON.stringify({ lol: "lel" }),
         runAt: new Date(Date.now() + 300).toISOString(),
       })
       .expect(201);
@@ -164,7 +164,7 @@ describe("jobs", () => {
     const { body } = await request(quirrel)
       .post("/queues/" + endpoint)
       .send({
-        body: { iWill: "beDeleted" },
+        body: JSON.stringify({ iWill: "beDeleted" }),
         runAt: new Date(Date.now() + 300).toISOString(),
       })
       .expect(201);
@@ -186,7 +186,7 @@ describe("jobs", () => {
     } = await request(quirrel)
       .post("/queues/" + endpoint)
       .send({
-        body: { iAm: "theFirstJob" },
+        body: JSON.stringify({ iAm: "theFirstJob" }),
         runAt: new Date(Date.now() + 300).toISOString(),
         id,
       })
@@ -199,7 +199,7 @@ describe("jobs", () => {
     } = await request(quirrel)
       .post("/queues/" + endpoint)
       .send({
-        body: { iAm: "theSecondJob" },
+        body: JSON.stringify({ iAm: "theSecondJob" }),
         runAt: new Date(Date.now() + 300).toISOString(),
         id,
       })
@@ -216,7 +216,7 @@ describe("jobs", () => {
     } = await request(quirrel)
       .post("/queues/" + endpoint)
       .send({
-        body: { iAm: "theSecondJob" },
+        body: JSON.stringify({ iAm: "theSecondJob" }),
         runAt: new Date(Date.now() + 300).toISOString(),
         id,
       })
@@ -244,7 +244,7 @@ describe("jobs", () => {
 
       await delay(700);
 
-      expect(bodies).toEqual(['"repeat!"', '"repeat!"', '"repeat!"']);
+      expect(bodies).toEqual(["repeat!", "repeat!", "repeat!"]);
     });
 
     it("can be stacked", async () => {
@@ -272,8 +272,8 @@ describe("jobs", () => {
 
       await delay(1500);
 
-      expect(bodies.filter((v) => v === '"repeat!"')).toHaveLength(3);
-      expect(bodies.filter((v) => v === '"repeat 2!"')).toHaveLength(4);
+      expect(bodies.filter((v) => v === "repeat!")).toHaveLength(3);
+      expect(bodies.filter((v) => v === "repeat 2!")).toHaveLength(4);
     });
 
     it("works with idempotency IDs", async () => {
@@ -303,7 +303,7 @@ describe("jobs", () => {
 
       await delay(1500);
 
-      expect(bodies).toEqual(['"repeat!"', '"repeat!"', '"repeat!"']);
+      expect(bodies).toEqual(["repeat!", "repeat!", "repeat!"]);
     });
 
     it("supports deletion", async () => {
@@ -329,7 +329,8 @@ describe("jobs", () => {
 
       await delay(2000);
 
-      const jobsExecutedAfterDeletion = bodies.length - numberOfExecutedJobsBeforeDeletion;
+      const jobsExecutedAfterDeletion =
+        bodies.length - numberOfExecutedJobsBeforeDeletion;
 
       expect(jobsExecutedAfterDeletion < 2).toBe(true);
     });
