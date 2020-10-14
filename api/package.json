@@ -11,7 +11,7 @@
     "dist/package.json"
   ],
   "main": "dist/src/index.js",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "engines": {
     "node": "12"
   },

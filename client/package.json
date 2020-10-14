@@ -1,6 +1,6 @@
 {
   "name": "@quirrel/client",
-  "version": "0.6.0",
+  "version": "0.6.3",
   "description": "Quirrel Client",
   "main": "dist/src/index.js",
   "files": [
