@@ -18,7 +18,7 @@ const defaultOldSecrets: string[] | null = JSON.parse(
 interface JobDTO {
   id: string;
   endpoint: string;
-  body: unknown;
+  body: string;
   runAt: string;
   repeat?: {
     every: number;
@@ -46,8 +46,9 @@ interface ScheduledEnqueueJobOpts extends BaseEnqueueJobOpts {
 
 export type EnqueueJobOpts = DelayedEnqueueJobOpts | ScheduledEnqueueJobOpts;
 
-export interface Job extends Omit<JobDTO, "runAt"> {
+export interface Job extends Omit<JobDTO, "runAt" | "body"> {
   runAt: Date;
+  body: unknown;
   delete(): Promise<Job | null>;
   invoke(): Promise<Job | null>;
 }
@@ -127,6 +128,7 @@ export class QuirrelClient {
   private toJob(dto: JobDTO): Job {
     return {
       ...dto,
+      body: this.decryptBody(dto.body),
       runAt: new Date(dto.runAt),
       delete: () => this.delete(dto.endpoint, dto.id),
       invoke: () => this.invoke(dto.endpoint, dto.id),
