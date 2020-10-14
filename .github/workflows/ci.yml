@@ -36,13 +36,13 @@ jobs:
       working-directory: api
     - run: npm run build
       working-directory: api
-    - run: npm test
+    - run: npm test -- --coverage
       working-directory: api
     - run: npm ci
       working-directory: client
     - run: npm run build
       working-directory: client
-    - run: npm test
+    - run: npm test -- --coverage
       working-directory: client
   
   push_to_registry:
