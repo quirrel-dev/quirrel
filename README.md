@@ -1,6 +1,7 @@
 # Quirrel
 
-![API CI](https://github.com/quirrel-dev/quirrel/workflows/API%20CI/badge.svg)
+![CI](https://github.com/quirrel-dev/quirrel/workflows/CI/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/quirrel-dev/quirrel/badge.svg?branch=master)](https://coveralls.io/github/quirrel-dev/quirrel?branch=master)
 
 The Task Queueing Solution for Next.js x Vercel.
 
