@@ -144,8 +144,10 @@ export class QuirrelClient {
       delay = +opts.runAt - Date.now();
     }
 
+    let stringifiedBody = JSON.stringify(opts.body);
+
     if (this.encryptor) {
-      opts.body = this.encryptor.encrypt(JSON.stringify(opts.body));
+      stringifiedBody = this.encryptor.encrypt(stringifiedBody);
     }
 
     const { body, status } = await this.fetcher({
@@ -156,7 +158,7 @@ export class QuirrelClient {
         ...this.getAuthHeaders(),
       },
       body: JSON.stringify({
-        body: opts.body,
+        body: stringifiedBody,
         delay,
         id: opts.id,
         repeat: opts.repeat,
@@ -268,19 +270,17 @@ export class QuirrelClient {
       }
     }
 
-    const decryptedBody = this.decryptBody(body);
     return {
       isValid: true,
-      body: JSON.parse(decryptedBody),
+      body: this.decryptBody(body),
     };
   }
 
   decryptBody(body: string) {
-    const parsedBody = JSON.parse(body);
-    if (!this.encryptor) {
-      return parsedBody;
+    if (this.encryptor) {
+      body = this.encryptor.decrypt(body);
     }
 
-    return this.encryptor.decrypt(parsedBody);
+    return JSON.parse(body);
   }
 }

@@ -4,6 +4,7 @@
         "strict": true,
         "sourceMap": true,
         "resolveJsonModule": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "declaration": true
     }
 }

@@ -55,8 +55,6 @@ export async function createWorker({
 
       console.log("Sending ", body, " to ", endpoint);
 
-      const input = JSON.stringify(body);
-
       const headers: Record<string, string> = {
         "Content-Type": "text/plain",
       };
@@ -64,7 +62,7 @@ export async function createWorker({
       if (tokenId) {
         const token = await tokenRepo.getById(tokenId);
         if (token) {
-          const signature = sign(input, token);
+          const signature = sign(body ?? "", token);
           headers["x-quirrel-signature"] = signature;
         }
       }
@@ -73,7 +71,7 @@ export async function createWorker({
         endpoint = replaceLocalhostWithDockerHost(endpoint);
       }
 
-      await axios.post(endpoint, input, {
+      await axios.post(endpoint, body, {
         headers,
       });
 

@@ -9,7 +9,7 @@ interface RepeatOptions {
 }
 
 export interface HttpJob {
-  body: any;
+  body?: string;
   repeat?: RepeatOptions;
 }
 

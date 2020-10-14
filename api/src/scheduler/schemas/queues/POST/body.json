@@ -3,7 +3,9 @@
   "title": "POST /queues/:endpoint body",
   "type": "object",
   "properties": {
-    "body": {},
+    "body": {
+      "type": "string"
+    },
     "runAt": {
       "type": "string",
       "format": "date-time",
