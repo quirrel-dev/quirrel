@@ -43,7 +43,8 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: quirrel Integration
-      working-directory: api
+        base-path: api
+        path-to-lcov: api/coverage/lcov.info
     - run: npm ci
       working-directory: client
     - run: npm run build
@@ -55,7 +56,8 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: "@quirrel/client Integration"
-      working-directory: client
+        base-path: client
+        path-to-lcov: client/coverage/lcov.info
   
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
