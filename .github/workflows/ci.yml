@@ -5,15 +5,7 @@ name: API CI
 
 on:
   push:
-    paths:
-      - api/**
   pull_request:
-    paths:
-      - api/**
-
-defaults:
-  run:
-    working-directory: api
 
 jobs:
   build:
@@ -41,8 +33,17 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
+      working-directory: api
     - run: npm run build
-    - run: npm test -- --forceExit
+      working-directory: api
+    - run: npm test
+      working-directory: api
+    - run: npm ci
+      working-directory: client
+    - run: npm run build
+      working-directory: client
+    - run: npm test
+      working-directory: client
   
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
