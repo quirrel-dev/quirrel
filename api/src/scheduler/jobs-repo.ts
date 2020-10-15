@@ -10,6 +10,7 @@ import {
   encodeQueueDescriptor,
 } from "../shared/http-job";
 
+import * as cronParser from "cron-parser";
 import * as uuid from "uuid";
 
 interface PaginationOpts {
@@ -23,9 +24,10 @@ interface JobDTO {
   body: unknown;
   runAt: string;
   repeat?: {
-    every: number;
-    times: number;
+    every?: number;
+    times?: number;
     count: number;
+    cron?: string;
   };
 }
 
@@ -49,7 +51,7 @@ export class BaseJobsRepo {
       endpoint,
       body: job.data.body,
       runAt: new Date(job.timestamp + (job.opts.delay ?? 0)).toISOString(),
-      repeat: job.data.repeat
+      repeat: job.data.repeat,
     };
   }
 
@@ -139,12 +141,28 @@ export class BaseJobsRepo {
     endpoint: string,
     { body, runAt, id, delay, repeat }: POSTQueuesEndpointBody
   ) {
+    const now = Date.now();
+
     if (typeof id === "undefined") {
       id = uuid.v4();
     }
 
     if (runAt) {
-      delay = Number(new Date(runAt)) - Date.now();
+      delay = Number(new Date(runAt)) - now;
+    }
+
+    if (repeat?.every && repeat.every < 1) {
+      return;
+    }
+
+    if (repeat?.cron) {
+      const expr = cronParser.parseExpression(repeat.cron, {
+        utc: true,
+        startDate: now + (delay ?? 0),
+      });
+
+      const firstExecution = expr.next().toDate();
+      delay = +firstExecution - now;
     }
 
     const queueDescriptor = encodeQueueDescriptor(tokenId, endpoint);
@@ -156,8 +174,7 @@ export class BaseJobsRepo {
         body,
         repeat: !!repeat
           ? {
-              every: repeat.every,
-              times: repeat.times,
+              ...repeat,
               count: 1,
             }
           : undefined,
@@ -171,29 +188,51 @@ export class BaseJobsRepo {
     return BaseJobsRepo.toJobDTO(job);
   }
 
-  public async reenqueue(
-    job: Job<HttpJob>,
-  ) {
-    const { repeat } = job.data
+  public async reenqueue(job: Job<HttpJob>) {
+    const { repeat } = job.data;
     if (!repeat) {
       return;
     }
 
-    const isFinished = repeat.count >= repeat.times;
+    const isFinished = repeat.times && repeat.count >= repeat.times;
     if (isFinished) {
       return;
     }
 
-    await this.jobsQueue.add(job.name, {
-      ...job.data,
-      repeat: {
-        ...repeat,
-        count: repeat.count + 1
+    let delay: number | undefined;
+
+    if (repeat.cron) {
+      const now = Date.now();
+
+      const expr = cronParser.parseExpression(repeat.cron, {
+        utc: true,
+        startDate: now
+      });
+
+      const nextExecution = expr.next().toDate();
+      delay = +nextExecution - now;
+    } else if (repeat.every) {
+      delay = repeat.every;
+    }
+
+    if (!delay) {
+      return;
+    }
+
+    await this.jobsQueue.add(
+      job.name,
+      {
+        ...job.data,
+        repeat: {
+          ...repeat,
+          count: repeat.count + 1,
+        },
+      },
+      {
+        delay,
+        jobId: job.id!,
       }
-    }, {
-      delay: repeat.every,
-      jobId: job.id!
-    })
+    );
   }
 }
 
