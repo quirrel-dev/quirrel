@@ -6,7 +6,7 @@ import { POSTTokensParams } from "../types/tokens/PUT/params";
 import * as DELETETokenParamsSchema from "../schemas/tokens/DELETE/params.json";
 import { DELETETokensTokenParams } from "../types/tokens/DELETE/params";
 
-const tokensPlugin: FastifyPluginCallback = async (fastify, opts, done) => {
+const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.addHook("onRequest", fastify.basicAuth);
 
   fastify.put<{ Params: POSTTokensParams }>("/:id", {

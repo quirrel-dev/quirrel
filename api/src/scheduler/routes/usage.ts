@@ -4,7 +4,7 @@ import { UsageMeter } from "../../shared/usage-meter";
 import * as DELETEUsageResponseSchema from "../schemas/usage/DELETE/response.json";
 import { DELETEUsageResponse } from "../types/usage/DELETE/response";
 
-const usageRoute: FastifyPluginCallback = async (fastify, opts, done) => {
+const usageRoute: FastifyPluginCallback = (fastify, opts, done) => {
   const usageMeter = new UsageMeter(fastify.redis);
 
   fastify.addHook("onRequest", fastify.basicAuth);

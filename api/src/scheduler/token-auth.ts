@@ -5,14 +5,18 @@ import { UsageMeter } from "../shared/usage-meter";
 
 interface TokenAuthService {
   authenticate(
-    request: FastifyRequest | IncomingMessage,
-    reply?: FastifyReply
-  ): Promise<[tokenId: string, done: boolean]>;
+    request: FastifyRequest | IncomingMessage
+  ): Promise<string | null>;
 }
 
 declare module "fastify" {
   interface FastifyInstance {
     tokenAuth: TokenAuthService;
+    tokenAuthPreValidation: any;
+  }
+
+  interface FastifyRequest {
+    tokenId: string;
   }
 }
 
@@ -20,55 +24,67 @@ interface TokenAuthPluginOpts {
   auth: boolean;
 }
 
-const tokenAuthPlugin: FastifyPluginCallback<TokenAuthPluginOpts> = async (
+const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
   fastify,
-  opts
+  opts,
+  done
 ) => {
   const usageMeter = new UsageMeter(fastify.redis);
 
   async function getTokenID(authorizationHeader?: string) {
     if (!authorizationHeader) {
-      return undefined;
+      return null;
     }
 
     if (!authorizationHeader.startsWith("Bearer ")) {
-      return undefined;
+      return null;
     }
 
     const [_, token] = authorizationHeader.split("Bearer ");
     const tokenId = await fastify.tokens.check(token);
-    return tokenId ?? undefined;
+    return tokenId;
   }
 
   async function authenticate(
-    request: FastifyRequest | IncomingMessage,
-    reply?: FastifyReply
-  ): Promise<[tokenId: string, done: boolean]> {
+    request: FastifyRequest | IncomingMessage
+  ): Promise<string | null> {
     if (opts.auth) {
       const { authorization } = request.headers;
       const tokenId = await getTokenID(authorization);
 
-      if (!tokenId) {
-        reply?.status(401).send("Unauthorized");
-
-        return ["unauthorized", true];
+      if (tokenId) {
+        usageMeter.record(tokenId);
       }
 
-      usageMeter.record(tokenId);
-
-      return [tokenId, false];
+      return tokenId;
     }
 
-    return ["anonymous", false];
+    return "anonymous";
   }
 
   const service: TokenAuthService = {
     authenticate,
   };
 
+  fastify.decorateRequest("tokenId", null);
   fastify.decorate("tokenAuth", service);
+
+  fastify.decorate(
+    "tokenAuthPreValidation",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const tokenId = await fastify.tokenAuth.authenticate(request);
+
+      if (tokenId === null) {
+        reply.status(401).send("Unauthenticated");
+      } else {
+        request.tokenId = tokenId;
+      }
+    }
+  );
+
+  done();
 };
 
-export default (fp as any)(tokenAuthPlugin) as FastifyPluginCallback<
+export default (fp as any)(tokenAuthServicePlugin) as FastifyPluginCallback<
   TokenAuthPluginOpts
 >;
