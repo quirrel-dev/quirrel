@@ -151,7 +151,7 @@ export class BaseJobsRepo {
       delay = Number(new Date(runAt)) - now;
     }
 
-    if (repeat?.every && repeat.every < 1) {
+    if (typeof repeat?.times === "number" && repeat.times < 1) {
       return;
     }
 
@@ -206,7 +206,7 @@ export class BaseJobsRepo {
 
       const expr = cronParser.parseExpression(repeat.cron, {
         utc: true,
-        startDate: now
+        startDate: now,
       });
 
       const nextExecution = expr.next().toDate();

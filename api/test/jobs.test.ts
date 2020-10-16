@@ -336,6 +336,22 @@ describe("jobs", () => {
     });
   });
 
+  test("repeat.times = 0", async () => {
+    await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: "cron",
+          repeat: {
+            times: 0
+          }
+        })
+        .expect(201);
+
+      await delay(500);
+
+      expect(bodies).toEqual([])
+  })
+
   describe("cron jobs", () => {
     test("work", async () => {
       await request(quirrel)
