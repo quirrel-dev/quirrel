@@ -7,16 +7,21 @@ enum ScreenWidth {
   Node = 900, // Tablet
 }
 
-const telemetryMessage = `
-Telemetry: Quirrel collects **completely anonymous** telemetry data about general usage.
-Participation in this anonymous program is optional, and you may opt-out if you'd not like to share any information.
-To opt-out, set the QUIRREL_DISABLE_TELEMETRY environment variable.
-`.trim();
+let alreadyPrinted = false;
+function printTelemetryMessage() {
+  if (alreadyPrinted) {
+    return;
+  }
 
-/**
- * Provides anonymous telemetry to Quirrel.
- * Can be disabled by setting `QUIRREL_DISABLE_TELEMETRY`
- */
+  console.log(
+    "Telemetry: Quirrel collects **completely anonymous** telemetry data about general usage.\n" +
+      "Participation in this anonymous program is optional, and you may opt-out if you'd not like to share any information.\n" +
+      "To opt-out, set the QUIRREL_DISABLE_TELEMETRY environment variable."
+  );
+
+  alreadyPrinted = true;
+}
+
 export class Telemetrist {
   isDisabled: boolean;
   screenWidth: ScreenWidth;
@@ -27,7 +32,7 @@ export class Telemetrist {
     if (process.env.QUIRREL_DISABLE_TELEMETRY) {
       this.isDisabled = true;
     } else {
-      console.log(telemetryMessage);
+      printTelemetryMessage();
       this.isDisabled = false;
     }
   }
