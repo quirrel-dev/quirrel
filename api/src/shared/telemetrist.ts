@@ -42,12 +42,24 @@ export class Telemetrist {
       return;
     }
 
-    axios.post("https://plausible.io/api/event", {
-      name,
-      url: `https://telemetry.quirrel.dev/${path}`,
-      domain: "telemetry.quirrel.dev",
-      screen_width: this.screenWidth,
-    });
+    try {
+      await axios.post(
+        "https://plausible.io/api/event",
+        {
+          name,
+          url: `https://telemetry.quirrel.dev/${path}`,
+          domain: "telemetry.quirrel.dev",
+          screen_width: this.screenWidth,
+        },
+        {
+          headers: {
+            "Content-Type": "text/plain",
+          },
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   public async goal(name: string) {
