@@ -29,6 +29,7 @@ export interface QuirrelWorkerConfig {
   enableUsageMetering?: boolean;
   runningInDocker?: boolean;
   concurrency?: number;
+  disableTelemetry?: boolean;
 }
 
 export async function createWorker({
@@ -36,9 +37,12 @@ export async function createWorker({
   enableUsageMetering,
   runningInDocker,
   concurrency = 100,
+  disableTelemetry,
 }: QuirrelWorkerConfig) {
   const redisClient = new Redis(redisOpts as any);
-  const telemetrist = new Telemetrist(runningInDocker ?? false);
+  const telemetrist = disableTelemetry
+    ? undefined
+    : new Telemetrist(runningInDocker ?? false);
 
   const tokenRepo = new TokenRepo(redisClient);
 
@@ -80,7 +84,7 @@ export async function createWorker({
 
       await usageMeter?.record(tokenId);
 
-      telemetrist.dispatch("dispatch_job");
+      telemetrist?.dispatch("dispatch_job");
 
       process.nextTick(() => {
         jobsRepo.reenqueue(job);

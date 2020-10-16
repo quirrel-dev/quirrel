@@ -18,7 +18,7 @@
   "bin": "./dist/src/cli.js",
   "scripts": {
     "start": "node dist/src/main.js",
-    "test": "QUIRREL_DISABLE_TELEMETRY=true jest --runInBand --forceExit",
+    "test": "DISABLE_TELEMETRY=true jest --runInBand --forceExit",
     "build": "run-s build:schemas build:tsc",
     "build:schemas": "json2ts -i src/scheduler/schemas/ -o src/scheduler/types/",
     "build:tsc": "tsc",
@@ -42,6 +42,8 @@
   },
   "dependencies": {
     "@quirrel/bullmq": "^1.9.0-6",
+    "@sentry/node": "^5.26.0",
+    "@sentry/tracing": "^5.26.0",
     "@types/ioredis": "^4.17.5",
     "axios": "^0.20.0",
     "commander": "^6.1.0",

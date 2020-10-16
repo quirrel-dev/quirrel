@@ -16,32 +16,22 @@ function printTelemetryMessage() {
   console.log(
     "Telemetry: Quirrel collects **completely anonymous** telemetry data about general usage.\n" +
       "Participation in this anonymous program is optional, and you may opt-out if you'd not like to share any information.\n" +
-      "To opt-out, set the QUIRREL_DISABLE_TELEMETRY environment variable."
+      "To opt-out, set the DISABLE_TELEMETRY environment variable."
   );
 
   alreadyPrinted = true;
 }
 
 export class Telemetrist {
-  private readonly isDisabled: boolean;
   private readonly screenWidth: ScreenWidth;
 
   constructor(runningInDocker: boolean) {
     this.screenWidth = runningInDocker ? ScreenWidth.Docker : ScreenWidth.Node;
 
-    if (process.env.QUIRREL_DISABLE_TELEMETRY) {
-      this.isDisabled = true;
-    } else {
-      printTelemetryMessage();
-      this.isDisabled = false;
-    }
+    printTelemetryMessage();
   }
 
   public async dispatch(path: string, name = "pageview") {
-    if (this.isDisabled) {
-      return;
-    }
-
     try {
       await axios.post(
         "https://plausible.io/api/event",

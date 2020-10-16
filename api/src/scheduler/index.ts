@@ -15,6 +15,7 @@ import activityPlugin from "./routes/activity";
 import blipp from "fastify-blipp";
 import cors from "fastify-cors";
 import telemetry from "./telemetry";
+import sentryPlugin from "./sentry";
 
 export interface QuirrelServerConfig {
   port?: number;
@@ -22,6 +23,7 @@ export interface QuirrelServerConfig {
   redis?: RedisOptions | string;
   passphrases?: string[];
   runningInDocker?: boolean;
+  disableTelemetry?: boolean;
 }
 
 export async function createServer({
@@ -30,10 +32,15 @@ export async function createServer({
   runningInDocker = false,
   redis,
   passphrases,
+  disableTelemetry,
 }: QuirrelServerConfig) {
   const app = fastify({
     logger: true,
   });
+
+  if (!disableTelemetry) {
+    app.register(sentryPlugin);
+  }
 
   app.register(blipp);
 
@@ -65,7 +72,9 @@ export async function createServer({
 
   app.register(tokenAuthPlugin, { auth: enableAuth });
 
-  app.register(telemetry, { runningInDocker });
+  if (!disableTelemetry) {
+    app.register(telemetry, { runningInDocker });
+  }
 
   if (passphrases) {
     app.register(basicAuthPlugin, { passphrases });
@@ -86,14 +95,14 @@ export async function createServer({
 
     await app.oas();
 
-    app.telemetrist.dispatch("ready");
+    app.telemetrist?.dispatch("ready");
 
     if (passphrases) {
-      app.telemetrist.dispatch("auth enabled");
+      app.telemetrist?.dispatch("auth enabled");
     }
 
     if (port !== 9181) {
-      app.telemetrist.dispatch("custom port");
+      app.telemetrist?.dispatch("custom port");
     }
   });
 

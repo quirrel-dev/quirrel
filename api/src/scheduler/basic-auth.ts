@@ -8,8 +8,7 @@ interface BasicAuthPluginOpts {
 
 const basicAuthPlugin: FastifyPluginCallback<BasicAuthPluginOpts> = async (
   fastify,
-  opts,
-  done
+  opts
 ) => {
   fastify.register(fastifyBasicAuth, {
     validate(username, password, req, reply, done) {
@@ -20,8 +19,8 @@ const basicAuthPlugin: FastifyPluginCallback<BasicAuthPluginOpts> = async (
       }
     },
   });
-
-  done();
 };
 
-export default (fp as any)(basicAuthPlugin);
+export default (fp as any)(basicAuthPlugin) as FastifyPluginCallback<
+  BasicAuthPluginOpts
+>;
