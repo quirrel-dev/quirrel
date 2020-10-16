@@ -29,7 +29,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       },
 
       async handler(request, reply) {
-        fastify.telemetrist.dispatch("enqueue");
+        fastify.telemetrist?.dispatch("enqueue");
 
         const job = await jobsRepo.enqueue(
           request.tokenId,
@@ -55,7 +55,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       },
     },
     async handler(request, reply) {
-      fastify.telemetrist.dispatch("scan_all");
+      fastify.telemetrist?.dispatch("scan_all");
 
       const { cursor, jobs } = await jobsRepo.findByTokenId(request.tokenId, {
         cursor: request.query.cursor ?? 0,
@@ -81,7 +81,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       },
     },
     async handler(request, reply) {
-      fastify.telemetrist.dispatch("scan_endpoint");
+      fastify.telemetrist?.dispatch("scan_endpoint");
 
       const { cursor, jobs } = await jobsRepo.find(
         request.tokenId,
@@ -106,7 +106,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     },
 
     async handler(request, reply) {
-      fastify.telemetrist.dispatch("get_job");
+      fastify.telemetrist?.dispatch("get_job");
 
       const { endpoint, id } = request.params;
 
@@ -127,7 +127,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     },
 
     async handler(request, reply) {
-      fastify.telemetrist.dispatch("invoke");
+      fastify.telemetrist?.dispatch("invoke");
 
       const { endpoint, id } = request.params;
 
@@ -148,7 +148,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     },
 
     async handler(request, reply) {
-      fastify.telemetrist.dispatch("delete");
+      fastify.telemetrist?.dispatch("delete");
 
       const { endpoint, id } = request.params;
 

@@ -6,6 +6,7 @@ const {
   HOST,
   PASSPHRASES,
   RUNNING_IN_DOCKER,
+  DISABLE_TELEMETRY,
 } = process.env;
 
 process.on("unhandledRejection", (reason, promise) => {
@@ -20,6 +21,7 @@ async function main() {
     redis: !!REDIS_URL ? REDIS_URL : undefined,
     passphrases: !!PASSPHRASES ? PASSPHRASES.split(":") : undefined,
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
+    disableTelemetry: Boolean(DISABLE_TELEMETRY),
   });
 
   async function teardown(signal: string) {

@@ -4,7 +4,7 @@ import { Telemetrist } from "../shared/telemetrist";
 
 declare module "fastify" {
   interface FastifyInstance {
-    telemetrist: Telemetrist;
+    telemetrist?: Telemetrist;
   }
 }
 

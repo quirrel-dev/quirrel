@@ -5,6 +5,7 @@ const {
   ENABLE_USAGE_METERING,
   RUNNING_IN_DOCKER,
   CONCURRENCY,
+  DISABLE_TELEMETRY,
 } = process.env;
 
 process.on("unhandledRejection", (reason, promise) => {
@@ -18,6 +19,7 @@ async function main() {
     enableUsageMetering: Boolean(ENABLE_USAGE_METERING),
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
     concurrency: Number.parseInt(CONCURRENCY ?? "") || 100,
+    disableTelemetry: Boolean(DISABLE_TELEMETRY),
   });
 
   async function teardown(signal: string) {

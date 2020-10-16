@@ -25,7 +25,7 @@ jobs:
     
     env:
       REDIS_URL: redis://redis:6379
-      QUIRREL_DISABLE_TELEMETRY: true
+      DISABLE_TELEMETRY: true
 
     steps:
     - uses: actions/checkout@v2
