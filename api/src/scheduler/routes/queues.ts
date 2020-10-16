@@ -35,6 +35,8 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
           return;
         }
 
+        fastify.telemetrist.dispatch("enqueue");
+
         const job = await jobsRepo.enqueue(
           tokenId,
           request.params.endpoint,
@@ -46,14 +48,17 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     }
   );
 
-  fastify.get<{ Params: QueuesEndpointParams, Querystring: SCANQuerystringParams }>("/", {
+  fastify.get<{
+    Params: QueuesEndpointParams;
+    Querystring: SCANQuerystringParams;
+  }>("/", {
     schema: {
       params: {
         data: EndpointParamsSchema,
       },
       querystring: {
-        data: SCANQueryStringSchema
-      }
+        data: SCANQueryStringSchema,
+      },
     },
     async handler(request, reply) {
       const [tokenId, done] = await fastify.tokenAuth.authenticate(
@@ -64,7 +69,11 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         return;
       }
 
-      const { cursor, jobs } = await jobsRepo.findByTokenId(tokenId, { cursor: request.query.cursor ?? 0});
+      fastify.telemetrist.dispatch("scan_all");
+
+      const { cursor, jobs } = await jobsRepo.findByTokenId(tokenId, {
+        cursor: request.query.cursor ?? 0,
+      });
 
       reply.status(200).send({
         cursor,
@@ -73,14 +82,17 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     },
   });
 
-  fastify.get<{ Params: QueuesEndpointParams, Querystring: SCANQuerystringParams }>("/:endpoint", {
+  fastify.get<{
+    Params: QueuesEndpointParams;
+    Querystring: SCANQuerystringParams;
+  }>("/:endpoint", {
     schema: {
       params: {
         data: EndpointParamsSchema,
       },
       querystring: {
-        data: SCANQueryStringSchema
-      }
+        data: SCANQueryStringSchema,
+      },
     },
     async handler(request, reply) {
       const [tokenId, done] = await fastify.tokenAuth.authenticate(
@@ -91,11 +103,13 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         return;
       }
 
+      fastify.telemetrist.dispatch("scan_endpoint");
+
       const { cursor, jobs } = await jobsRepo.find(
         tokenId,
         request.params.endpoint,
         {
-          cursor: request.query.cursor ?? 0
+          cursor: request.query.cursor ?? 0,
         }
       );
 
@@ -121,6 +135,8 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       if (done) {
         return;
       }
+
+      fastify.telemetrist.dispatch("get_job");
 
       const { endpoint, id } = request.params;
 
@@ -149,6 +165,8 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         return;
       }
 
+      fastify.telemetrist.dispatch("invoke");
+
       const { endpoint, id } = request.params;
 
       const job = await jobsRepo.invoke(tokenId, endpoint, id);
@@ -175,6 +193,8 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       if (done) {
         return;
       }
+
+      fastify.telemetrist.dispatch("delete");
 
       const { endpoint, id } = request.params;
 

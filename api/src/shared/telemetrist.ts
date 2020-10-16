@@ -23,8 +23,8 @@ function printTelemetryMessage() {
 }
 
 export class Telemetrist {
-  isDisabled: boolean;
-  screenWidth: ScreenWidth;
+  private readonly isDisabled: boolean;
+  private readonly screenWidth: ScreenWidth;
 
   constructor(runningInDocker: boolean) {
     this.screenWidth = runningInDocker ? ScreenWidth.Docker : ScreenWidth.Node;

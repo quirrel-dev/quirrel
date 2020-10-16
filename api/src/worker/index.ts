@@ -10,6 +10,7 @@ import { TokenRepo } from "../shared/token-repo";
 import { sign } from "secure-webhooks";
 import * as Redis from "ioredis";
 import { BaseJobsRepo } from "../scheduler/jobs-repo";
+import { Telemetrist } from "../shared/telemetrist";
 
 export function replaceLocalhostWithDockerHost(url: string): string {
   if (url.startsWith("http://localhost")) {
@@ -37,6 +38,7 @@ export async function createWorker({
   concurrency = 100,
 }: QuirrelWorkerConfig) {
   const redisClient = new Redis(redisOpts as any);
+  const telemetrist = new Telemetrist(runningInDocker ?? false);
 
   const tokenRepo = new TokenRepo(redisClient);
 
@@ -62,7 +64,7 @@ export async function createWorker({
       if (tokenId) {
         const token = await tokenRepo.getById(tokenId);
         if (token) {
-          console.log({ body })
+          console.log({ body });
           const signature = sign(body ?? "", token);
           headers["x-quirrel-signature"] = signature;
         }
@@ -77,6 +79,8 @@ export async function createWorker({
       });
 
       await usageMeter?.record(tokenId);
+
+      telemetrist.dispatch("dispatch_job");
 
       process.nextTick(() => {
         jobsRepo.reenqueue(job);

@@ -6,11 +6,7 @@ import { POSTTokensParams } from "../types/tokens/PUT/params";
 import * as DELETETokenParamsSchema from "../schemas/tokens/DELETE/params.json";
 import { DELETETokensTokenParams } from "../types/tokens/DELETE/params";
 
-const tokensPlugin: FastifyPluginCallback = async (
-  fastify,
-  opts,
-  done
-) => {
+const tokensPlugin: FastifyPluginCallback = async (fastify, opts, done) => {
   fastify.addHook("onRequest", fastify.basicAuth);
 
   fastify.put<{ Params: POSTTokensParams }>("/:id", {
@@ -23,6 +19,8 @@ const tokensPlugin: FastifyPluginCallback = async (
     async handler(request, reply) {
       const { id } = request.params;
       const token = await fastify.tokens.create(id);
+
+      fastify.telemetrist.dispatch("token created");
 
       reply.status(201).send(token);
     },
@@ -37,6 +35,9 @@ const tokensPlugin: FastifyPluginCallback = async (
 
     async handler(request, reply) {
       const success = await fastify.tokens.revoke(request.params.id);
+
+      fastify.telemetrist.dispatch("token revoked");
+
       if (success) {
         reply.status(204);
       } else {
