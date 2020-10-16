@@ -335,4 +335,48 @@ describe("jobs", () => {
       expect(jobsExecutedAfterDeletion < 2).toBe(true);
     });
   });
+
+  test("repeat.times = 0", async () => {
+    await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: "cron",
+          repeat: {
+            times: 0
+          }
+        })
+        .expect(201);
+
+      await delay(500);
+
+      expect(bodies).toEqual([])
+  })
+
+  describe("cron jobs", () => {
+    test("work", async () => {
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: "cron",
+          repeat: {
+            times: 2,
+            cron: "* * * * * *" // every second
+          },
+          id: "myCronJob",
+        })
+        .expect(201);
+
+      await delay(1000);
+
+      expect(bodies).toEqual(["cron"])
+
+      await delay(1200);
+
+      expect(bodies).toEqual(["cron", "cron"])
+
+      await delay(1200);
+
+      expect(bodies).toEqual(["cron", "cron"])
+    })
+  })
 });

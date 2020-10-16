@@ -21,8 +21,9 @@ interface JobDTO {
   body: string;
   runAt: string;
   repeat?: {
-    every: number;
-    times: number;
+    every?: number;
+    times?: number;
+    cron?: string;
     count: number;
   };
 }
@@ -31,8 +32,9 @@ interface BaseEnqueueJobOpts {
   body?: any;
   id?: string;
   repeat?: {
-    every: number;
-    times: number;
+    every?: number;
+    times?: number;
+    cron?: string;
   };
 }
 

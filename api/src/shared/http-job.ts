@@ -3,8 +3,9 @@ export const HTTP_JOB_QUEUE = "http";
 const delimiter = ";";
 
 interface RepeatOptions {
-  every: number;
-  times: number;
+  every?: number;
+  times?: number;
+  cron?: string;
   count: number;
 }
 

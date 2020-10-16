@@ -45,6 +45,7 @@ jobs:
         flag-name: quirrel Integration
         base-path: api
         path-to-lcov: api/coverage/lcov.info
+        parallel: true
     - run: npm ci
       working-directory: client
     - run: npm run build
@@ -58,6 +59,12 @@ jobs:
         flag-name: "@quirrel/client Integration"
         base-path: client
         path-to-lcov: client/coverage/lcov.info
+        parallel: true
+    - name: Coveralls Finish
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        parallel-finished: true
   
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
