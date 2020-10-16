@@ -1,5 +1,6 @@
 import Encryptor from "secure-e2ee";
 import { verify } from "secure-webhooks";
+import ms from "ms";
 
 const fallbackEndpoint =
   process.env.NODE_ENV === "production"
@@ -32,14 +33,14 @@ interface BaseEnqueueJobOpts {
   body?: any;
   id?: string;
   repeat?: {
-    every?: number;
+    every?: number | string;
     times?: number;
     cron?: string;
   };
 }
 
 interface DelayedEnqueueJobOpts extends BaseEnqueueJobOpts {
-  delay?: number;
+  delay?: number | string;
 }
 
 interface ScheduledEnqueueJobOpts extends BaseEnqueueJobOpts {
@@ -141,11 +142,19 @@ export class QuirrelClient {
     let delay: number | undefined = undefined;
 
     if ("delay" in opts && opts.delay) {
-      delay = opts.delay;
+      if (typeof opts.delay === "string") {
+        delay = ms(opts.delay);
+      } else {
+        delay = opts.delay;
+      }
     }
 
     if ("runAt" in opts && opts.runAt) {
       delay = +opts.runAt - Date.now();
+    }
+
+    if (typeof opts.repeat?.every === "string") {
+      opts.repeat.every = ms(opts.repeat.every);
     }
 
     let stringifiedBody = JSON.stringify(opts.body);
