@@ -8,12 +8,10 @@ declare module "fastify" {
   }
 }
 
-const tokensPlugin: FastifyPluginCallback = async (fastify, opts, done) => {
+const tokensPlugin: FastifyPluginCallback = async (fastify) => {
   const tokenRepo = new TokenRepo(fastify.redis);
 
   fastify.decorate("tokens", tokenRepo);
-
-  done();
 };
 
-export default (fp as any)(tokensPlugin);
+export default (fp as any)(tokensPlugin) as FastifyPluginCallback;

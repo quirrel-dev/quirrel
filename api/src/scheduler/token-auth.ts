@@ -22,8 +22,7 @@ interface TokenAuthPluginOpts {
 
 const tokenAuthPlugin: FastifyPluginCallback<TokenAuthPluginOpts> = async (
   fastify,
-  opts,
-  done
+  opts
 ) => {
   const usageMeter = new UsageMeter(fastify.redis);
 
@@ -68,8 +67,8 @@ const tokenAuthPlugin: FastifyPluginCallback<TokenAuthPluginOpts> = async (
   };
 
   fastify.decorate("tokenAuth", service);
-
-  done();
 };
 
-export default (fp as any)(tokenAuthPlugin);
+export default (fp as any)(tokenAuthPlugin) as FastifyPluginCallback<
+  TokenAuthPluginOpts
+>;

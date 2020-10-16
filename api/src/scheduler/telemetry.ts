@@ -9,15 +9,18 @@ declare module "fastify" {
 }
 
 interface TelemetryPluginOptions {
-    runningInDocker: boolean;
+  runningInDocker: boolean;
 }
 
-const telemetryPlugin: FastifyPluginCallback<TelemetryPluginOptions> = async (fastify, opts, done) => {
+const telemetryPlugin: FastifyPluginCallback<TelemetryPluginOptions> = async (
+  fastify,
+  opts
+) => {
   const telemetrist = new Telemetrist(opts.runningInDocker);
 
   fastify.decorate("telemetrist", telemetrist);
-
-  done();
 };
 
-export default (fp as any)(telemetryPlugin) as FastifyPluginCallback<TelemetryPluginOptions>;
+export default (fp as any)(telemetryPlugin) as FastifyPluginCallback<
+  TelemetryPluginOptions
+>;
