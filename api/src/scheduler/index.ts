@@ -14,17 +14,20 @@ import tokenAuthPlugin from "./token-auth";
 import activityPlugin from "./routes/activity";
 import blipp from "fastify-blipp";
 import cors from "fastify-cors";
+import telemetry from "./telemetry";
 
 export interface QuirrelServerConfig {
   port?: number;
   host?: string;
   redis?: RedisOptions | string;
   passphrases?: string[];
+  runningInDocker?: boolean;
 }
 
 export async function createServer({
   port = 9181,
   host = "0.0.0.0",
+  runningInDocker = false,
   redis,
   passphrases,
 }: QuirrelServerConfig) {
@@ -36,7 +39,7 @@ export async function createServer({
 
   app.register(cors, {
     origin: "*",
-  })
+  });
 
   app.register(oas, {
     routePrefix: "/documentation",
@@ -62,6 +65,8 @@ export async function createServer({
 
   app.register(tokenAuthPlugin, { auth: enableAuth });
 
+  app.register(telemetry, { runningInDocker });
+
   if (passphrases) {
     app.register(basicAuthPlugin, { passphrases });
     app.register(tokensPlugin);
@@ -80,6 +85,16 @@ export async function createServer({
     }
 
     await app.oas();
+
+    app.telemetrist.dispatch("ready");
+
+    if (passphrases) {
+      app.telemetrist.dispatch("auth enabled");
+    }
+
+    if (port !== 9181) {
+      app.telemetrist.dispatch("custom port");
+    }
   });
 
   await app.listen(port, host);

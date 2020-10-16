@@ -1,6 +1,6 @@
 import { createServer } from ".";
 
-const { PORT = 9181, REDIS_URL, HOST, PASSPHRASES } = process.env;
+const { PORT = 9181, REDIS_URL, HOST, PASSPHRASES, RUNNING_IN_DOCKER } = process.env;
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
@@ -13,6 +13,7 @@ async function main() {
     host: HOST,
     redis: !!REDIS_URL ? REDIS_URL : undefined,
     passphrases: !!PASSPHRASES ? PASSPHRASES.split(":") : undefined,
+    runningInDocker: Boolean(RUNNING_IN_DOCKER)
   });
 
   async function teardown(signal: string) {
