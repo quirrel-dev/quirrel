@@ -1,6 +1,7 @@
 import Encryptor from "secure-e2ee";
 import { verify } from "secure-webhooks";
 import ms from "ms";
+import fetch from "node-fetch";
 
 const fallbackEndpoint =
   process.env.NODE_ENV === "production"
@@ -17,59 +18,134 @@ const defaultOldSecrets: string[] | null = JSON.parse(
 );
 
 interface JobDTO {
-  id: string;
-  endpoint: string;
-  body: string;
-  runAt: string;
-  repeat?: {
-    every?: number;
-    times?: number;
-    cron?: string;
-    count: number;
+  /**
+   * ID, used in conjunction with `endpoint` to identify the job.
+   */
+  readonly id: string;
+
+  /**
+   * Endpoint the job will be executed against.
+   * It's the HTTP address of your Queue.
+   */
+  readonly endpoint: string;
+
+  /**
+   * Stringified and potentially encrypted job payload.
+   */
+  readonly body: string;
+
+  /**
+   * Date that the job has been scheduled for.
+   * @implements ISO-8601
+   */
+  readonly runAt: string;
+
+  /**
+   * Present if the job has been scheduled to repeat.
+   */
+  readonly repeat?: {
+    /**
+     * Interval at which the job is executed.
+     */
+    readonly every?: number;
+
+    /**
+     * Maximum number of repetitions to execute.
+     */
+    readonly times?: number;
+
+    /**
+     * Cron expression that's used for scheduling.
+     * @see https://github.com/harrisiirak/cron-parser
+     */
+    readonly cron?: string;
+
+    /**
+     * What repetition the next execution will be.
+     * Starts at 1, increments with every execution.
+     */
+    readonly count: number;
   };
 }
 
 interface BaseEnqueueJobOpts {
+  /**
+   * The job's payload.
+   */
   body?: any;
+
+  /**
+   * Can be used to make a job easier to manage.
+   * If there's already a job with the same ID, this job will be trashed.
+   * @tutorial https://demo.quirrel.dev/managed
+   */
   id?: string;
+
   repeat?: {
+    /**
+     * Will make the job repeat every X milliseconds.
+     * Supports human-readable notation as of @see https://github.com/vercel/ms.
+     * If `delay` isn't set, the first repetition will be executed immediately.
+     */
     every?: number | string;
+
+    /**
+     * Can be used in conjunction with @field every and @field cron
+     * to limit the number of executions.
+     */
     times?: number;
+
+    /**
+     * Schedules the job according to the Cron expression.
+     * @see https://github.com/harrisiirak/cron-parser for supported syntax
+     * If `delay` isn't set, the first repetition will be executed immediately.
+     */
     cron?: string;
   };
 }
 
 interface DelayedEnqueueJobOpts extends BaseEnqueueJobOpts {
+  /**
+   * Will delay the job's execution by the specified amount of milliseconds.
+   * Supports human-readable notation as of @see https://github.com/vercel/ms.
+   * If used together with `repeat`, this will delay the first job to be executed.
+   */
   delay?: number | string;
 }
 
 interface ScheduledEnqueueJobOpts extends BaseEnqueueJobOpts {
+  /**
+   * Schedules the job for execution at the specified timestamp.
+   */
   runAt?: Date;
 }
 
 export type EnqueueJobOpts = DelayedEnqueueJobOpts | ScheduledEnqueueJobOpts;
 
 export interface Job extends Omit<JobDTO, "runAt" | "body"> {
-  runAt: Date;
-  body: unknown;
+  /**
+   * Date that the job has been scheduled for.
+   * If it's a repeated job, this is the date for the next execution.
+   */
+  readonly runAt: Date;
+  /**
+   * Job payload.
+   */
+  readonly body: unknown;
+
+  /**
+   * Delete this job.
+   * @returns null if the job already has been deleted.
+   */
   delete(): Promise<Job | null>;
+
+  /**
+   * Schdule this job for immediate execution.
+   * If it's a repeated job, the next executions will be scheduled normally.
+   * @returns null if the job has been deleted in the meantime.
+   */
   invoke(): Promise<Job | null>;
 }
-
-interface HttpRequest {
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  url: string;
-  headers?: Record<string, string>;
-  body?: string;
-}
-
-interface HttpResponse {
-  status: number;
-  body: string;
-  headers: Record<string, string>;
-}
-
-type HttpFetcher = (req: HttpRequest) => Promise<HttpResponse>;
 
 type SignatureCheckResult<T> =
   | { isValid: true; body: T }
@@ -79,10 +155,28 @@ type SignatureCheckResult<T> =
     };
 
 interface QuirrelClientOpts {
-  fetcher: HttpFetcher;
+  /**
+   * URL of the Quirrel Endpoint.
+   * @default https://api.quirrel.dev or http://localhost:9181
+   */
   baseUrl?: string;
+
+  /**
+   * Bearer Secret for authenticating with Quirrel.
+   * Obtain on quirrel.dev or using the API of a self-hosted instance.
+   */
   token?: string;
+
+  /**
+   * Secret used for end-to-end encryption.
+   * Needs to be 32 characters long.
+   */
   encryptionSecret?: string;
+
+  /**
+   * Old Secrets that have been rotated out.
+   * @see https://docs.quirrel.dev/faq#my-encryption-secret-has-been-leaked-what-now
+   */
   oldSecrets?: string[];
 }
 
@@ -91,9 +185,12 @@ export class QuirrelClient {
 
   private readonly token;
   private readonly baseUrl;
-  private readonly fetcher;
 
-  constructor(opts: QuirrelClientOpts) {
+  /**
+   * Constructs a new Quirrel Client.
+   * @param opts
+   */
+  constructor(opts: QuirrelClientOpts = {}) {
     const enrichedOpts: QuirrelClientOpts = {
       baseUrl: defaultBaseUrl,
       token: defaultToken,
@@ -115,7 +212,6 @@ export class QuirrelClient {
 
     this.token = enrichedOpts.token;
     this.baseUrl = enrichedOpts.baseUrl;
-    this.fetcher = enrichedOpts.fetcher;
   }
 
   private getAuthHeaders(): Record<string, string> {
@@ -138,6 +234,11 @@ export class QuirrelClient {
     };
   }
 
+  /**
+   * Enqueue a job to the specified endpoint.
+   * @param endpoint endpoint to execute the job against
+   * @param opts job options
+   */
   async enqueue(endpoint: string, opts: EnqueueJobOpts): Promise<Job> {
     let delay: number | undefined = undefined;
 
@@ -163,44 +264,58 @@ export class QuirrelClient {
       stringifiedBody = this.encryptor.encrypt(stringifiedBody);
     }
 
-    const { body, status } = await this.fetcher({
-      url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint),
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...this.getAuthHeaders(),
-      },
-      body: JSON.stringify({
-        body: stringifiedBody,
-        delay,
-        id: opts.id,
-        repeat: opts.repeat,
-      }),
-    });
+    const res = await fetch(
+      this.baseUrl + "/queues/" + encodeURIComponent(endpoint),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeaders(),
+        },
+        body: JSON.stringify({
+          body: stringifiedBody,
+          delay,
+          id: opts.id,
+          repeat: opts.repeat,
+        }),
+      }
+    );
 
-    if (status !== 201) {
-      throw new Error(`Unexpected status: ${status}`);
+    if (res.status !== 201) {
+      throw new Error(`Unexpected status: ${res.status}`);
     }
 
-    return this.toJob(JSON.parse(body));
+    const body = await res.json();
+
+    return this.toJob(body);
   }
 
+  /**
+   * Iterate through scheduled jobs.
+   * @param endpoint filter for this endpoint
+   * @example
+   * for await (const jobs of queue.get()) {
+   *   // do smth
+   * }
+   */
   async *get(endpoint?: string) {
     let cursor: number | null = 0;
 
     while (cursor !== null) {
-      const { body } = await this.fetcher({
-        url:
-          this.baseUrl +
+      const res = await fetch(
+        this.baseUrl +
           "/queues/" +
           (!!endpoint ? encodeURIComponent(endpoint!) : "") +
           "?cursor=" +
           cursor,
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      });
+        {
+          headers: this.getAuthHeaders(),
+        }
+      );
 
-      const { cursor: newCursor, jobs } = JSON.parse(body) as {
+      const json = await res.json();
+
+      const { cursor: newCursor, jobs } = json as {
         cursor: number | null;
         jobs: JobDTO[];
       };
@@ -211,60 +326,81 @@ export class QuirrelClient {
     }
   }
 
+  /**
+   * Get a specific job.
+   * @returns null if no job was found.
+   */
   async getById(endpoint: string, id: string): Promise<Job | null> {
-    const { body, status } = await this.fetcher({
-      url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
-      method: "GET",
-      headers: this.getAuthHeaders(),
-    });
+    const res = await fetch(
+      this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
+      {
+        headers: this.getAuthHeaders(),
+      }
+    );
 
-    if (status === 404) {
+    if (res.status === 404) {
       return null;
     }
 
-    if (status === 200) {
-      return this.toJob(JSON.parse(body));
+    if (res.status === 200) {
+      return this.toJob(await res.json());
     }
 
-    throw new Error("Unexpected response: " + status);
+    throw new Error("Unexpected response: " + res.status);
   }
 
+  /**
+   * Schedule a job for immediate execution.
+   * @returns null if job could not be found.
+   */
   async invoke(endpoint: string, id: string): Promise<Job | null> {
-    const { status, body } = await this.fetcher({
-      url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
-      method: "POST",
-      headers: this.getAuthHeaders(),
-    });
+    const res = await fetch(
+      this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+      }
+    );
 
-    if (status === 404) {
+    if (res.status === 404) {
       return null;
     }
 
-    if (status === 200) {
-      return this.toJob(JSON.parse(body));
+    if (res.status === 200) {
+      return this.toJob(await res.json());
     }
 
-    throw new Error("Unexpected response: " + status);
+    throw new Error("Unexpected response: " + res.status);
   }
 
+  /**
+   * Delete a job, preventing it from executing.
+   * @returns null if job could not be found.
+   */
   async delete(endpoint: string, id: string): Promise<Job | null> {
-    const { status, body } = await this.fetcher({
-      url: this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
-      method: "DELETE",
-      headers: this.getAuthHeaders(),
-    });
+    const res = await fetch(
+      this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
+      {
+        method: "DELETE",
+        headers: this.getAuthHeaders(),
+      }
+    );
 
-    if (status === 404) {
+    if (res.status === 404) {
       return null;
     }
 
-    if (status === 200) {
-      return this.toJob(JSON.parse(body));
+    if (res.status === 200) {
+      return this.toJob(await res.json());
     }
 
-    throw new Error("Unexpected response: " + status);
+    throw new Error("Unexpected response: " + res.status);
   }
 
+  /**
+   * Verify an incoming request for correct signature
+   * and decrypt / decode the body.
+   */
   verifyRequestSignature<T = any>(
     headers: { "x-quirrel-signature": string },
     body: string
@@ -289,6 +425,9 @@ export class QuirrelClient {
     };
   }
 
+  /**
+   * Decrypt and decode the body.
+   */
   decryptBody(body: string) {
     if (this.encryptor) {
       body = this.encryptor.decrypt(body);

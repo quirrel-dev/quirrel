@@ -1,7 +1,6 @@
 import { QuirrelClient } from "../src";
 import { runQuirrel } from "quirrel";
 import type { AddressInfo } from "net";
-import fetch from "node-fetch";
 import * as http from "http";
 import delay from "delay";
 
@@ -13,23 +12,11 @@ function getAddress(server: http.Server): string {
 test("encryption", async () => {
   const server = await runQuirrel({
     port: 0,
-    redis: process.env.REDIS_URL
+    redis: process.env.REDIS_URL,
   });
 
   const quirrel = new QuirrelClient({
     baseUrl: getAddress(server.httpServer),
-    async fetcher(req) {
-      const res = await fetch(req.url, {
-        method: req.method,
-        headers: req.headers,
-        body: req.body,
-      });
-      return {
-        body: await res.text(),
-        headers: res.headers as any,
-        status: res.status,
-      };
-    },
     encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
   });
 
@@ -62,10 +49,8 @@ test("encryption", async () => {
   await delay(200);
 
   expect(encryptedBodies).toHaveLength(1);
-  expect(encryptedBodies[0].startsWith('ddb7:')).toBe(true);
-  expect(decryptedBodies).toEqual([
-      "hello world"
-  ])
+  expect(encryptedBodies[0].startsWith("ddb7:")).toBe(true);
+  expect(decryptedBodies).toEqual(["hello world"]);
 
   server.close();
   endpoint.close();

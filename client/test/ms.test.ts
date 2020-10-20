@@ -1,7 +1,6 @@
 import { QuirrelClient } from "../src";
 import { runQuirrel } from "quirrel";
 import type { AddressInfo } from "net";
-import fetch from "node-fetch";
 import * as http from "http";
 import delay from "delay";
 
@@ -18,18 +17,6 @@ test("encryption", async () => {
 
   const quirrel = new QuirrelClient({
     baseUrl: getAddress(server.httpServer),
-    async fetcher(req) {
-      const res = await fetch(req.url, {
-        method: req.method,
-        headers: req.headers,
-        body: req.body,
-      });
-      return {
-        body: await res.text(),
-        headers: res.headers as any,
-        status: res.status,
-      };
-    },
   });
 
   const encryptedBodies: string[] = [];

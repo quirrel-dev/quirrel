@@ -33,7 +33,6 @@
     "delay": "^4.4.0",
     "ioredis": "^4.17.3",
     "jest": "^26.5.3",
-    "node-fetch": "^2.6.1",
     "prettier": "^2.1.2",
     "quirrel": "file:../api",
     "ts-jest": "^26.4.1",
@@ -42,6 +41,7 @@
   "dependencies": {
     "ms": "^2.1.2",
     "secure-e2ee": "^0.1.1",
+    "node-fetch": "^2.6.1",
     "secure-webhooks": "^0.2.0"
   }
 }
