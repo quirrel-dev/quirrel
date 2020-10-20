@@ -57,6 +57,7 @@ program
         passphrases: passphrase,
         host,
         port: Number(port),
+        disableTelemetry: Boolean(process.env.DISABLE_TELEMETRY),
       });
 
       process.on("SIGINT", async () => {
