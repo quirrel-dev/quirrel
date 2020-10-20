@@ -13,6 +13,7 @@ test("encryption", async () => {
   const server = await runQuirrel({
     port: 0,
     redis: process.env.REDIS_URL,
+    disableTelemetry: true,
   });
 
   const quirrel = new QuirrelClient({
