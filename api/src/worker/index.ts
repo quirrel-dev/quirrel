@@ -1,16 +1,11 @@
-import { Worker } from "@quirrel/bullmq";
-import {
-  decodeQueueDescriptor,
-  HttpJob,
-  HTTP_JOB_QUEUE,
-} from "../shared/http-job";
+import { decodeQueueDescriptor, HttpJob } from "../shared/http-job";
 import { UsageMeter } from "../shared/usage-meter";
 import axios from "axios";
 import { TokenRepo } from "../shared/token-repo";
 import { sign } from "secure-webhooks";
 import * as Redis from "ioredis";
-import { BaseJobsRepo } from "../scheduler/jobs-repo";
 import { Telemetrist } from "../shared/telemetrist";
+import { createOwl } from "../shared/owl";
 
 export function replaceLocalhostWithDockerHost(url: string): string {
   if (url.startsWith("http://localhost")) {
@@ -51,13 +46,12 @@ export async function createWorker({
     usageMeter = new UsageMeter(redisClient);
   }
 
-  const jobsRepo = new BaseJobsRepo(redisClient);
+  const owl = createOwl(() => new Redis(redisOpts as any));
 
-  const worker = new Worker<HttpJob>(
-    HTTP_JOB_QUEUE,
+  const worker = owl.createWorker(
     async (job) => {
-      let { tokenId, endpoint } = decodeQueueDescriptor(job.name);
-      let { body } = job.data as HttpJob;
+      let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
+      const body = job.payload;
 
       console.log("Sending ", body, " to ", endpoint);
 
@@ -68,7 +62,6 @@ export async function createWorker({
       if (tokenId) {
         const token = await tokenRepo.getById(tokenId);
         if (token) {
-          console.log({ body });
           const signature = sign(body ?? "", token);
           headers["x-quirrel-signature"] = signature;
         }
@@ -85,21 +78,15 @@ export async function createWorker({
       await usageMeter?.record(tokenId);
 
       telemetrist?.dispatch("dispatch_job");
-
-      process.nextTick(() => {
-        jobsRepo.reenqueue(job);
-      });
     },
-    {
-      connection: redisClient,
-      concurrency,
+    (job, error) => {
+      console.error(job, error);
     }
   );
 
   async function close() {
     await worker.close();
     await redisClient.quit();
-    await jobsRepo.close();
   }
 
   return {

@@ -18,9 +18,7 @@ const health: FastifyPluginCallback = (app, opts, done) => {
 
   app.get<{ Reply: GETHealthResponse }>("/", {
     schema: {
-      response: {
-        data: GetHealthResponseSchema
-      },
+      response: GetHealthResponseSchema,
     },
 
     async handler(request, reply) {

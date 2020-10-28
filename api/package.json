@@ -15,7 +15,9 @@
   "engines": {
     "node": "12"
   },
-  "bin": "./dist/src/cli.js",
+  "bin": {
+    "quirrel": "dist/src/cli.js"
+  },
   "scripts": {
     "start": "node dist/src/main.js",
     "test": "DISABLE_TELEMETRY=true jest --runInBand --forceExit",
@@ -48,7 +50,7 @@
     "axios": "^0.20.0",
     "commander": "^6.1.0",
     "cron-parser": "^2.16.3",
-    "fastify": "^3.3.0",
+    "fastify": "^3.7.0",
     "fastify-basic-auth": "^1.0.1",
     "fastify-blipp": "^3.0.0",
     "fastify-cors": "^4.1.0",
