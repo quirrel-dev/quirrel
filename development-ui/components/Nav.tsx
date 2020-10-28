@@ -1,6 +1,7 @@
 import { useState } from "react";
 import clsx from "clsx";
 import Link from "next/link";
+import { FeedbackFish } from "@feedback-fish/react";
 
 function PillButton({
   selected,
@@ -55,7 +56,7 @@ export function Nav(props: NavProps) {
     <nav className="bg-orange-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0" style={{ width: "100px" }}>
             <img
               className="h-10 w-auto"
               src="/img/horn_transparent.png"
@@ -84,8 +85,12 @@ export function Nav(props: NavProps) {
               </div>
             </div>
           </div>
-          <div className="w-12">
-            {/* This is a phantom object to make justify-between work*/}
+          <div className="-mr-2 hidden md:flex" style={{ width: "100px" }}>
+            <FeedbackFish projectId="97b5e3470471e7">
+              <a className="text-gray-600 hover:text-gray-400 px-3 mt-7 block text-base font-medium cursor-pointer">
+                Feedback
+              </a>
+            </FeedbackFish>
           </div>
           <div className="-mr-2 flex md:hidden">
             <button
@@ -139,6 +144,12 @@ export function Nav(props: NavProps) {
           <Link href="/cron">
             <MenuButton title="Cron" selected={selectedPage === "cron"} />
           </Link>
+
+          <FeedbackFish projectId="97b5e3470471e7">
+            <a className="text-gray-600 hover:text-gray-400 px-3 mt-7 block text-base font-medium cursor-pointer">
+              Feedback
+            </a>
+          </FeedbackFish>
         </div>
       </div>
     </nav>
