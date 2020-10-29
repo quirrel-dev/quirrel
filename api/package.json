@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@quirrel/bullmq": "^1.9.0-6",
+    "@quirrel/owl": "^0.0.1",
     "@sentry/node": "^5.26.0",
     "@sentry/tracing": "^5.26.0",
     "@types/ioredis": "^4.17.5",
