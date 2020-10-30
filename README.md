@@ -1,10 +1,35 @@
+<img src="./logo.png" height="50px" align="left" />
+
 # Quirrel
 
 ![CI](https://github.com/quirrel-dev/quirrel/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/quirrel-dev/quirrel/badge.svg?branch=master)](https://coveralls.io/github/quirrel-dev/quirrel?branch=master)
+[![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/4u38.svg)](https://status.quirrel.dev)
+[![Twitter Follow](https://img.shields.io/twitter/follow/skn0tt?label=Stay%20updated&style=social)](https://twitter.com/skn0tt)
 
-The Task Queueing Solution for Next.js x Vercel.
+<p align="middle">
+The Task Queueing Solution for Serverless.
+</p>
 
-This repository contains the Quirrel backend. It's a job scheduler similar to [repeater.dev](https://repeater.dev) or [Google Cloud Tasks](https://cloud.google.com/tasks/), but written in TypeScript and with the option to self-host.
+- [Landing Page](https://quirrel.dev)
+- [Documentation](https://docs.quirrel.dev)
+- [Next.js Client](https://github.com/quirrel-dev/quirrel-next)
 
-Visit https://api.quirrel.dev/documentation to find out about available endpoints.
+Quirrel makes job queueing simple as cake.
+It supports delayed jobs, fanout jobs, recurring jobs and CRON jobs.
+
+Quirrel values ...
+
+- ... great DX (through [tailormade client libraries](https://github.com/quirrel-dev/quirrel-next) & the [development UI](https://docs.quirrel.dev/development-ui))
+- ... privacy (through end-to-end encryption)
+- ... free software (it's MIT licensed!)
+- ... easy setup (through [hosted offering](https://quirrel.dev) and easy on-prem)
+
+This repository contains the Quirrel backend, the base Quirrel base Client and the development UI.
+
+## Getting Started
+
+If you want to learn about Quirrel, do [the tutorial](https://dev.to/quirrel/building-a-water-drinking-reminder-with-next-js-and-quirrel-1ckj)!
+
+
+If you want to integrate Quirrel into an existing application, check out the [Getting Started Guide](https://docs.quirrel.dev).
