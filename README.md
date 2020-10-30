@@ -1,4 +1,4 @@
-<img src="./logo.png" height="50px" align="left" />
+<img src="./logo.png" height="70px" align="left" />
 
 # Quirrel
 
