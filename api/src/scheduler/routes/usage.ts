@@ -11,7 +11,9 @@ const usageRoute: FastifyPluginCallback = (fastify, opts, done) => {
 
   fastify.delete<{ Reply: DELETEUsageResponse }>("/", {
     schema: {
-      response: DELETEUsageResponseSchema,
+      response: {
+        200: DELETEUsageResponseSchema,
+      },
     },
     async handler(request, reply) {
       const usage = await usageMeter.readAndReset();

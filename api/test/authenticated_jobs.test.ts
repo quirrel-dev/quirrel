@@ -60,7 +60,6 @@ describe("authenticated jobs", () => {
 
     expect(lastBody).toEqual('{"foo":"bar"}');
     expect(lastSignature).toMatch(/v=(\d+),d=([\da-f]+)/);
-    console.log({ lastBody, token, lastSignature })
     expect(verify(lastBody, token, lastSignature)).toBe(true);
 
     await request(quirrel)

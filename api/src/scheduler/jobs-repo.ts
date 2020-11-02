@@ -1,13 +1,12 @@
 import type { Redis } from "ioredis";
 import { POSTQueuesEndpointBody } from "./types/queues/POST/body";
 import {
-  decodeJobDescriptor,
   encodeQueueDescriptor,
   decodeQueueDescriptor,
 } from "../shared/http-job";
 
 import * as uuid from "uuid";
-import { createOwl } from "../shared/owl";
+import { createOwl, cron } from "../shared/owl";
 import { Job } from "@quirrel/owl";
 
 interface PaginationOpts {
@@ -38,19 +37,22 @@ export class JobsRepo {
   }
 
   private static toJobDTO(job: Job<"every" | "cron">): JobDTO {
-    const { jobId, endpoint } = decodeJobDescriptor(job.id!);
+    const { endpoint } = decodeQueueDescriptor(job.queue);
 
     return {
-      id: jobId,
+      id: job.id,
       endpoint,
       body: job.payload,
       runAt: job.runAt.toISOString(),
-      repeat: {
-        count: job.count,
-        cron: job.schedule?.type === "cron" ? job.schedule.meta : undefined,
-        every: job.schedule?.type === "every" ? +job.schedule.meta : undefined,
-        times: job.times,
-      },
+      repeat: job.schedule
+        ? {
+            count: job.count,
+            cron: job.schedule?.type === "cron" ? job.schedule.meta : undefined,
+            every:
+              job.schedule?.type === "every" ? +job.schedule.meta : undefined,
+            times: job.times,
+          }
+        : undefined,
     };
   }
 
@@ -99,18 +101,23 @@ export class JobsRepo {
     return job ? JobsRepo.toJobDTO(job) : undefined;
   }
 
-  public async invoke(tokenId: string, endpoint: string, id: string) {
+  public async invoke(
+    tokenId: string,
+    endpoint: string,
+    id: string
+  ) {
     return await this.producer.invoke(
       encodeQueueDescriptor(tokenId, endpoint),
       id
     );
   }
 
-  public async delete(tokenId: string, endpoint: string, id: string) {
-    return await this.producer.delete(
-      encodeQueueDescriptor(tokenId, endpoint),
-      id
-    );
+  public async delete(
+    tokenId: string,
+    endpoint: string,
+    id: string
+  ) {
+    return await this.producer.delete(encodeQueueDescriptor(tokenId, endpoint), id);
   }
 
   public async enqueue(
@@ -129,12 +136,20 @@ export class JobsRepo {
       id = uuid.v4();
     }
 
-    let runAt = new Date(0);
+    let runAt: Date | undefined = undefined;
 
     if (runAtOption) {
       runAt = new Date(runAtOption);
     } else if (delay) {
       runAt = new Date(Date.now() + delay);
+    }
+
+    if (repeat?.cron) {
+      runAt = cron(runAt ?? new Date(), repeat.cron);
+    }
+
+    if (repeat?.every) {
+      runAt = new Date();
     }
 
     if (typeof repeat?.times === "number" && repeat.times < 1) {
@@ -154,7 +169,7 @@ export class JobsRepo {
       schedule_meta = "" + repeat.every;
     }
 
-    await this.producer.enqueue({
+    const createdJob = await this.producer.enqueue({
       queue: encodeQueueDescriptor(tokenId, endpoint),
       id,
       payload: body ?? "",
@@ -168,6 +183,8 @@ export class JobsRepo {
       times: repeat?.times,
       override,
     });
+
+    return JobsRepo.toJobDTO(createdJob);
   }
 
   public onEvent(
@@ -175,12 +192,26 @@ export class JobsRepo {
     cb: (event: string, job: { endpoint: string; id: string }) => void
   ) {
     const activity = this.owl.createActivity(
+      async (event, job) => {
+        const { endpoint } = decodeQueueDescriptor(job.queue);
+
+        switch (event) {
+          case "acknowledged":
+            cb("completed", { endpoint, id: job.id });
+            break;
+          case "requested":
+            cb("started", { endpoint, id: job.id });
+            break;
+          case "scheduled":
+            cb("scheduled", { endpoint, id: job.id });
+            break;
+          case "deleted":
+            cb("deleted", { endpoint, id: job.id });
+            break;
+        }
+      },
       {
         queue: encodeQueueDescriptor(requesterTokenId, "*"),
-      },
-      async (event, job) => {
-        const { endpoint, tokenId } = decodeQueueDescriptor(job.queue);
-        cb(event, { endpoint, id: tokenId });
       }
     );
 

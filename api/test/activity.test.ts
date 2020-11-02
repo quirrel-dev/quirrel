@@ -29,40 +29,44 @@ test("activity", async () => {
 
   let conn: websocket.connection | undefined;
 
-  client.on("connect", (connection) => {
-    conn = connection;
+  await new Promise((resolve) => {
+    client.on("connect", (connection) => {
+      conn = connection;
 
-    log.push("connect");
+      log.push("connect");
 
-    connection.on("message", (message) => {
-      log.push(JSON.parse(message.utf8Data!));
+      connection.on("message", (message) => {
+        log.push(JSON.parse(message.utf8Data!));
+      });
+
+      connection.on("close", () => {
+        log.push("close");
+      });
+
+      resolve();
     });
 
-    connection.on("close", () => {
-      log.push("close");
+    client.on("connectFailed", (error) => {
+      expect(error).toBeNull();
     });
+
+    const { address, port } = quirrel.address() as AddressInfo;
+
+    client.connect(`ws://${address}:${port}/activity`);
   });
-
-  client.on("connectFailed", (error) => {
-    expect(error).toBeNull();
-  });
-
-  const { address, port } = quirrel.address() as AddressInfo;
-
-  client.connect(`ws://${address}:${port}/activity`);
 
   const {
     body: { id: job1id },
   } = await request(quirrel)
     .post("/queues/" + endpoint)
-    .send({ body: { foo: "bar" } })
+    .send({ body: JSON.stringify({ foo: "bar" }) })
     .expect(201);
 
   const {
     body: { id: job2id },
   } = await request(quirrel)
     .post("/queues/" + endpoint)
-    .send({ body: { qux: "baz" }, delay: 300 })
+    .send({ body: JSON.stringify({ qux: "baz" }), delay: 300 })
     .expect(201);
 
   await delay(500);
@@ -79,14 +83,14 @@ test("activity", async () => {
     },
   ]);
   expect(log).toContainEqual([
-    "waiting",
+    "started",
     {
       endpoint: decodeURIComponent(endpoint),
       id: job2id,
     },
   ]);
   expect(log).toContainEqual([
-    "delayed",
+    "scheduled",
     {
       endpoint: decodeURIComponent(endpoint),
       id: job2id,

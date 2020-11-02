@@ -106,10 +106,10 @@ describe("jobs", () => {
 
       await request(quirrel)
         .delete(`/queues/${endpoint}/${jobId1}`)
-        .expect(200);
+        .expect(204);
       await request(quirrel)
         .delete(`/queues/${endpoint}/${jobId2}`)
-        .expect(200);
+        .expect(204);
     });
 
     test("by id", async () => {
@@ -138,7 +138,7 @@ describe("jobs", () => {
 
       expect(+new Date(jobRunAt)).toBeCloseTo(+new Date(runAt), -3);
 
-      await request(quirrel).delete(`/queues/${endpoint}/${id}`).expect(200);
+      await request(quirrel).delete(`/queues/${endpoint}/${id}`).expect(204);
     });
   });
 
@@ -171,7 +171,7 @@ describe("jobs", () => {
 
     expect(typeof body.id).toBe("string");
 
-    await request(quirrel).delete(`/queues/${endpoint}/${body.id}`).expect(200);
+    await request(quirrel).delete(`/queues/${endpoint}/${body.id}`).expect(204);
 
     await delay(500);
 
@@ -325,14 +325,16 @@ describe("jobs", () => {
 
       const numberOfExecutedJobsBeforeDeletion = bodies.length;
 
-      await request(quirrel).delete(`/queues/${endpoint}/${jobId}`).expect(200);
+      console.log({ endpoint, jobId, numberOfExecutedJobsBeforeDeletion })
 
-      await delay(2000);
+      await request(quirrel).delete(`/queues/${endpoint}/${jobId}`).expect(204);
+
+      await delay(3000);
 
       const jobsExecutedAfterDeletion =
         bodies.length - numberOfExecutedJobsBeforeDeletion;
 
-      expect(jobsExecutedAfterDeletion < 2).toBe(true);
+      expect(jobsExecutedAfterDeletion).toBeLessThan(3);
     });
   });
 

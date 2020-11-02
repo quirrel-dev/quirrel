@@ -27,8 +27,6 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     async (request, reply) => {
       fastify.telemetrist?.dispatch("enqueue");
 
-      console.log({ body: request.body });
-
       const job = await jobsRepo.enqueue(
         request.tokenId,
         request.params.endpoint,
@@ -81,7 +79,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       );
 
       reply.status(200).send({
-        cursor,
+        cursor: cursor === 0 ? null : cursor,
         jobs,
       });
     },
@@ -116,11 +114,12 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const { endpoint, id } = request.params;
 
-      const job = await jobsRepo.invoke(request.tokenId, endpoint, id);
-      if (job) {
-        reply.status(200).send(job);
-      } else {
-        reply.status(404).send("Not Found");
+      const result = await jobsRepo.invoke(request.tokenId, endpoint, id);
+      switch (result) {
+        case "invoked":
+          return reply.status(204).send();
+        case "not_found":
+          return reply.status(404).send();
       }
     },
   });
@@ -135,12 +134,13 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const { endpoint, id } = request.params;
 
-      const deletedJob = await jobsRepo.delete(request.tokenId, endpoint, id);
+      const result = await jobsRepo.delete(request.tokenId, endpoint, id);
 
-      if (deletedJob) {
-        reply.status(200).send(deletedJob);
-      } else {
-        reply.status(404).send("Not Found");
+      switch (result) {
+        case "deleted":
+          return reply.status(204).send();
+        case "not_found":
+          return reply.status(404).send();
       }
     },
   });
