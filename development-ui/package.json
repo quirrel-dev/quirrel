@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@feedback-fish/react": "^1.1.0",
     "@quirrel/client": "^0.6.0",
     "@tailwindui/react": "^0.1.1",
     "clsx": "^1.1.1",
