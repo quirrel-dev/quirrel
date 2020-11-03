@@ -3,7 +3,7 @@
 # Quirrel
 
 ![CI](https://github.com/quirrel-dev/quirrel/workflows/CI/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/quirrel-dev/quirrel/badge.svg?branch=master)](https://coveralls.io/github/quirrel-dev/quirrel?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/quirrel-dev/quirrel/badge.svg?branch=main)](https://coveralls.io/github/quirrel-dev/quirrel?branch=main)
 [![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/4u38.svg)](https://status.quirrel.dev)
 [![Twitter Follow](https://img.shields.io/twitter/follow/skn0tt?label=Stay%20updated&style=social)](https://twitter.com/skn0tt)
 
