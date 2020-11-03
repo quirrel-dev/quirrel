@@ -1,11 +1,11 @@
 import { FastifyPluginCallback } from "fastify";
-import * as fastifyWebsocket from "fastify-websocket";
+import fastifyWebsocket from "fastify-websocket";
 import { JobsRepo } from "../jobs-repo";
 
 const activityPlugin: FastifyPluginCallback = (fastify, _opts, done) => {
   fastify.register(fastifyWebsocket);
 
-  const jobsRepo = new JobsRepo(fastify.redis);
+  const jobsRepo = new JobsRepo(fastify.redisFactory);
 
   fastify.get("/", { websocket: true }, async (connection, req) => {
     const tokenId = await fastify.tokenAuth.authenticate(req);

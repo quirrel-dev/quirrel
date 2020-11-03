@@ -1,17 +1,13 @@
 import type { Redis } from "ioredis";
-
-import { Job, Queue, QueueEvents, QueueScheduler } from "@quirrel/bullmq";
 import { POSTQueuesEndpointBody } from "./types/queues/POST/body";
 import {
-  encodeJobDescriptor,
-  decodeJobDescriptor,
-  HttpJob,
-  HTTP_JOB_QUEUE,
   encodeQueueDescriptor,
+  decodeQueueDescriptor,
 } from "../shared/http-job";
 
-import * as cronParser from "cron-parser";
 import * as uuid from "uuid";
+import { createOwl, cron } from "../shared/owl";
+import type { Job } from "@quirrel/owl";
 
 interface PaginationOpts {
   cursor: number;
@@ -21,7 +17,7 @@ interface PaginationOpts {
 interface JobDTO {
   id: string;
   endpoint: string;
-  body: unknown;
+  body: string;
   runAt: string;
   repeat?: {
     every?: number;
@@ -31,32 +27,37 @@ interface JobDTO {
   };
 }
 
-export class BaseJobsRepo {
-  protected jobsQueue;
+export class JobsRepo {
+  protected owl;
+  protected producer;
 
-  constructor(redis: Redis) {
-    this.jobsQueue = new Queue<HttpJob>(HTTP_JOB_QUEUE, {
-      connection: redis,
-      defaultJobOptions: {
-        removeOnComplete: true,
-      },
-    });
+  constructor(redisFactory: () => Redis) {
+    this.owl = createOwl(redisFactory);
+    this.producer = this.owl.createProducer();
   }
 
-  private static toJobDTO(job: Job<HttpJob>): JobDTO {
-    const { jobId, endpoint } = decodeJobDescriptor(job.id!);
+  private static toJobDTO(job: Job<"every" | "cron">): JobDTO {
+    const { endpoint } = decodeQueueDescriptor(job.queue);
 
     return {
-      id: jobId,
+      id: job.id,
       endpoint,
-      body: job.data.body,
-      runAt: new Date(job.timestamp + (job.opts.delay ?? 0)).toISOString(),
-      repeat: job.data.repeat,
+      body: job.payload,
+      runAt: job.runAt.toISOString(),
+      repeat: job.schedule
+        ? {
+            count: job.count,
+            cron: job.schedule?.type === "cron" ? job.schedule.meta : undefined,
+            every:
+              job.schedule?.type === "every" ? +job.schedule.meta : undefined,
+            times: job.times,
+          }
+        : undefined,
     };
   }
 
   public async close() {
-    await this.jobsQueue.close();
+    await this.producer.close();
   }
 
   public async find(
@@ -64,7 +65,7 @@ export class BaseJobsRepo {
     endpoint: string,
     { count, cursor }: PaginationOpts
   ) {
-    const { newCursor, jobs } = await this.jobsQueue.getJobsByName(
+    const { newCursor, jobs } = await this.producer.scanQueue(
       encodeQueueDescriptor(byTokenId, endpoint),
       cursor,
       count
@@ -72,7 +73,7 @@ export class BaseJobsRepo {
 
     return {
       cursor: newCursor,
-      jobs: jobs.map(BaseJobsRepo.toJobDTO),
+      jobs: jobs.map(JobsRepo.toJobDTO),
     };
   }
 
@@ -80,244 +81,135 @@ export class BaseJobsRepo {
     byTokenId: string,
     { count, cursor }: PaginationOpts
   ) {
-    const { newCursor, jobs } = await this.jobsQueue.getJobsFromIdPattern(
-      encodeJobDescriptor(byTokenId, "*", "*"),
+    const { newCursor, jobs } = await this.producer.scanQueuePattern(
+      encodeQueueDescriptor(byTokenId, "*"),
       cursor,
       count
     );
 
     return {
       cursor: newCursor,
-      jobs: jobs.map(BaseJobsRepo.toJobDTO),
+      jobs: jobs.map(JobsRepo.toJobDTO),
     };
   }
 
   public async findById(tokenId: string, endpoint: string, id: string) {
-    const internalId = encodeJobDescriptor(tokenId, endpoint, id);
-
-    const job: Job<HttpJob> | undefined = await this.jobsQueue.getJob(
-      internalId
+    const job = await this.producer.findById(
+      encodeQueueDescriptor(tokenId, endpoint),
+      id
     );
-    return job ? BaseJobsRepo.toJobDTO(job) : undefined;
+    return job ? JobsRepo.toJobDTO(job) : undefined;
   }
 
   public async invoke(tokenId: string, endpoint: string, id: string) {
-    const internalId = encodeJobDescriptor(tokenId, endpoint, id);
-
-    const job: Job<HttpJob> | undefined = await this.jobsQueue.getJob(
-      internalId
+    return await this.producer.invoke(
+      encodeQueueDescriptor(tokenId, endpoint),
+      id
     );
-
-    if (!job) {
-      return undefined;
-    }
-
-    await job.promote();
-
-    return BaseJobsRepo.toJobDTO(job);
   }
 
-  public async delete(
-    tokenId: string,
-    endpoint: string,
-    id: string
-  ): Promise<JobDTO | null> {
-    const jobDescriptor = encodeJobDescriptor(tokenId, endpoint, id);
-
-    const job: Job<HttpJob> | undefined = await this.jobsQueue.getJob(
-      jobDescriptor
+  public async delete(tokenId: string, endpoint: string, id: string) {
+    return await this.producer.delete(
+      encodeQueueDescriptor(tokenId, endpoint),
+      id
     );
-    if (!job) {
-      return null;
-    }
-
-    await job.remove();
-
-    return BaseJobsRepo.toJobDTO(job);
   }
 
   public async enqueue(
     tokenId: string,
     endpoint: string,
-    { body, runAt, id, delay, repeat }: POSTQueuesEndpointBody
+    {
+      body,
+      runAt: runAtOption,
+      id,
+      delay,
+      repeat,
+      override,
+    }: POSTQueuesEndpointBody
   ) {
-    const now = Date.now();
-
     if (typeof id === "undefined") {
       id = uuid.v4();
     }
 
-    if (runAt) {
-      delay = Number(new Date(runAt)) - now;
+    let runAt: Date | undefined = undefined;
+
+    if (runAtOption) {
+      runAt = new Date(runAtOption);
+    } else if (delay) {
+      runAt = new Date(Date.now() + delay);
+    }
+
+    if (repeat?.cron) {
+      runAt = cron(runAt ?? new Date(), repeat.cron);
+    }
+
+    if (repeat?.every) {
+      runAt = new Date();
     }
 
     if (typeof repeat?.times === "number" && repeat.times < 1) {
       return;
     }
 
+    let schedule_type: "every" | "cron" | undefined = undefined;
+    let schedule_meta: string | undefined = undefined;
+
     if (repeat?.cron) {
-      const expr = cronParser.parseExpression(repeat.cron, {
-        utc: true,
-        startDate: now + (delay ?? 0),
-      });
-
-      const firstExecution = expr.next().toDate();
-      delay = +firstExecution - now;
+      schedule_type = "cron";
+      schedule_meta = repeat.cron;
     }
 
-    const queueDescriptor = encodeQueueDescriptor(tokenId, endpoint);
-    const jobDescriptor = encodeJobDescriptor(tokenId, endpoint, id);
-
-    const job = await this.jobsQueue.add(
-      queueDescriptor,
-      {
-        body,
-        repeat: !!repeat
-          ? {
-              ...repeat,
-              count: 1,
-            }
-          : undefined,
-      },
-      {
-        delay,
-        jobId: jobDescriptor,
-      }
-    );
-
-    return BaseJobsRepo.toJobDTO(job);
-  }
-
-  public async reenqueue(job: Job<HttpJob>) {
-    const { repeat } = job.data;
-    if (!repeat) {
-      return;
+    if (repeat?.every) {
+      schedule_type = "every";
+      schedule_meta = "" + repeat.every;
     }
 
-    const isFinished = repeat.times && repeat.count >= repeat.times;
-    if (isFinished) {
-      return;
-    }
-
-    let delay: number | undefined;
-
-    if (repeat.cron) {
-      const now = Date.now();
-
-      const expr = cronParser.parseExpression(repeat.cron, {
-        utc: true,
-        startDate: now,
-      });
-
-      const nextExecution = expr.next().toDate();
-      delay = +nextExecution - now;
-    } else if (repeat.every) {
-      delay = repeat.every;
-    }
-
-    if (!delay) {
-      return;
-    }
-
-    await this.jobsQueue.add(
-      job.name,
-      {
-        ...job.data,
-        repeat: {
-          ...repeat,
-          count: repeat.count + 1,
-        },
-      },
-      {
-        delay,
-        jobId: job.id!,
-      }
-    );
-  }
-}
-
-export class JobsRepo extends BaseJobsRepo {
-  protected jobsScheduler;
-  protected jobsEvents;
-
-  constructor(redis: Redis) {
-    super(redis);
-    this.jobsScheduler = new QueueScheduler(HTTP_JOB_QUEUE, {
-      connection: redis,
+    const createdJob = await this.producer.enqueue({
+      queue: encodeQueueDescriptor(tokenId, endpoint),
+      id,
+      payload: body ?? "",
+      runAt,
+      schedule: schedule_type
+        ? {
+            type: schedule_type,
+            meta: schedule_meta!,
+          }
+        : undefined,
+      times: repeat?.times,
+      override,
     });
-    this.jobsEvents = new QueueEvents(HTTP_JOB_QUEUE, {
-      connection: redis.duplicate(),
-    });
-  }
 
-  public async close() {
-    await Promise.all([
-      this.jobsScheduler.close(),
-      this.jobsQueue.close(),
-      this.jobsEvents.close(),
-    ]);
+    return JobsRepo.toJobDTO(createdJob);
   }
 
   public onEvent(
     requesterTokenId: string,
-    cb: (
-      event: string,
-      job: { endpoint: string; id: string; reason?: string }
-    ) => void
+    cb: (event: string, job: { endpoint: string; id: string }) => void
   ) {
-    function onDelayed({ jobId }: { jobId: string; delay: number }) {
-      const { tokenId, endpoint, jobId: id } = decodeJobDescriptor(jobId);
-      if (tokenId === requesterTokenId) {
-        cb("delayed", { endpoint, id });
+    const activity = this.owl.createActivity(
+      async (event, job) => {
+        const { endpoint } = decodeQueueDescriptor(job.queue);
+
+        switch (event) {
+          case "acknowledged":
+            cb("completed", { endpoint, id: job.id });
+            break;
+          case "requested":
+            cb("started", { endpoint, id: job.id });
+            break;
+          case "scheduled":
+            cb("scheduled", { endpoint, id: job.id });
+            break;
+          case "deleted":
+            cb("deleted", { endpoint, id: job.id });
+            break;
+        }
+      },
+      {
+        queue: encodeQueueDescriptor(requesterTokenId, "*"),
       }
-    }
+    );
 
-    function onCompleted({ jobId }: { jobId: string }) {
-      const { tokenId, endpoint, jobId: id } = decodeJobDescriptor(jobId);
-      if (tokenId === requesterTokenId) {
-        cb("completed", { endpoint, id });
-      }
-    }
-
-    function onFailed({
-      jobId,
-      failedReason,
-    }: {
-      jobId: string;
-      failedReason: string;
-    }) {
-      const { tokenId, endpoint, jobId: id } = decodeJobDescriptor(jobId);
-      if (tokenId === requesterTokenId) {
-        cb("failed", { endpoint, id, reason: failedReason });
-      }
-    }
-
-    function onWaiting({ jobId }: { jobId: string }) {
-      const { tokenId, endpoint, jobId: id } = decodeJobDescriptor(jobId);
-      if (tokenId === requesterTokenId) {
-        cb("waiting", { endpoint, id });
-      }
-    }
-
-    function onRemoved({ jobId }: { jobId: string }) {
-      const { tokenId, endpoint, jobId: id } = decodeJobDescriptor(jobId);
-      if (tokenId === requesterTokenId) {
-        cb("removed", { endpoint, id });
-      }
-    }
-
-    this.jobsEvents.on("completed", onCompleted);
-    this.jobsEvents.on("delayed", onDelayed);
-    this.jobsEvents.on("waiting", onWaiting);
-    this.jobsEvents.on("removed", onRemoved);
-    this.jobsEvents.on("failed", onFailed);
-
-    return () => {
-      this.jobsEvents.removeListener("completed", onCompleted);
-      this.jobsEvents.removeListener("delayed", onDelayed);
-      this.jobsEvents.removeListener("waiting", onWaiting);
-      this.jobsEvents.removeListener("removed", onRemoved);
-      this.jobsEvents.removeListener("failed", onFailed);
-    };
+    return () => activity.close();
   }
 }

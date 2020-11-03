@@ -1,22 +1,27 @@
-import * as request from "supertest";
+import request from "supertest";
 import { run } from "./runQuirrel";
-import type * as http from "http";
+import type http from "http";
 
-describe("health", () => {
-  let quirrel: http.Server;
-  let teardown: () => Promise<void>;
+function testAgainst(backend: "Redis" | "Mock") {
+  describe(backend + " > health", () => {
+    let quirrel: http.Server;
+    let teardown: () => Promise<void>;
 
-  beforeAll(async () => {
-    const res = await run();
-    quirrel = res.server;
-    teardown = res.teardown;
+    beforeAll(async () => {
+      const res = await run(backend);
+      quirrel = res.server;
+      teardown = res.teardown;
+    });
+
+    afterAll(async () => {
+      await teardown();
+    });
+
+    test("health", async () => {
+      await request(quirrel).get("/health").expect(200, { redis: "up" });
+    });
   });
+}
 
-  afterAll(async () => {
-    await teardown();
-  });
-
-  test("health", async () => {
-    await request(quirrel).get("/health").expect(200, { redis: "up" });
-  });
-});
+testAgainst("Mock");
+testAgainst("Redis");

@@ -15,6 +15,7 @@
     "id": {
       "type": "string"
     },
+    "override": { "type": "boolean" },
     "repeat": {
       "type": "object",
       "properties": {
@@ -34,6 +35,6 @@
       "additionalProperties": false
     }
   },
-  "required": ["endpoint"],
+  "required": [],
   "additionalProperties": false
 }

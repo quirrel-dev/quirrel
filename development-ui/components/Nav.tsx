@@ -1,47 +1,66 @@
 import { useState } from "react";
 import clsx from "clsx";
 import Link from "next/link";
+import React from "react";
 import { FeedbackFish } from "@feedback-fish/react";
 
-function PillButton({
-  selected,
-  title,
-  ...rest
-}: React.HTMLProps<HTMLAnchorElement> & { selected: boolean; title: string }) {
-  return (
-    <a
-      {...rest}
-      className={clsx(
-        selected
-          ? "text-white bg-orange-500"
-          : "text-gray-800 hover:text-white hover:bg-orange-300",
-        "px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
-      )}
-    >
-      {title}
-    </a>
-  );
-}
+const PillButton = React.forwardRef(
+  (
+    {
+      selected,
+      title,
+      ...rest
+    }: React.HTMLProps<HTMLAnchorElement> & {
+      selected: boolean;
+      title: string;
+    },
+    ref
+  ) => {
+    return (
+      <a
+        {...rest}
+        ref={ref as any}
+        className={clsx(
+          selected
+            ? "text-white bg-orange-500"
+            : "text-gray-800 hover:text-white hover:bg-orange-300",
+          "px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
+        )}
+      >
+        {title}
+      </a>
+    );
+  }
+);
 
-function MenuButton({
-  selected,
-  title,
-  ...rest
-}: React.HTMLProps<HTMLAnchorElement> & { selected: boolean; title: string }) {
-  return (
-    <a
-      {...rest}
-      className={clsx(
-        selected
-          ? "text-white bg-orange-500"
-          : "text-gray-800 hover:text-white hover:bg-orange-300",
-        "block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
-      )}
-    >
-      {title}
-    </a>
-  );
-}
+const MenuButton = React.forwardRef(
+  (
+    {
+      selected,
+      title,
+      ...rest
+    }: React.HTMLProps<HTMLAnchorElement> & {
+      selected: boolean;
+      title: string;
+    },
+    ref
+  ) => {
+    return (
+      <a
+        {...rest}
+        ref={ref as any}
+        className={clsx(
+          selected
+            ? "text-white bg-orange-500"
+            : "text-gray-800 hover:text-white hover:bg-orange-300",
+          "block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
+        )}
+      >
+        {title}
+      </a>
+    );
+  }
+);
 
 export interface NavProps {
   selectedPage?: "activity" | "pending" | "cron";

@@ -1,4 +1,5 @@
 import { runQuirrel } from ".";
+import { createRedisFactory } from "./shared/create-redis";
 
 const {
   PORT = 9181,
@@ -18,7 +19,7 @@ async function main() {
   const quirrel = await runQuirrel({
     port: +PORT,
     host: HOST,
-    redis: !!REDIS_URL ? REDIS_URL : undefined,
+    redisFactory: createRedisFactory(REDIS_URL),
     passphrases: !!PASSPHRASES ? PASSPHRASES.split(":") : undefined,
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
     disableTelemetry: Boolean(DISABLE_TELEMETRY),

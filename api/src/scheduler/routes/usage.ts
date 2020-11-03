@@ -1,7 +1,7 @@
 import { FastifyPluginCallback } from "fastify";
 import { UsageMeter } from "../../shared/usage-meter";
 
-import * as DELETEUsageResponseSchema from "../schemas/usage/DELETE/response.json";
+import DELETEUsageResponseSchema from "../schemas/usage/DELETE/response.json";
 import { DELETEUsageResponse } from "../types/usage/DELETE/response";
 
 const usageRoute: FastifyPluginCallback = (fastify, opts, done) => {
@@ -12,7 +12,7 @@ const usageRoute: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.delete<{ Reply: DELETEUsageResponse }>("/", {
     schema: {
       response: {
-        data: DELETEUsageResponseSchema,
+        200: DELETEUsageResponseSchema,
       },
     },
     async handler(request, reply) {

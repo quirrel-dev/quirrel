@@ -6,6 +6,7 @@ export default function Cron() {
     <BaseLayout selectedPage="cron">
       <Table
         items={[null]}
+        extractKey={item => item}
         columns={[
           {
             title: "Endpoint",

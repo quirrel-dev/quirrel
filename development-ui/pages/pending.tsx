@@ -30,6 +30,7 @@ export default function Pending() {
     <BaseLayout selectedPage="pending">
       <Table
         items={pending}
+        extractKey={(item) => item.endpoint + ";" + item.id}
         columns={[
           {
             title: "Endpoint",

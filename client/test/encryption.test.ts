@@ -3,6 +3,7 @@ import { runQuirrel } from "quirrel";
 import type { AddressInfo } from "net";
 import * as http from "http";
 import delay from "delay";
+import Redis from "ioredis";
 
 function getAddress(server: http.Server): string {
   const { address, port } = server.address() as AddressInfo;
@@ -12,7 +13,7 @@ function getAddress(server: http.Server): string {
 test("encryption", async () => {
   const server = await runQuirrel({
     port: 0,
-    redis: process.env.REDIS_URL,
+    redisFactory: () => new Redis(process.env.REDIS_URL),
     disableTelemetry: true,
   });
 

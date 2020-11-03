@@ -1,4 +1,5 @@
 import type { Redis } from "ioredis";
+import RedisMock from "ioredis-mock";
 
 export class UsageMeter {
   constructor(private readonly redis: Redis) {}
@@ -17,6 +18,14 @@ export class UsageMeter {
       1,
       "usage"
     );
+
+    if (this.redis instanceof RedisMock) {
+      for (const key of Object.keys(result)) {
+        result[key] = Number(result[key]);
+      }
+
+      return result
+    }
 
     const usage: Record<string, number> = {};
 

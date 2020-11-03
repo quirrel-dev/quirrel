@@ -1,6 +1,6 @@
 import { FastifyPluginCallback } from "fastify";
 import fastifyBasicAuth from "fastify-basic-auth";
-import * as fp from "fastify-plugin";
+import fp from "fastify-plugin";
 
 interface BasicAuthPluginOpts {
   passphrases: string[];

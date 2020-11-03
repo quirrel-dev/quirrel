@@ -5,13 +5,19 @@ name: CI
 
 on:
   push:
+    branches: [main, master]
+    tags:
   pull_request:
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: node:12
+    container: node:${{ matrix.node-version }}
+
+    strategy:
+      matrix:
+        node-version: [12, 14]
 
     services:
       redis:
@@ -29,10 +35,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
     - run: npm ci
       working-directory: api
     - run: npm run build
@@ -41,6 +43,7 @@ jobs:
       working-directory: api
     - name: Coveralls API
       uses: coverallsapp/github-action@master
+      if: ${{ matrix.node-version == 14 }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: quirrel Integration
@@ -55,6 +58,7 @@ jobs:
       working-directory: client
     - name: Coveralls Client
       uses: coverallsapp/github-action@master
+      if: ${{ matrix.node-version == 14 }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: "@quirrel/client Integration"
@@ -63,6 +67,7 @@ jobs:
         parallel: true
     - name: Coveralls Finish
       uses: coverallsapp/github-action@master
+      if: ${{ matrix.node-version == 14 }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         parallel-finished: true

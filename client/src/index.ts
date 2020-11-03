@@ -1,7 +1,7 @@
 import Encryptor from "secure-e2ee";
 import { verify } from "secure-webhooks";
 import ms from "ms";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 
 const fallbackEndpoint =
   process.env.NODE_ENV === "production"
@@ -135,16 +135,16 @@ export interface Job extends Omit<JobDTO, "runAt" | "body"> {
 
   /**
    * Delete this job.
-   * @returns null if the job already has been deleted.
+   * @returns false if the job already has been deleted.
    */
-  delete(): Promise<Job | null>;
+  delete(): Promise<boolean>;
 
   /**
    * Schdule this job for immediate execution.
    * If it's a repeated job, the next executions will be scheduled normally.
-   * @returns null if the job has been deleted in the meantime.
+   * @returns false if the job has been deleted in the meantime.
    */
-  invoke(): Promise<Job | null>;
+  invoke(): Promise<boolean>;
 }
 
 type SignatureCheckResult<T> =
@@ -304,8 +304,8 @@ export class QuirrelClient {
     while (cursor !== null) {
       const res = await fetch(
         this.baseUrl +
-          "/queues/" +
-          (!!endpoint ? encodeURIComponent(endpoint!) : "") +
+          "/queues" +
+          (!!endpoint ? "/" + encodeURIComponent(endpoint!) : "") +
           "?cursor=" +
           cursor,
         {
@@ -353,7 +353,7 @@ export class QuirrelClient {
    * Schedule a job for immediate execution.
    * @returns null if job could not be found.
    */
-  async invoke(endpoint: string, id: string): Promise<Job | null> {
+  async invoke(endpoint: string, id: string): Promise<boolean> {
     const res = await fetch(
       this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       {
@@ -363,11 +363,11 @@ export class QuirrelClient {
     );
 
     if (res.status === 404) {
-      return null;
+      return false;
     }
 
-    if (res.status === 200) {
-      return this.toJob(await res.json());
+    if (res.status === 204) {
+      return true;
     }
 
     throw new Error("Unexpected response: " + res.status);
@@ -377,7 +377,7 @@ export class QuirrelClient {
    * Delete a job, preventing it from executing.
    * @returns null if job could not be found.
    */
-  async delete(endpoint: string, id: string): Promise<Job | null> {
+  async delete(endpoint: string, id: string): Promise<boolean> {
     const res = await fetch(
       this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       {
@@ -387,11 +387,11 @@ export class QuirrelClient {
     );
 
     if (res.status === 404) {
-      return null;
+      return false;
     }
 
-    if (res.status === 200) {
-      return this.toJob(await res.json());
+    if (res.status === 204) {
+      return true;
     }
 
     throw new Error("Unexpected response: " + res.status);

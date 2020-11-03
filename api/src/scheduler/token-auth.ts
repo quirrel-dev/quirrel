@@ -1,5 +1,5 @@
 import { FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
-import * as fp from "fastify-plugin";
+import fp from "fastify-plugin";
 import { IncomingMessage } from "http";
 import { UsageMeter } from "../shared/usage-meter";
 

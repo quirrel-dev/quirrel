@@ -1,5 +1,5 @@
 import { FastifyPluginCallback } from "fastify";
-import * as fp from "fastify-plugin";
+import fp from "fastify-plugin";
 import { Telemetrist } from "../shared/telemetrist";
 
 declare module "fastify" {

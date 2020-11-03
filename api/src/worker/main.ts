@@ -1,4 +1,5 @@
 import { createWorker } from ".";
+import { createRedisFactory } from "../shared/create-redis";
 
 const {
   REDIS_URL,
@@ -15,7 +16,7 @@ process.on("unhandledRejection", (reason, promise) => {
 
 async function main() {
   const worker = await createWorker({
-    redis: !!REDIS_URL ? REDIS_URL : undefined,
+    redisFactory: createRedisFactory(REDIS_URL ?? "redis://localhost:6379"),
     enableUsageMetering: Boolean(ENABLE_USAGE_METERING),
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
     concurrency: Number.parseInt(CONCURRENCY ?? "") || 100,

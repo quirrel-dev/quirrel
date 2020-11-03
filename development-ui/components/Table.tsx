@@ -5,12 +5,13 @@ interface TableRow<T> {
 
 interface TableProps<T> {
   items: T[];
+  extractKey: (item: T) => string;
   columns: TableRow<T>[];
   endOfRow?: (v: T) => React.ReactChild;
 }
 
 export function Table<T>(props: TableProps<T>) {
-  const { items, columns, endOfRow } = props;
+  const { items, columns, endOfRow, extractKey } = props;
   return (
     <div className="flex flex-col">
       <div className="-my-2 overflow-x-auto lg:-mx-8">
@@ -20,7 +21,10 @@ export function Table<T>(props: TableProps<T>) {
               <thead>
                 <tr>
                   {columns.map(({ title }) => (
-                    <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      key={title}
+                      className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       {title}
                     </th>
                   ))}
@@ -29,7 +33,7 @@ export function Table<T>(props: TableProps<T>) {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {items.map((item) => (
-                  <tr>
+                  <tr key={extractKey(item)}>
                     {columns.map((col) => {
                       let child = col.render(item);
 
@@ -42,7 +46,7 @@ export function Table<T>(props: TableProps<T>) {
                       }
 
                       return (
-                        <td className="px-6 py-4 whitespace-no-wrap">
+                        <td key={col.title} className="px-6 py-4 whitespace-no-wrap">
                           {child}
                         </td>
                       );

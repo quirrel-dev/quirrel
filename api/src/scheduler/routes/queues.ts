@@ -1,9 +1,9 @@
 import { FastifyPluginCallback } from "fastify";
 
-import * as EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
-import * as SCANQueryStringSchema from "../schemas/queues/scan-querystring.json";
-import * as EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
-import * as POSTQueuesEndpointBodySchema from "../schemas/queues/POST/body.json";
+import EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
+import SCANQueryStringSchema from "../schemas/queues/scan-querystring.json";
+import EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
+import POSTQueuesEndpointBodySchema from "../schemas/queues/POST/body.json";
 import { POSTQueuesEndpointBody } from "../types/queues/POST/body";
 import { SCANQuerystringParams } from "../types/queues/scan-querystring";
 import { QueuesEndpointParams } from "../types/queues/endpoint-params";
@@ -12,7 +12,7 @@ import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 import { JobsRepo } from "../jobs-repo";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
-  const jobsRepo = new JobsRepo(fastify.redis);
+  const jobsRepo = new JobsRepo(fastify.redisFactory);
 
   fastify.addHook("preValidation", fastify.tokenAuthPreValidation);
 
@@ -20,39 +20,28 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     "/:endpoint",
     {
       schema: {
-        body: {
-          data: POSTQueuesEndpointBodySchema,
-        },
-        params: {
-          data: EndpointParamsSchema,
-        },
+        body: POSTQueuesEndpointBodySchema,
+        params: EndpointParamsSchema,
       },
+    },
+    async (request, reply) => {
+      fastify.telemetrist?.dispatch("enqueue");
 
-      async handler(request, reply) {
-        fastify.telemetrist?.dispatch("enqueue");
+      const job = await jobsRepo.enqueue(
+        request.tokenId,
+        request.params.endpoint,
+        request.body
+      );
 
-        const job = await jobsRepo.enqueue(
-          request.tokenId,
-          request.params.endpoint,
-          request.body
-        );
-
-        reply.status(201).send(job);
-      },
+      reply.status(201).send(job);
     }
   );
 
   fastify.get<{
-    Params: QueuesEndpointParams;
     Querystring: SCANQuerystringParams;
   }>("/", {
     schema: {
-      params: {
-        data: EndpointParamsSchema,
-      },
-      querystring: {
-        data: SCANQueryStringSchema,
-      },
+      querystring: SCANQueryStringSchema,
     },
     async handler(request, reply) {
       fastify.telemetrist?.dispatch("scan_all");
@@ -62,7 +51,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       });
 
       reply.status(200).send({
-        cursor,
+        cursor: cursor === 0 ? null : cursor,
         jobs,
       });
     },
@@ -73,12 +62,8 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     Querystring: SCANQuerystringParams;
   }>("/:endpoint", {
     schema: {
-      params: {
-        data: EndpointParamsSchema,
-      },
-      querystring: {
-        data: SCANQueryStringSchema,
-      },
+      params: EndpointParamsSchema,
+      querystring: SCANQueryStringSchema,
     },
     async handler(request, reply) {
       fastify.telemetrist?.dispatch("scan_endpoint");
@@ -92,7 +77,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       );
 
       reply.status(200).send({
-        cursor,
+        cursor: cursor === 0 ? null : cursor,
         jobs,
       });
     },
@@ -100,9 +85,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
   fastify.get<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
-      params: {
-        data: EndpointJobIDParamsSchema,
-      },
+      params: EndpointJobIDParamsSchema,
     },
 
     async handler(request, reply) {
@@ -121,9 +104,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
   fastify.post<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
-      params: {
-        data: EndpointJobIDParamsSchema,
-      },
+      params: EndpointJobIDParamsSchema,
     },
 
     async handler(request, reply) {
@@ -131,20 +112,19 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const { endpoint, id } = request.params;
 
-      const job = await jobsRepo.invoke(request.tokenId, endpoint, id);
-      if (job) {
-        reply.status(200).send(job);
-      } else {
-        reply.status(404).send("Not Found");
+      const result = await jobsRepo.invoke(request.tokenId, endpoint, id);
+      switch (result) {
+        case "invoked":
+          return reply.status(204).send();
+        case "not_found":
+          return reply.status(404).send();
       }
     },
   });
 
   fastify.delete<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
-      params: {
-        data: EndpointJobIDParamsSchema,
-      },
+      params: EndpointJobIDParamsSchema,
     },
 
     async handler(request, reply) {
@@ -152,12 +132,13 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const { endpoint, id } = request.params;
 
-      const deletedJob = await jobsRepo.delete(request.tokenId, endpoint, id);
+      const result = await jobsRepo.delete(request.tokenId, endpoint, id);
 
-      if (deletedJob) {
-        reply.status(200).send(deletedJob);
-      } else {
-        reply.status(404).send("Not Found");
+      switch (result) {
+        case "deleted":
+          return reply.status(204).send();
+        case "not_found":
+          return reply.status(404).send();
       }
     },
   });

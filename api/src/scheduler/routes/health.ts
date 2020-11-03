@@ -1,6 +1,6 @@
 import { FastifyPluginCallback } from "fastify";
 
-import * as GetHealthResponseSchema from "../schemas/health.json";
+import GetHealthResponseSchema from "../schemas/health.json";
 import { GETHealthResponse } from "../types/health";
 
 const health: FastifyPluginCallback = (app, opts, done) => {
@@ -12,26 +12,28 @@ const health: FastifyPluginCallback = (app, opts, done) => {
         } else {
           resolve(true);
         }
-      })
-    })
+      });
+    });
   }
 
-  app.get<{ Reply: GETHealthResponse }>("/", {
-    schema: {
-      response: {
-        data: GetHealthResponseSchema
+  app.get<{ Reply: GETHealthResponse }>(
+    "/",
+    {
+      schema: {
+        response: {
+          200: GetHealthResponseSchema,
+        },
       },
     },
-
-    async handler(request, reply) {
+    async (request, reply) => {
       const redis = await checkRedis();
 
       reply.status(redis ? 200 : 502);
       reply.send({
-        redis: redis ? "up" : "down"
-      })
-    },
-  });
+        redis: redis ? "up" : "down",
+      });
+    }
+  );
 
   done();
 };
