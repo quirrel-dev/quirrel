@@ -1,5 +1,5 @@
 import { FastifyPluginCallback } from "fastify";
-import Sentry from "@sentry/node";
+import * as Sentry from "@sentry/node";
 import fp from "fastify-plugin";
 import pack from "../../package.json";
 

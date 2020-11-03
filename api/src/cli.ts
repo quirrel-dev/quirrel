@@ -25,11 +25,7 @@ program
   .version(pack.version)
   .option("-h, --host <host>", "host to bind on", "localhost")
   .option("-p, --port <port>", "port to bind on", "9181")
-  .option(
-    "-r, --redis-url <redis-url>",
-    "enables the redis backend",
-    "localhost:6379"
-  )
+  .option("-r, --redis-url <redis-url>", "enables the redis backend")
   .option(
     "--passphrase <passphrase>",
     "secure the server with a passphrase",
@@ -42,14 +38,16 @@ program
       host,
       port,
     }: {
-      redisUrl: string;
+      redisUrl?: string;
       passphrase: string[];
-      host?: string;
-      port?: string;
+      host: string;
+      port: string;
     }) => {
-      if (!(await isRedisConnectionIntact(redisUrl))) {
-        console.log("Couldn't connect to Redis.");
-        process.exit(1);
+      if (redisUrl) {
+        if (!(await isRedisConnectionIntact(redisUrl))) {
+          console.log("Couldn't connect to Redis.");
+          process.exit(1);
+        }
       }
 
       const quirrel = await runQuirrel({

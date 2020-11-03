@@ -19,7 +19,7 @@
     "quirrel": "dist/src/cli.js"
   },
   "scripts": {
-    "start": "node dist/src/main.js",
+    "start": "node dist/src/cli.js",
     "test": "DISABLE_TELEMETRY=true jest --runInBand --forceExit",
     "build": "run-s build:schemas build:tsc",
     "build:schemas": "json2ts -i src/scheduler/schemas/ -o src/scheduler/types/",
