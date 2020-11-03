@@ -27,7 +27,7 @@
     "prepack": "npm run build"
   },
   "devDependencies": {
-    "@types/ioredis": "^4.17.5",
+    "@types/ioredis": "^4.17.7",
     "@types/jest": "^26.0.13",
     "@types/redis": "^2.8.27",
     "@types/supertest": "^2.0.10",
@@ -57,7 +57,7 @@
     "fastify-oas": "^3.0.3",
     "fastify-plugin": "^2.3.3",
     "fastify-websocket": "^2.0.7",
-    "ioredis": "^4.17.3",
+    "ioredis": "^4.19.2",
     "ioredis-mock": "^5.1.0",
     "open": "^7.3.0",
     "parse-duration": "^0.4.4",
