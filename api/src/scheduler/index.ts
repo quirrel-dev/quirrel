@@ -1,14 +1,15 @@
 import fastify from "fastify";
+import { Redis } from "ioredis"
+import owlPlugin from "./owl";
 import redisPlugin from "./redis";
 import tokensPlugin from "./tokens";
 import tokensRoute from "./routes/tokens";
 import health from "./routes/health";
 import queues from "./routes/queues";
 import usageRoute from "./routes/usage";
-import * as oas from "fastify-oas";
-import * as pack from "../../package.json";
+import oas from "fastify-oas";
+import pack from "../../package.json";
 import basicAuthPlugin from "./basic-auth";
-import type { RedisOptions } from "ioredis";
 import type { AddressInfo } from "net";
 import tokenAuthPlugin from "./token-auth";
 import activityPlugin from "./routes/activity";
@@ -18,9 +19,9 @@ import telemetry from "./telemetry";
 import sentryPlugin from "./sentry";
 
 export interface QuirrelServerConfig {
+  redisFactory: () => Redis;
   port?: number;
   host?: string;
-  redis?: RedisOptions | string;
   passphrases?: string[];
   runningInDocker?: boolean;
   disableTelemetry?: boolean;
@@ -30,7 +31,7 @@ export async function createServer({
   port = 9181,
   host = "0.0.0.0",
   runningInDocker = false,
-  redis,
+  redisFactory,
   passphrases,
   disableTelemetry,
 }: QuirrelServerConfig) {
@@ -68,7 +69,8 @@ export async function createServer({
 
   const enableAuth = !!passphrases?.length;
 
-  app.register(redisPlugin, { opts: redis });
+  app.register(redisPlugin, { redisFactory });
+  app.register(owlPlugin);
 
   app.register(tokenAuthPlugin, { auth: enableAuth });
 

@@ -1,9 +1,9 @@
 import { FastifyPluginCallback } from "fastify";
 
-import * as EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
-import * as SCANQueryStringSchema from "../schemas/queues/scan-querystring.json";
-import * as EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
-import * as POSTQueuesEndpointBodySchema from "../schemas/queues/POST/body.json";
+import EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
+import SCANQueryStringSchema from "../schemas/queues/scan-querystring.json";
+import EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
+import POSTQueuesEndpointBodySchema from "../schemas/queues/POST/body.json";
 import { POSTQueuesEndpointBody } from "../types/queues/POST/body";
 import { SCANQuerystringParams } from "../types/queues/scan-querystring";
 import { QueuesEndpointParams } from "../types/queues/endpoint-params";
@@ -12,7 +12,7 @@ import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 import { JobsRepo } from "../jobs-repo";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
-  const jobsRepo = new JobsRepo(fastify.redis);
+  const jobsRepo = new JobsRepo(fastify.redisFactory);
 
   fastify.addHook("preValidation", fastify.tokenAuthPreValidation);
 

@@ -1,19 +1,20 @@
 import { runQuirrel } from "../src";
-import * as Redis from "ioredis"
+import { createRedisFactory } from "../src/shared/create-redis";
 
 export async function run(passphrases?: string[]) {
+  const redisFactory = createRedisFactory(process.env.REDIS_URL);
   const { httpServer, close } = await runQuirrel({
     port: 0,
-    redis: process.env.REDIS_URL,
+    redisFactory,
     passphrases,
-    disableTelemetry: true
+    disableTelemetry: true,
   });
 
-  const redis = new Redis(process.env.REDIS_URL)
+  const redis = redisFactory();
 
   return {
     teardown: close,
     server: httpServer,
-    redis
+    redis,
   };
 }

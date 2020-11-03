@@ -1,8 +1,8 @@
 import { run } from "./runQuirrel";
 import fastify from "fastify";
 import delay from "delay";
-import * as request from "supertest";
-import * as websocket from "websocket";
+import request from "supertest";
+import websocket from "websocket";
 import { AddressInfo } from "ws";
 
 jest.setTimeout(20 * 1000);

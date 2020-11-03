@@ -1,9 +1,9 @@
 import { FastifyPluginCallback } from "fastify";
 
-import * as POSTTokensParamsSchema from "../schemas/tokens/PUT/params.json";
+import POSTTokensParamsSchema from "../schemas/tokens/PUT/params.json";
 import { POSTTokensParams } from "../types/tokens/PUT/params";
 
-import * as DELETETokenParamsSchema from "../schemas/tokens/DELETE/params.json";
+import DELETETokenParamsSchema from "../schemas/tokens/DELETE/params.json";
 import { DELETETokensTokenParams } from "../types/tokens/DELETE/params";
 
 const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {

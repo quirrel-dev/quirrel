@@ -2,8 +2,8 @@ import { run } from "./runQuirrel";
 import fastify, { FastifyInstance } from "fastify";
 import delay from "delay";
 import { verify } from "secure-webhooks";
-import type * as http from "http";
-import * as request from "supertest";
+import type http from "http";
+import request from "supertest";
 
 const passphrase = "hello";
 

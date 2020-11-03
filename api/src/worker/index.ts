@@ -1,9 +1,9 @@
-import { decodeQueueDescriptor, HttpJob } from "../shared/http-job";
+import { decodeQueueDescriptor } from "../shared/http-job";
 import { UsageMeter } from "../shared/usage-meter";
 import axios from "axios";
 import { TokenRepo } from "../shared/token-repo";
 import { sign } from "secure-webhooks";
-import * as Redis from "ioredis";
+import { Redis } from "ioredis";
 import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
 
@@ -20,7 +20,7 @@ export function replaceLocalhostWithDockerHost(url: string): string {
 }
 
 export interface QuirrelWorkerConfig {
-  redis?: Redis.RedisOptions | string;
+  redisFactory: () => Redis;
   enableUsageMetering?: boolean;
   runningInDocker?: boolean;
   concurrency?: number;
@@ -28,13 +28,13 @@ export interface QuirrelWorkerConfig {
 }
 
 export async function createWorker({
-  redis: redisOpts,
+  redisFactory,
   enableUsageMetering,
   runningInDocker,
   concurrency = 100,
   disableTelemetry,
 }: QuirrelWorkerConfig) {
-  const redisClient = new Redis(redisOpts as any);
+  const redisClient = redisFactory();
   const telemetrist = disableTelemetry
     ? undefined
     : new Telemetrist(runningInDocker ?? false);
@@ -46,7 +46,7 @@ export async function createWorker({
     usageMeter = new UsageMeter(redisClient);
   }
 
-  const owl = createOwl(() => new Redis(redisOpts as any));
+  const owl = createOwl(redisFactory);
 
   const worker = owl.createWorker(
     async (job) => {

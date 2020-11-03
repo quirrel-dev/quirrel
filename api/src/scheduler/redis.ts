@@ -1,24 +1,26 @@
 import { FastifyPluginCallback } from "fastify";
-import * as fp from "fastify-plugin";
-import * as Redis from "ioredis";
+import fp from "fastify-plugin";
+import { Redis } from "ioredis";
 
 declare module "fastify" {
   interface FastifyInstance {
-    redis: Redis.Redis;
+    redis: Redis;
+    redisFactory: () => Redis;
   }
 }
 
 interface RedisPluginOpts {
-  opts?: Redis.RedisOptions | string;
+  redisFactory: () => Redis;
 }
 
 const redisPlugin: FastifyPluginCallback<RedisPluginOpts> = (
   fastify,
-  { opts },
+  { redisFactory },
   done
 ) => {
-  const client = new Redis(opts as any);
+  const client = redisFactory();
   fastify.decorate("redis", client);
+  fastify.decorate("redisFactory", redisFactory);
 
   fastify.addHook("onClose", async () => {
     await client.quit();

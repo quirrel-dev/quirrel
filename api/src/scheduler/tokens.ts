@@ -1,5 +1,5 @@
 import { FastifyPluginCallback } from "fastify";
-import * as fp from "fastify-plugin";
+import fp from "fastify-plugin";
 import { TokenRepo } from "../shared/token-repo";
 
 declare module "fastify" {

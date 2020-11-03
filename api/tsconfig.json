@@ -5,6 +5,7 @@
         "sourceMap": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
-        "declaration": true
+        "declaration": true,
+        "esModuleInterop": true
     }
 }

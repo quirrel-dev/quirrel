@@ -1,6 +1,6 @@
-import * as request from "supertest";
+import request from "supertest";
 import { run } from "./runQuirrel";
-import type * as http from "http";
+import type http from "http";
 
 describe("health", () => {
   let quirrel: http.Server;

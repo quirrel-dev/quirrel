@@ -1,6 +1,6 @@
 import Owl from "@quirrel/owl";
 import { Redis } from "ioredis";
-import * as cronParser from "cron-parser";
+import cronParser from "cron-parser";
 
 export function cron(lastDate: Date, cronExpression: string): Date {
   const expr = cronParser.parseExpression(cronExpression, {

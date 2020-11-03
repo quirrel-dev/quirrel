@@ -7,7 +7,7 @@ import {
 
 import * as uuid from "uuid";
 import { createOwl, cron } from "../shared/owl";
-import { Job } from "@quirrel/owl";
+import type { Job } from "@quirrel/owl";
 
 interface PaginationOpts {
   cursor: number;
@@ -31,8 +31,8 @@ export class JobsRepo {
   protected owl;
   protected producer;
 
-  constructor(redis: Redis) {
-    this.owl = createOwl(() => redis.duplicate());
+  constructor(redisFactory: () => Redis) {
+    this.owl = createOwl(redisFactory);
     this.producer = this.owl.createProducer();
   }
 
@@ -101,23 +101,18 @@ export class JobsRepo {
     return job ? JobsRepo.toJobDTO(job) : undefined;
   }
 
-  public async invoke(
-    tokenId: string,
-    endpoint: string,
-    id: string
-  ) {
+  public async invoke(tokenId: string, endpoint: string, id: string) {
     return await this.producer.invoke(
       encodeQueueDescriptor(tokenId, endpoint),
       id
     );
   }
 
-  public async delete(
-    tokenId: string,
-    endpoint: string,
-    id: string
-  ) {
-    return await this.producer.delete(encodeQueueDescriptor(tokenId, endpoint), id);
+  public async delete(tokenId: string, endpoint: string, id: string) {
+    return await this.producer.delete(
+      encodeQueueDescriptor(tokenId, endpoint),
+      id
+    );
   }
 
   public async enqueue(

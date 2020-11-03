@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import * as pack from "../package.json";
-import * as open from "open";
+import pack from "../package.json";
+import open from "open";
 import { runQuirrel } from "./index";
 import IORedis = require("ioredis");
+import { createRedisFactory } from "./shared/create-redis";
 
 async function isRedisConnectionIntact(redisUrl: string) {
   try {
@@ -26,7 +27,7 @@ program
   .option("-p, --port <port>", "port to bind on", "9181")
   .option(
     "-r, --redis-url <redis-url>",
-    "set the redis url to be used",
+    "enables the redis backend",
     "localhost:6379"
   )
   .option(
@@ -52,7 +53,7 @@ program
       }
 
       const quirrel = await runQuirrel({
-        redis: redisUrl,
+        redisFactory: createRedisFactory(redisUrl),
         runningInDocker: false,
         passphrases: passphrase,
         host,

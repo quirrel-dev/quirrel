@@ -1,6 +1,6 @@
 import { FastifyPluginCallback } from "fastify";
 
-import * as GetHealthResponseSchema from "../schemas/health.json";
+import GetHealthResponseSchema from "../schemas/health.json";
 import { GETHealthResponse } from "../types/health";
 
 const health: FastifyPluginCallback = (app, opts, done) => {
