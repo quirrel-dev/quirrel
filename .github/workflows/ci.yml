@@ -5,6 +5,8 @@ name: CI
 
 on:
   push:
+    branches: [main, master]
+    tags:
   pull_request:
 
 jobs:
@@ -41,6 +43,7 @@ jobs:
       working-directory: api
     - name: Coveralls API
       uses: coverallsapp/github-action@master
+      if: ${{ matrix.node-version == 14 }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: quirrel Integration
@@ -55,6 +58,7 @@ jobs:
       working-directory: client
     - name: Coveralls Client
       uses: coverallsapp/github-action@master
+      if: ${{ matrix.node-version == 14 }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: "@quirrel/client Integration"
@@ -63,6 +67,7 @@ jobs:
         parallel: true
     - name: Coveralls Finish
       uses: coverallsapp/github-action@master
+      if: ${{ matrix.node-version == 14 }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         parallel-finished: true
