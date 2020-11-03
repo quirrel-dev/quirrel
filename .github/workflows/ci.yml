@@ -33,7 +33,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - run: npm install --global npm@7
     - run: npm ci
       working-directory: api
     - run: npm run build
