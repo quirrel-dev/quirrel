@@ -38,11 +38,9 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   );
 
   fastify.get<{
-    Params: QueuesEndpointParams;
     Querystring: SCANQuerystringParams;
   }>("/", {
     schema: {
-      params: EndpointParamsSchema,
       querystring: SCANQueryStringSchema,
     },
     async handler(request, reply) {
@@ -53,7 +51,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       });
 
       reply.status(200).send({
-        cursor,
+        cursor: cursor === 0 ? null : cursor,
         jobs,
       });
     },

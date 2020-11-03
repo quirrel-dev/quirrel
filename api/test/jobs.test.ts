@@ -325,8 +325,6 @@ describe("jobs", () => {
 
       const numberOfExecutedJobsBeforeDeletion = bodies.length;
 
-      console.log({ endpoint, jobId, numberOfExecutedJobsBeforeDeletion })
-
       await request(quirrel).delete(`/queues/${endpoint}/${jobId}`).expect(204);
 
       await delay(3000);

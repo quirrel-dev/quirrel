@@ -1,7 +1,7 @@
 import Encryptor from "secure-e2ee";
 import { verify } from "secure-webhooks";
 import ms from "ms";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 
 const fallbackEndpoint =
   process.env.NODE_ENV === "production"
@@ -304,8 +304,8 @@ export class QuirrelClient {
     while (cursor !== null) {
       const res = await fetch(
         this.baseUrl +
-          "/queues/" +
-          (!!endpoint ? encodeURIComponent(endpoint!) : "") +
+          "/queues" +
+          (!!endpoint ? "/" + encodeURIComponent(endpoint!) : "") +
           "?cursor=" +
           cursor,
         {
