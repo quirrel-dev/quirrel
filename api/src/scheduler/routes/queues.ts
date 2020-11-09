@@ -33,6 +33,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         request.body
       );
 
+      if (job) {
+        fastify.logger?.jobCreated({ ...job, tokenId: request.tokenId });
+      }
+
       reply.status(201).send(job);
     }
   );

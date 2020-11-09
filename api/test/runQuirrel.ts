@@ -10,6 +10,7 @@ export async function run(backend: "Redis" | "Mock", passphrases?: string[]) {
     redisFactory,
     passphrases,
     disableTelemetry: true,
+    logger: "none",
   });
 
   const redis = redisFactory();

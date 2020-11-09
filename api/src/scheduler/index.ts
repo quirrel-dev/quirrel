@@ -18,9 +18,8 @@ import cors from "fastify-cors";
 import telemetry from "./telemetry";
 import sentryPlugin from "./sentry";
 import loggerPlugin from "./logger";
-import { DxLogger } from "../shared/dx-logger";
 import { StructuredLogger } from "../shared/structured-logger";
-import { getLogger, LoggerType } from "../shared/logger";
+import { Logger } from "../shared/logger";
 
 export interface QuirrelServerConfig {
   redisFactory: () => Redis;
@@ -29,7 +28,7 @@ export interface QuirrelServerConfig {
   passphrases?: string[];
   runningInDocker?: boolean;
   disableTelemetry?: boolean;
-  logger: LoggerType;
+  logger?: Logger;
 }
 
 export async function createServer({
@@ -42,7 +41,7 @@ export async function createServer({
   logger,
 }: QuirrelServerConfig) {
   const app = fastify({
-    logger: logger === "structured",
+    logger: logger instanceof StructuredLogger ? logger.pino : undefined,
   });
 
   if (!disableTelemetry) {
@@ -74,7 +73,7 @@ export async function createServer({
   });
 
   app.register(loggerPlugin, {
-    logger: getLogger(logger, app.log),
+    logger,
   });
 
   const enableAuth = !!passphrases?.length;

@@ -1,12 +1,38 @@
-import { FastifyLoggerInstance } from "fastify";
 import { Logger } from "./logger";
+import * as uuid from "uuid";
+import pino from "pino";
 
 export class StructuredLogger implements Logger {
-  constructor(private readonly logger: FastifyLoggerInstance) {}
-  jobCreated(): void {
-    throw new Error("Method not implemented.");
+  public readonly pino = pino();
+
+  executionErrored(
+    job: { tokenId: string; id: string; endpoint: string; body: string },
+    error: Error
+  ): void {
+    this.pino.error(
+      { error: error.toString(), job },
+      "Caught error during execution"
+    );
   }
-  startingExecution(): { done: () => void } {
-    throw new Error("Method not implemented.");
+  jobCreated(job: {
+    id: string;
+    body: string;
+    tokenId: string;
+    endpoint: string;
+  }): void {
+    this.pino.info({ job }, "Created job.");
+  }
+  startingExecution(job: {
+    id: string;
+    tokenId: string;
+    endpoint: string;
+    body: string;
+  }): () => void {
+    const child = this.pino.child({ correlationId: uuid.v4() });
+
+    child.info({ job }, "Started execution of job.");
+    return () => {
+      child.info({ job }, "Ended execution of job");
+    };
   }
 }

@@ -1,5 +1,6 @@
 import { createWorker } from ".";
 import { createRedisFactory } from "../shared/create-redis";
+import { StructuredLogger } from "../shared/structured-logger";
 
 const {
   REDIS_URL,
@@ -21,6 +22,7 @@ async function main() {
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
     concurrency: Number.parseInt(CONCURRENCY ?? "") || 100,
     disableTelemetry: Boolean(DISABLE_TELEMETRY),
+    logger: new StructuredLogger(),
   });
 
   async function teardown(signal: string) {

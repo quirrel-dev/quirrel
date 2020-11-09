@@ -1,7 +1,15 @@
 import { createServer } from ".";
 import { createRedisFactory } from "../shared/create-redis";
+import { StructuredLogger } from "../shared/structured-logger";
 
-const { PORT = 9181, REDIS_URL, HOST, PASSPHRASES, RUNNING_IN_DOCKER, DISABLE_TELEMETRY } = process.env;
+const {
+  PORT = 9181,
+  REDIS_URL,
+  HOST,
+  PASSPHRASES,
+  RUNNING_IN_DOCKER,
+  DISABLE_TELEMETRY,
+} = process.env;
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
@@ -15,7 +23,8 @@ async function main() {
     redisFactory: createRedisFactory(REDIS_URL ?? "redis://localhost:6379"),
     passphrases: !!PASSPHRASES ? PASSPHRASES.split(":") : undefined,
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
-    disableTelemetry: Boolean(DISABLE_TELEMETRY)
+    disableTelemetry: Boolean(DISABLE_TELEMETRY),
+    logger: new StructuredLogger(),
   });
 
   async function teardown(signal: string) {
