@@ -6,6 +6,8 @@ import { sign } from "secure-webhooks";
 import { Redis } from "ioredis";
 import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
+import pino from "pino";
+import { getLogger, LoggerType } from "../shared/logger";
 
 export function replaceLocalhostWithDockerHost(url: string): string {
   if (url.startsWith("http://localhost")) {
@@ -25,6 +27,7 @@ export interface QuirrelWorkerConfig {
   runningInDocker?: boolean;
   concurrency?: number;
   disableTelemetry?: boolean;
+  logger: LoggerType;
 }
 
 export async function createWorker({
@@ -33,7 +36,10 @@ export async function createWorker({
   runningInDocker,
   concurrency = 100,
   disableTelemetry,
+  logger: loggerType
 }: QuirrelWorkerConfig) {
+  const logger = getLogger(loggerType, pino());
+
   const redisClient = redisFactory();
   const telemetrist = disableTelemetry
     ? undefined
