@@ -6,7 +6,7 @@ export function BaseLayout(props: PropsWithChildren<NavProps>) {
     <>
       <Nav {...props} />
 
-      <main className="max-w-4xl mx-auto">{props.children}</main>
+      <main className="max-w-6xl mx-auto">{props.children}</main>
     </>
   );
 }
