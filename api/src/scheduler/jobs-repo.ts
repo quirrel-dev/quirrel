@@ -184,7 +184,10 @@ export class JobsRepo {
 
   public onEvent(
     requesterTokenId: string,
-    cb: (event: string, job: { endpoint: string; id: string } | JobDTO) => void
+    cb: (
+      event: string,
+      job: { endpoint: string; id: string; runAt?: string } | JobDTO
+    ) => void
   ) {
     const activity = this.owl.createActivity(
       async (event) => {
@@ -209,7 +212,11 @@ export class JobsRepo {
             cb("invoked", { endpoint, id: event.id });
             break;
           case "rescheduled":
-            cb("rescheduled", { endpoint, id: event.id });
+            cb("rescheduled", {
+              endpoint,
+              id: event.id,
+              runAt: event.runAt.toISOString(),
+            });
             break;
           case "deleted":
             cb("deleted", { endpoint, id: event.id });

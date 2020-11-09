@@ -37,7 +37,7 @@ namespace Quirrel {
     }
     export interface Rescheduled {
       type: "rescheduled";
-      payload: { id: string; endpoint: string };
+      payload: { id: string; endpoint: string; runAt: string };
       date: number;
     }
     export interface Invoked {
@@ -109,7 +109,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         Quirrel.ContextValue,
         "activity" | "pending" | "completed"
       >,
-      action: Quirrel.Activity | { type: "dump"; payload: Job[]; date: number; }
+      action: Quirrel.Activity | { type: "dump"; payload: Job[]; date: number }
     ): Pick<Quirrel.ContextValue, "activity" | "pending" | "completed"> => {
       switch (action.type) {
         case "dump": {
@@ -187,7 +187,13 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
           return {
             completed: _.without(prevState.completed, rescheduledJob),
             activity: [action, ...prevState.activity],
-            pending: [rescheduledJob, ...prevState.pending],
+            pending: [
+              {
+                ...rescheduledJob,
+                runAt: action.payload.runAt,
+              },
+              ...prevState.pending,
+            ],
           };
         }
         case "completed": {

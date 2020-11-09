@@ -44,7 +44,7 @@
     "websocket": "^1.0.32"
   },
   "dependencies": {
-    "@quirrel/owl": "^0.2.0",
+    "@quirrel/owl": "^0.2.2",
     "@sentry/node": "^5.26.0",
     "@sentry/tracing": "^5.26.0",
     "axios": "^0.20.0",
