@@ -50,7 +50,7 @@ export class JobsRepo {
             cron: job.schedule?.type === "cron" ? job.schedule.meta : undefined,
             every:
               job.schedule?.type === "every" ? +job.schedule.meta : undefined,
-            times: job.schedule.times,
+            times: job.schedule?.times,
           }
         : undefined,
     };
