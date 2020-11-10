@@ -17,7 +17,7 @@ const defaultOldSecrets: string[] | null = JSON.parse(
   process.env.QUIRREL_OLD_SECRETS ?? "null"
 );
 
-interface JobDTO {
+export interface JobDTO {
   /**
    * ID, used in conjunction with `endpoint` to identify the job.
    */
@@ -68,7 +68,7 @@ interface JobDTO {
   };
 }
 
-interface BaseEnqueueJobOpts {
+export interface BaseEnqueueJobOpts {
   /**
    * The job's payload.
    */
@@ -104,7 +104,7 @@ interface BaseEnqueueJobOpts {
   };
 }
 
-interface DelayedEnqueueJobOpts extends BaseEnqueueJobOpts {
+export interface DelayedEnqueueJobOpts extends BaseEnqueueJobOpts {
   /**
    * Will delay the job's execution by the specified amount of milliseconds.
    * Supports human-readable notation as of @see https://github.com/vercel/ms.
@@ -113,7 +113,7 @@ interface DelayedEnqueueJobOpts extends BaseEnqueueJobOpts {
   delay?: number | string;
 }
 
-interface ScheduledEnqueueJobOpts extends BaseEnqueueJobOpts {
+export interface ScheduledEnqueueJobOpts extends BaseEnqueueJobOpts {
   /**
    * Schedules the job for execution at the specified timestamp.
    */

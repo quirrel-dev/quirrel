@@ -8,7 +8,7 @@ export default function Activity() {
     <BaseLayout selectedPage="activity">
       <Table
         items={activity}
-        extractKey={item => JSON.stringify(item.payload)}
+        extractKey={(item) => "" + item.date}
         columns={[
           {
             title: "Endpoint",

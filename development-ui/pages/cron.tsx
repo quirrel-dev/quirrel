@@ -1,22 +1,31 @@
+import { InvokeButton } from "../components/InvokeButton";
 import { Table } from "../components/Table";
+import { useQuirrel } from "../hooks/useQuirrel";
 import { BaseLayout } from "../layouts/BaseLayout";
 
 export default function Cron() {
+  const { pending, invoke } = useQuirrel();
+  const cronJob = pending.filter((job) => !!job.repeat?.cron);
   return (
     <BaseLayout selectedPage="cron">
       <Table
-        items={[null]}
-        extractKey={item => item}
+        items={cronJob}
+        extractKey={(item) => item.endpoint + item.id}
         columns={[
           {
             title: "Endpoint",
-            render: () => "Coming",
+            render: (job) => job.endpoint,
           },
           {
             title: "Schedule",
-            render: () => "Soon",
+            render: (job) => job.repeat?.cron,
+          },
+          {
+            title: "ID",
+            render: (job) => job.id,
           },
         ]}
+        endOfRow={(job) => <InvokeButton invoke={() => invoke(job)} />}
       />
     </BaseLayout>
   );

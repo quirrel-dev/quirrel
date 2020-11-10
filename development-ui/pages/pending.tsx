@@ -1,35 +1,15 @@
-import { useState } from "react";
+import { InvokeButton } from "../components/InvokeButton";
 import { Table } from "../components/Table";
 import { useQuirrel } from "../hooks/useQuirrel";
 import { BaseLayout } from "../layouts/BaseLayout";
-
-interface InvokeButtonProps {
-  invoke(): Promise<void>;
-}
-
-function InvokeButton(props: InvokeButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  return (
-    <button
-      className="bg-transparent hover:bg-indigo-500 text-indigo-700 font-semibold hover:text-white py-2 px-4 border border-indigo-500 hover:border-transparent rounded w-20"
-      onClick={async () => {
-        setIsLoading(true);
-        await props.invoke();
-        setIsLoading(false);
-      }}
-    >
-      {isLoading ? "..." : "Invoke"}
-    </button>
-  );
-}
+import _ from "lodash";
 
 export default function Pending() {
   const { pending, invoke } = useQuirrel();
   return (
     <BaseLayout selectedPage="pending">
       <Table
-        items={pending}
+        items={_.sortBy(pending, job => job.runAt)}
         extractKey={(item) => item.endpoint + ";" + item.id}
         columns={[
           {
@@ -39,6 +19,10 @@ export default function Pending() {
           {
             title: "ID",
             render: (job) => job.id,
+          },
+          {
+            title: "Run At",
+            render: (job) => job.runAt,
           },
         ]}
         endOfRow={(job) => <InvokeButton invoke={() => invoke(job)} />}

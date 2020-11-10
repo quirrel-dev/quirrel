@@ -7,12 +7,14 @@ import React, {
   useState,
 } from "react";
 import { BaseLayout } from "../layouts/BaseLayout";
-import { Job, QuirrelClient } from "@quirrel/client";
+import { QuirrelClient, JobDTO, Job } from "@quirrel/client";
+import _ from "lodash";
 
 namespace Quirrel {
   export interface ContextValue {
     activity: Quirrel.Activity[];
     pending: Quirrel.JobDescriptor[];
+    completed: Quirrel.JobDescriptor[];
     invoke(job: Quirrel.JobDescriptor): Promise<void>;
     client: QuirrelClient;
   }
@@ -20,26 +22,45 @@ namespace Quirrel {
   export namespace Activity {
     export interface Scheduled {
       type: "scheduled";
-      payload: JobDescriptor;
+      payload: JobDTO;
+      date: number;
     }
     export interface Started {
       type: "started";
-      payload: JobDescriptor;
+      payload: { id: string; endpoint: string };
+      date: number;
     }
     export interface Completed {
       type: "completed";
-      payload: JobDescriptor;
+      payload: { id: string; endpoint: string };
+      date: number;
+    }
+    export interface Rescheduled {
+      type: "rescheduled";
+      payload: { id: string; endpoint: string; runAt: string };
+      date: number;
+    }
+    export interface Invoked {
+      type: "invoked";
+      payload: { id: string; endpoint: string };
+      date: number;
+    }
+    export interface Requested {
+      type: "requested";
+      payload: { id: string; endpoint: string };
+      date: number;
     }
   }
 
   export type Activity =
     | Activity.Scheduled
     | Activity.Completed
+    | Activity.Requested
+    | Activity.Invoked
+    | Activity.Rescheduled
     | Activity.Started;
 
-  export interface JobDescriptor {
-    id: string;
-    endpoint: string;
+  export interface JobDescriptor extends JobDTO {
     started: boolean;
   }
 }
@@ -47,15 +68,18 @@ namespace Quirrel {
 const mockCtxValue: Quirrel.ContextValue = {
   activity: [],
   pending: [],
+  completed: [],
   invoke: async () => {},
   client: null as any,
 };
 
 const QuirrelCtx = React.createContext<Quirrel.ContextValue>(mockCtxValue);
 
-function uniqueDescriptors(descr: Quirrel.JobDescriptor[]): Quirrel.JobDescriptor[] {
+function uniqueDescriptors(
+  descr: Quirrel.JobDescriptor[]
+): Quirrel.JobDescriptor[] {
   const alreadySeen = new Set<string>();
-  return descr.filter(descr => {
+  return descr.filter((descr) => {
     const id = descr.endpoint + ";" + descr.id;
     if (alreadySeen.has(id)) {
       return false;
@@ -63,7 +87,7 @@ function uniqueDescriptors(descr: Quirrel.JobDescriptor[]): Quirrel.JobDescripto
 
     alreadySeen.add(id);
     return true;
-  })
+  });
 }
 
 export function useQuirrel() {
@@ -79,19 +103,23 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
   const [client, setClient] = useState<QuirrelClient>();
 
-  const [{ activity, pending }, dispatchActivity] = useReducer(
+  const [{ activity, pending, completed }, dispatchActivity] = useReducer(
     (
-      prevState: Pick<Quirrel.ContextValue, "activity" | "pending">,
-      action: Quirrel.Activity | { type: "dump"; payload: Job[] }
-    ): Pick<Quirrel.ContextValue, "activity" | "pending"> => {
+      prevState: Pick<
+        Quirrel.ContextValue,
+        "activity" | "pending" | "completed"
+      >,
+      action: Quirrel.Activity | { type: "dump"; payload: Job[]; date: number }
+    ): Pick<Quirrel.ContextValue, "activity" | "pending" | "completed"> => {
       switch (action.type) {
         case "dump": {
           return {
-            activity: prevState.activity,
+            ...prevState,
             pending: [
               ...action.payload.map((j) => ({
-                endpoint: j.endpoint,
-                id: j.id,
+                ...j,
+                body: j.body as string,
+                runAt: j.runAt.toISOString(),
                 started: false,
               })),
               ...prevState.pending,
@@ -100,6 +128,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         }
         case "started": {
           return {
+            ...prevState,
             activity: [action, ...prevState.activity],
             pending: prevState.pending.map((pendingJob) => {
               if (
@@ -118,20 +147,66 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         }
         case "scheduled": {
           return {
+            ...prevState,
             activity: [action, ...prevState.activity],
-            pending: uniqueDescriptors([action.payload, ...prevState.pending]),
+            pending: [
+              {
+                ...action.payload,
+                body: action.payload.body as string,
+                started: false,
+              },
+              ...prevState.pending,
+            ],
+          };
+        }
+        case "invoked": {
+          return {
+            ...prevState,
+            activity: [action, ...prevState.activity],
+            pending: prevState.pending.map((pendingJob) => {
+              if (
+                pendingJob.id === action.payload.id &&
+                pendingJob.endpoint === action.payload.endpoint
+              ) {
+                return {
+                  ...pendingJob,
+                  runAt: new Date().toISOString(),
+                };
+              }
+
+              return pendingJob;
+            }),
+          };
+        }
+        case "rescheduled": {
+          const rescheduledJob = prevState.completed.find(
+            (job) =>
+              job.id === action.payload.id &&
+              job.endpoint === action.payload.endpoint
+          );
+          return {
+            completed: _.without(prevState.completed, rescheduledJob),
+            activity: [action, ...prevState.activity],
+            pending: [
+              {
+                ...rescheduledJob,
+                runAt: action.payload.runAt,
+              },
+              ...prevState.pending,
+            ],
           };
         }
         case "completed": {
+          const completedJob = prevState.pending.find(
+            (job) =>
+              job.id === action.payload.id &&
+              job.endpoint === action.payload.endpoint
+          );
           return {
+            ...prevState,
+            completed: [completedJob, ...prevState.completed],
             activity: [action, ...prevState.activity],
-            pending: prevState.pending.filter(
-              (job) =>
-                !(
-                  job.id === action.payload.id &&
-                  job.endpoint === action.payload.endpoint
-                )
-            ),
+            pending: _.without(prevState.pending, completedJob),
           };
         }
         default:
@@ -141,6 +216,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
     {
       activity: [],
       pending: [],
+      completed: [],
     }
   );
 
@@ -176,7 +252,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
     (async () => {
       for await (const jobs of client.get()) {
-        dispatchActivity({ type: "dump", payload: jobs });
+        dispatchActivity({ type: "dump", payload: jobs, date: Date.now() });
       }
     })();
 
@@ -195,7 +271,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
     socket.onmessage = (evt) => {
       const data = JSON.parse(evt.data);
-      dispatchActivity({ type: data[0], payload: data[1] });
+      dispatchActivity({ type: data[0], payload: data[1], date: Date.now() });
     };
 
     return () => {
@@ -208,6 +284,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       value={{
         activity,
         pending,
+        completed,
         invoke,
         client,
       }}

@@ -50,7 +50,7 @@ export class JobsRepo {
             cron: job.schedule?.type === "cron" ? job.schedule.meta : undefined,
             every:
               job.schedule?.type === "every" ? +job.schedule.meta : undefined,
-            times: job.times,
+            times: job.schedule?.times,
           }
         : undefined,
     };
@@ -173,9 +173,9 @@ export class JobsRepo {
         ? {
             type: schedule_type,
             meta: schedule_meta!,
+            times: repeat?.times,
           }
         : undefined,
-      times: repeat?.times,
       override,
     });
 
@@ -184,24 +184,42 @@ export class JobsRepo {
 
   public onEvent(
     requesterTokenId: string,
-    cb: (event: string, job: { endpoint: string; id: string }) => void
+    cb: (
+      event: string,
+      job: { endpoint: string; id: string; runAt?: string } | JobDTO
+    ) => void
   ) {
     const activity = this.owl.createActivity(
-      async (event, job) => {
-        const { endpoint } = decodeQueueDescriptor(job.queue);
+      async (event) => {
+        if (event.type === "scheduled") {
+          cb(
+            "scheduled",
+            JobsRepo.toJobDTO(event.job as Job<"every" | "cron">)
+          );
+          return;
+        }
 
-        switch (event) {
+        const { endpoint } = decodeQueueDescriptor(event.queue);
+
+        switch (event.type) {
           case "acknowledged":
-            cb("completed", { endpoint, id: job.id });
+            cb("completed", { endpoint, id: event.id });
             break;
           case "requested":
-            cb("started", { endpoint, id: job.id });
+            cb("started", { endpoint, id: event.id });
             break;
-          case "scheduled":
-            cb("scheduled", { endpoint, id: job.id });
+          case "invoked":
+            cb("invoked", { endpoint, id: event.id });
+            break;
+          case "rescheduled":
+            cb("rescheduled", {
+              endpoint,
+              id: event.id,
+              runAt: event.runAt.toISOString(),
+            });
             break;
           case "deleted":
-            cb("deleted", { endpoint, id: job.id });
+            cb("deleted", { endpoint, id: event.id });
             break;
         }
       },

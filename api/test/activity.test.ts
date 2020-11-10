@@ -9,6 +9,8 @@ jest.setTimeout(20 * 1000);
 
 function testAgainst(backend: "Redis" | "Mock") {
   test(backend + " > activity", async () => {
+    const now = Date.now();
+
     const { server: quirrel, teardown: teardownQuirrel, redis } = await run(
       backend
     );
@@ -69,7 +71,10 @@ function testAgainst(backend: "Redis" | "Mock") {
       body: { id: job2id },
     } = await request(quirrel)
       .post("/queues/" + endpoint)
-      .send({ body: JSON.stringify({ qux: "baz" }), delay: 300 })
+      .send({
+        body: JSON.stringify({ qux: "baz" }),
+        runAt: new Date(now + 300).toISOString(),
+      })
       .expect(201);
 
     await delay(500);
@@ -95,8 +100,10 @@ function testAgainst(backend: "Redis" | "Mock") {
     expect(log).toContainEqual([
       "scheduled",
       {
+        body: JSON.stringify({ qux: "baz" }),
         endpoint: decodeURIComponent(endpoint),
         id: job2id,
+        runAt: new Date(now + 300).toISOString(),
       },
     ]);
     expect(log).toContainEqual([
