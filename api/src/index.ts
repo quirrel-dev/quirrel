@@ -1,14 +1,20 @@
 import { createServer, QuirrelServerConfig } from "./scheduler";
+import { getLogger, LoggerType } from "./shared/logger";
 import { createWorker, QuirrelWorkerConfig } from "./worker";
 
-type QuirrelConfig = QuirrelServerConfig &
-  Omit<QuirrelWorkerConfig, "enableUsageMetering">;
+type QuirrelConfig = Omit<QuirrelServerConfig, "logger"> &
+  Omit<QuirrelWorkerConfig, "enableUsageMetering" | "logger"> & {
+    logger: LoggerType;
+  };
 
 export async function runQuirrel(config: QuirrelConfig) {
-  const server = await createServer(config);
+  const logger = getLogger(config.logger);
+
+  const server = await createServer({ ...config, logger });
   const worker = await createWorker({
-    enableUsageMetering: !!config.passphrases?.length,
     ...config,
+    enableUsageMetering: !!config.passphrases?.length,
+    logger,
   });
 
   return {

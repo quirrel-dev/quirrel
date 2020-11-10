@@ -57,6 +57,7 @@ program
         host,
         port: Number(port),
         disableTelemetry: Boolean(process.env.DISABLE_TELEMETRY),
+        logger: "dx",
       });
 
       process.on("SIGINT", async () => {

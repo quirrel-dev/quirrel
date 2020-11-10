@@ -6,6 +6,7 @@ import { sign } from "secure-webhooks";
 import { Redis } from "ioredis";
 import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
+import type { Logger } from "../shared/logger";
 
 export function replaceLocalhostWithDockerHost(url: string): string {
   if (url.startsWith("http://localhost")) {
@@ -25,6 +26,7 @@ export interface QuirrelWorkerConfig {
   runningInDocker?: boolean;
   concurrency?: number;
   disableTelemetry?: boolean;
+  logger?: Logger;
 }
 
 export async function createWorker({
@@ -33,6 +35,7 @@ export async function createWorker({
   runningInDocker,
   concurrency = 100,
   disableTelemetry,
+  logger,
 }: QuirrelWorkerConfig) {
   const redisClient = redisFactory();
   const telemetrist = disableTelemetry
@@ -53,7 +56,12 @@ export async function createWorker({
       let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
       const body = job.payload;
 
-      console.log("Sending ", body, " to ", endpoint);
+      const executionDone = logger?.startingExecution({
+        tokenId,
+        endpoint,
+        body,
+        id: job.id,
+      });
 
       const headers: Record<string, string> = {
         "Content-Type": "text/plain",
@@ -77,10 +85,16 @@ export async function createWorker({
 
       await usageMeter?.record(tokenId);
 
+      executionDone?.();
+
       telemetrist?.dispatch("dispatch_job");
     },
     (job, error) => {
-      console.error(job, error);
+      const { endpoint, tokenId } = decodeQueueDescriptor(job.queue);
+      logger?.executionErrored(
+        { endpoint, tokenId, body: job.payload, id: job.id },
+        error
+      );
     }
   );
 

@@ -1,5 +1,5 @@
 import fastify from "fastify";
-import { Redis } from "ioredis"
+import { Redis } from "ioredis";
 import owlPlugin from "./owl";
 import redisPlugin from "./redis";
 import tokensPlugin from "./tokens";
@@ -17,6 +17,9 @@ import blipp from "fastify-blipp";
 import cors from "fastify-cors";
 import telemetry from "./telemetry";
 import sentryPlugin from "./sentry";
+import loggerPlugin from "./logger";
+import { StructuredLogger } from "../shared/structured-logger";
+import { Logger } from "../shared/logger";
 
 export interface QuirrelServerConfig {
   redisFactory: () => Redis;
@@ -25,6 +28,7 @@ export interface QuirrelServerConfig {
   passphrases?: string[];
   runningInDocker?: boolean;
   disableTelemetry?: boolean;
+  logger?: Logger;
 }
 
 export async function createServer({
@@ -34,9 +38,10 @@ export async function createServer({
   redisFactory,
   passphrases,
   disableTelemetry,
+  logger,
 }: QuirrelServerConfig) {
   const app = fastify({
-    logger: true,
+    logger: logger instanceof StructuredLogger ? logger.pino : undefined,
   });
 
   if (!disableTelemetry) {
@@ -65,6 +70,10 @@ export async function createServer({
       produces: ["application/json"],
     },
     exposeRoute: true,
+  });
+
+  app.register(loggerPlugin, {
+    logger,
   });
 
   const enableAuth = !!passphrases?.length;
@@ -110,9 +119,13 @@ export async function createServer({
 
   await app.listen(port, host);
 
+  const { address, port: runningPort } = app.server.address() as AddressInfo;
+
+  logger?.started(`${address}:${runningPort}`, !disableTelemetry);
+
   return {
     server: app.server,
-    port: (app.server.address() as AddressInfo).port,
+    port,
     async close() {
       app.log.info("Closing.");
       await app.close();

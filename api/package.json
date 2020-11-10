@@ -29,6 +29,7 @@
   "devDependencies": {
     "@types/ioredis": "^4.17.7",
     "@types/jest": "^26.0.13",
+    "@types/pino": "^6.3.3",
     "@types/redis": "^2.8.27",
     "@types/supertest": "^2.0.10",
     "@types/uuid": "^8.3.0",
@@ -48,6 +49,7 @@
     "@sentry/node": "^5.26.0",
     "@sentry/tracing": "^5.26.0",
     "axios": "^0.20.0",
+    "chalk": "^4.1.0",
     "commander": "^6.1.0",
     "cron-parser": "^2.16.3",
     "fastify": "^3.7.0",
@@ -61,6 +63,7 @@
     "ioredis-mock": "^5.1.0",
     "open": "^7.3.0",
     "parse-duration": "^0.4.4",
+    "pino": "^6.7.0",
     "secure-webhooks": "^0.2.0",
     "uuid": "^8.3.0",
     "ws": "^7.3.1"
