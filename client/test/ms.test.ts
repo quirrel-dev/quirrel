@@ -15,6 +15,7 @@ test("encryption", async () => {
     port: 0,
     redisFactory: () => new Redis(process.env.REDIS_URL),
     disableTelemetry: true,
+    logger: "none",
   });
 
   const quirrel = new QuirrelClient({

@@ -17,6 +17,7 @@ test("getAll", async () => {
     port: 0,
     redisFactory: () => redis.duplicate(),
     disableTelemetry: true,
+    logger: "none",
   });
 
   const quirrel = new QuirrelClient({
