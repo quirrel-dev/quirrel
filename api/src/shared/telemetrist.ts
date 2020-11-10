@@ -7,28 +7,11 @@ enum ScreenWidth {
   Node = 900, // Tablet
 }
 
-let alreadyPrinted = false;
-function printTelemetryMessage() {
-  if (alreadyPrinted) {
-    return;
-  }
-
-  console.log(
-    "Telemetry: Quirrel collects **completely anonymous** telemetry data about general usage.\n" +
-      "Participation in this anonymous program is optional, and you may opt-out if you'd not like to share any information.\n" +
-      "To opt-out, set the DISABLE_TELEMETRY environment variable."
-  );
-
-  alreadyPrinted = true;
-}
-
 export class Telemetrist {
-  private readonly screenWidth: ScreenWidth;
+  constructor(private readonly runningInDocker: boolean) {}
 
-  constructor(runningInDocker: boolean) {
-    this.screenWidth = runningInDocker ? ScreenWidth.Docker : ScreenWidth.Node;
-
-    printTelemetryMessage();
+  private getScreenWidth() {
+    return this.runningInDocker ? ScreenWidth.Docker : ScreenWidth.Node;
   }
 
   public async dispatch(path: string, name = "pageview") {
@@ -39,7 +22,7 @@ export class Telemetrist {
           name,
           url: `https://telemetry.quirrel.dev/${path}`,
           domain: "telemetry.quirrel.dev",
-          screen_width: this.screenWidth,
+          screen_width: this.getScreenWidth(),
         },
         {
           headers: {

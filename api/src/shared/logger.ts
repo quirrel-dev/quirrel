@@ -2,6 +2,7 @@ import { DxLogger } from "./dx-logger";
 import { StructuredLogger } from "./structured-logger";
 
 export interface Logger {
+  started(address: string, telemetryEnabled: boolean): void;
   jobCreated(job: { id: string, body: string, tokenId: string, endpoint: string }): void;
   /**
    * @returns function to call when execution is done

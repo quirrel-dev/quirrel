@@ -119,9 +119,13 @@ export async function createServer({
 
   await app.listen(port, host);
 
+  const { address, port: runningPort } = app.server.address() as AddressInfo;
+
+  logger?.started(`${address}:${runningPort}`, !disableTelemetry);
+
   return {
     server: app.server,
-    port: (app.server.address() as AddressInfo).port,
+    port,
     async close() {
       app.log.info("Closing.");
       await app.close();

@@ -49,6 +49,7 @@
     "@sentry/node": "^5.26.0",
     "@sentry/tracing": "^5.26.0",
     "axios": "^0.20.0",
+    "chalk": "^4.1.0",
     "commander": "^6.1.0",
     "cron-parser": "^2.16.3",
     "fastify": "^3.7.0",
