@@ -104,6 +104,7 @@ function testAgainst(backend: "Redis" | "Mock") {
         endpoint: decodeURIComponent(endpoint),
         id: job2id,
         runAt: new Date(now + 300).toISOString(),
+        exclusive: false,
       },
     ]);
     expect(log).toContainEqual([
