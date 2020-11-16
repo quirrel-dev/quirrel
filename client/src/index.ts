@@ -74,7 +74,7 @@ export interface JobDTO {
   };
 }
 
-export interface BaseEnqueueJobOpts {
+export interface EnqueueJobOpts {
   /**
    * The job's payload.
    */
@@ -93,6 +93,18 @@ export interface BaseEnqueueJobOpts {
    * will be executed at the same time.
    */
   exclusive?: boolean;
+
+  /**
+   * Will delay the job's execution by the specified amount of milliseconds.
+   * Supports human-readable notation as of @see https://github.com/vercel/ms.
+   * If used together with `repeat`, this will delay the first job to be executed.
+   */
+  delay?: number | string;
+
+  /**
+   * Schedules the job for execution at the specified timestamp.
+   */
+  runAt?: Date;
 
   repeat?: {
     /**
@@ -116,24 +128,6 @@ export interface BaseEnqueueJobOpts {
     cron?: string;
   };
 }
-
-export interface DelayedEnqueueJobOpts extends BaseEnqueueJobOpts {
-  /**
-   * Will delay the job's execution by the specified amount of milliseconds.
-   * Supports human-readable notation as of @see https://github.com/vercel/ms.
-   * If used together with `repeat`, this will delay the first job to be executed.
-   */
-  delay?: number | string;
-}
-
-export interface ScheduledEnqueueJobOpts extends BaseEnqueueJobOpts {
-  /**
-   * Schedules the job for execution at the specified timestamp.
-   */
-  runAt?: Date;
-}
-
-export type EnqueueJobOpts = DelayedEnqueueJobOpts | ScheduledEnqueueJobOpts;
 
 export interface Job extends Omit<JobDTO, "runAt" | "body"> {
   /**
