@@ -41,6 +41,12 @@ export interface JobDTO {
   readonly runAt: string;
 
   /**
+   * Guarantees that no other job (from the same queue)
+   * is executed while this job is being executed.
+   */
+  readonly exclusive: boolean;
+
+  /**
    * Present if the job has been scheduled to repeat.
    */
   readonly repeat?: {
@@ -80,6 +86,13 @@ export interface BaseEnqueueJobOpts {
    * @tutorial https://demo.quirrel.dev/managed
    */
   id?: string;
+
+  /**
+   * If set to `true`,
+   * no other job (on the same queue)
+   * will be executed at the same time.
+   */
+  exclusive?: boolean;
 
   repeat?: {
     /**

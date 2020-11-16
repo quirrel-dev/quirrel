@@ -16,6 +16,7 @@
       "type": "string"
     },
     "override": { "type": "boolean" },
+    "exclusive": { "type": "boolean" },
     "repeat": {
       "type": "object",
       "properties": {
