@@ -95,6 +95,14 @@ export interface EnqueueJobOpts {
   exclusive?: boolean;
 
   /**
+   * Determines what to do when a job
+   * with the same ID already exists.
+   * false: do nothing (default)
+   * true: replace the job
+   */
+  override?: boolean;
+
+  /**
    * Will delay the job's execution by the specified amount of milliseconds.
    * Supports human-readable notation as of @see https://github.com/vercel/ms.
    * If used together with `repeat`, this will delay the first job to be executed.
