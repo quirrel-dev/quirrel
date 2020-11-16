@@ -19,6 +19,7 @@ interface JobDTO {
   endpoint: string;
   body: string;
   runAt: string;
+  exclusive: boolean;
   repeat?: {
     every?: number;
     times?: number;
@@ -44,6 +45,7 @@ export class JobsRepo {
       endpoint,
       body: job.payload,
       runAt: job.runAt.toISOString(),
+      exclusive: job.exclusive,
       repeat: job.schedule
         ? {
             count: job.count,
@@ -125,6 +127,7 @@ export class JobsRepo {
       delay,
       repeat,
       override,
+      exclusive,
     }: POSTQueuesEndpointBody
   ) {
     if (typeof id === "undefined") {
@@ -169,6 +172,7 @@ export class JobsRepo {
       id,
       payload: body ?? "",
       runAt,
+      exclusive,
       schedule: schedule_type
         ? {
             type: schedule_type,

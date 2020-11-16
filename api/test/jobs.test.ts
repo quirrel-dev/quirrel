@@ -94,6 +94,7 @@ function testAgainst(backend: "Redis" | "Mock") {
             this: "willBeRetrieved",
             nr: 1,
           }),
+          exclusive: false,
           endpoint: decodeURIComponent(endpoint),
         });
         expect(jobsWithoutRunAt).toContainEqual({
@@ -102,6 +103,7 @@ function testAgainst(backend: "Redis" | "Mock") {
             this: "willBeRetrieved",
             nr: 2,
           }),
+          exclusive: false,
           endpoint: decodeURIComponent(endpoint),
         });
 
@@ -135,6 +137,7 @@ function testAgainst(backend: "Redis" | "Mock") {
           id,
           body: JSON.stringify({ this: "willBeRetrieved" }),
           endpoint: decodeURIComponent(endpoint),
+          exclusive: false,
         });
 
         expect(+new Date(jobRunAt)).toBeCloseTo(+new Date(runAt), -3);

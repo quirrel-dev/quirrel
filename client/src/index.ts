@@ -41,6 +41,12 @@ export interface JobDTO {
   readonly runAt: string;
 
   /**
+   * Guarantees that no other job (from the same queue)
+   * is executed while this job is being executed.
+   */
+  readonly exclusive: boolean;
+
+  /**
    * Present if the job has been scheduled to repeat.
    */
   readonly repeat?: {
@@ -68,7 +74,7 @@ export interface JobDTO {
   };
 }
 
-export interface BaseEnqueueJobOpts {
+export interface EnqueueJobOpts {
   /**
    * The job's payload.
    */
@@ -80,6 +86,33 @@ export interface BaseEnqueueJobOpts {
    * @tutorial https://demo.quirrel.dev/managed
    */
   id?: string;
+
+  /**
+   * If set to `true`,
+   * no other job (on the same queue)
+   * will be executed at the same time.
+   */
+  exclusive?: boolean;
+
+  /**
+   * Determines what to do when a job
+   * with the same ID already exists.
+   * false: do nothing (default)
+   * true: replace the job
+   */
+  override?: boolean;
+
+  /**
+   * Will delay the job's execution by the specified amount of milliseconds.
+   * Supports human-readable notation as of @see https://github.com/vercel/ms.
+   * If used together with `repeat`, this will delay the first job to be executed.
+   */
+  delay?: number | string;
+
+  /**
+   * Schedules the job for execution at the specified timestamp.
+   */
+  runAt?: Date;
 
   repeat?: {
     /**
@@ -104,23 +137,7 @@ export interface BaseEnqueueJobOpts {
   };
 }
 
-export interface DelayedEnqueueJobOpts extends BaseEnqueueJobOpts {
-  /**
-   * Will delay the job's execution by the specified amount of milliseconds.
-   * Supports human-readable notation as of @see https://github.com/vercel/ms.
-   * If used together with `repeat`, this will delay the first job to be executed.
-   */
-  delay?: number | string;
-}
-
-export interface ScheduledEnqueueJobOpts extends BaseEnqueueJobOpts {
-  /**
-   * Schedules the job for execution at the specified timestamp.
-   */
-  runAt?: Date;
-}
-
-export type EnqueueJobOpts = DelayedEnqueueJobOpts | ScheduledEnqueueJobOpts;
+export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">
 
 export interface Job extends Omit<JobDTO, "runAt" | "body"> {
   /**
@@ -178,6 +195,8 @@ interface QuirrelClientOpts {
    * @see https://docs.quirrel.dev/faq#my-encryption-secret-has-been-leaked-what-now
    */
   oldSecrets?: string[];
+
+  defaultJobOptions?: DefaultJobOptions;
 }
 
 export class QuirrelClient {
@@ -185,6 +204,7 @@ export class QuirrelClient {
 
   private readonly token;
   private readonly baseUrl;
+  private readonly defaultJobOptions: DefaultJobOptions;
 
   /**
    * Constructs a new Quirrel Client.
@@ -212,6 +232,7 @@ export class QuirrelClient {
 
     this.token = enrichedOpts.token;
     this.baseUrl = enrichedOpts.baseUrl;
+    this.defaultJobOptions = opts.defaultJobOptions ?? {};
   }
 
   private getAuthHeaders(): Record<string, string> {
@@ -273,6 +294,7 @@ export class QuirrelClient {
           ...this.getAuthHeaders(),
         },
         body: JSON.stringify({
+          ...this.defaultJobOptions,
           body: stringifiedBody,
           delay,
           id: opts.id,
