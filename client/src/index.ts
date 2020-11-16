@@ -129,6 +129,8 @@ export interface EnqueueJobOpts {
   };
 }
 
+export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">
+
 export interface Job extends Omit<JobDTO, "runAt" | "body"> {
   /**
    * Date that the job has been scheduled for.
@@ -185,6 +187,8 @@ interface QuirrelClientOpts {
    * @see https://docs.quirrel.dev/faq#my-encryption-secret-has-been-leaked-what-now
    */
   oldSecrets?: string[];
+
+  defaultJobOptions?: DefaultJobOptions;
 }
 
 export class QuirrelClient {
@@ -192,6 +196,7 @@ export class QuirrelClient {
 
   private readonly token;
   private readonly baseUrl;
+  private readonly defaultJobOptions: DefaultJobOptions;
 
   /**
    * Constructs a new Quirrel Client.
@@ -219,6 +224,7 @@ export class QuirrelClient {
 
     this.token = enrichedOpts.token;
     this.baseUrl = enrichedOpts.baseUrl;
+    this.defaultJobOptions = opts.defaultJobOptions ?? {};
   }
 
   private getAuthHeaders(): Record<string, string> {
@@ -280,6 +286,7 @@ export class QuirrelClient {
           ...this.getAuthHeaders(),
         },
         body: JSON.stringify({
+          ...this.defaultJobOptions,
           body: stringifiedBody,
           delay,
           id: opts.id,
