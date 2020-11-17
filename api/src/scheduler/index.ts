@@ -18,6 +18,7 @@ import cors from "fastify-cors";
 import telemetry from "./telemetry";
 import sentryPlugin from "./sentry";
 import loggerPlugin from "./logger";
+import indexRoute from "./routes/index";
 import { StructuredLogger } from "../shared/structured-logger";
 import { Logger } from "../shared/logger";
 
@@ -94,6 +95,7 @@ export async function createServer({
     app.register(usageRoute, { prefix: "/usage" });
   }
 
+  app.register(indexRoute);
   app.register(health, { prefix: "/health" });
   app.register(queues, { prefix: "/queues" });
   app.register(activityPlugin, { prefix: "/activity" });
