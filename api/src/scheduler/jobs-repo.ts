@@ -146,10 +146,6 @@ export class JobsRepo {
       runAt = cron(runAt ?? new Date(), repeat.cron);
     }
 
-    if (repeat?.every) {
-      runAt = new Date();
-    }
-
     if (typeof repeat?.times === "number" && repeat.times < 1) {
       return;
     }
