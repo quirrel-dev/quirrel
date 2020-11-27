@@ -11,7 +11,7 @@
     "dist/package.json"
   ],
   "main": "dist/src/index.js",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "engines": {
     "node": "12 || 14"
   },
