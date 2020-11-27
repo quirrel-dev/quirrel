@@ -363,6 +363,32 @@ function testAgainst(backend: "Redis" | "Mock") {
       expect(bodies).toEqual([]);
     });
 
+    test("regression #27: delay & repeat.every", async () => {
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: "delay & repeat.every",
+          delay: 100,
+          repeat: {
+            every: 100,
+            times: 2,
+          },
+        })
+        .expect(201);
+
+      await delay(75);
+
+      expect(bodies).toEqual([]);
+
+      await delay(75);
+
+      expect(bodies).toEqual(["delay & repeat.every"]);
+
+      await delay(75);
+
+      expect(bodies).toEqual(["delay & repeat.every", "delay & repeat.every"]);
+    });
+
     describe("cron jobs", () => {
       test("work", async () => {
         await request(quirrel)
