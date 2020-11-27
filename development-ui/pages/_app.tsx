@@ -1,6 +1,6 @@
 import { QuirrelProvider } from "../hooks/useQuirrel";
 import "../styles/tailwind.css";
-import Head from "next/head"
+import Head from "next/head";
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -9,8 +9,8 @@ function MyApp({ Component, pageProps }) {
         <script
           async
           defer
-          data-website-id="9a40fe6e-8d93-45f4-b660-451d0ab28921"
-          src="https://umami.quirrel.dev/umami.js"
+          data-domain="ui.quirrel.dev"
+          src="https://plausible.io/js/plausible.js"
         ></script>
       </Head>
       <QuirrelProvider>
