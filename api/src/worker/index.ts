@@ -1,4 +1,4 @@
-import { decodeQueueDescriptor } from "../shared/http-job";
+import { decodeQueueDescriptor } from "../shared/queue-descriptor";
 import { UsageMeter } from "../shared/usage-meter";
 import axios from "axios";
 import { TokenRepo } from "../shared/token-repo";
