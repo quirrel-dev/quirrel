@@ -8,6 +8,8 @@ const {
   RUNNING_IN_DOCKER,
   CONCURRENCY,
   DISABLE_TELEMETRY,
+  INCIDENT_RECEIVER_ENDPOINT,
+  INCIDENT_RECEIVER_PASSPHRASE,
 } = process.env;
 
 process.on("unhandledRejection", (reason, promise) => {
@@ -23,6 +25,12 @@ async function main() {
     concurrency: Number.parseInt(CONCURRENCY ?? "") || 100,
     disableTelemetry: Boolean(DISABLE_TELEMETRY),
     logger: new StructuredLogger(),
+    incidentReceiver: INCIDENT_RECEIVER_ENDPOINT
+      ? {
+          endpoint: INCIDENT_RECEIVER_ENDPOINT,
+          passphrase: INCIDENT_RECEIVER_PASSPHRASE!,
+        }
+      : undefined,
   });
 
   async function teardown(signal: string) {
