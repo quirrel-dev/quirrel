@@ -3,7 +3,7 @@ import { POSTQueuesEndpointBody } from "./types/queues/POST/body";
 import {
   encodeQueueDescriptor,
   decodeQueueDescriptor,
-} from "../shared/http-job";
+} from "../shared/queue-descriptor";
 
 import * as uuid from "uuid";
 import { createOwl, cron } from "../shared/owl";

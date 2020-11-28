@@ -2,7 +2,7 @@ import { createServer, QuirrelServerConfig } from "./scheduler";
 import { getLogger, LoggerType } from "./shared/logger";
 import { createWorker, QuirrelWorkerConfig } from "./worker";
 
-type QuirrelConfig = Omit<QuirrelServerConfig, "logger"> &
+export type QuirrelConfig = Omit<QuirrelServerConfig, "logger"> &
   Omit<QuirrelWorkerConfig, "enableUsageMetering" | "logger"> & {
     logger: LoggerType;
   };

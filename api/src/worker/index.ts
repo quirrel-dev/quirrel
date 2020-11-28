@@ -1,4 +1,4 @@
-import { decodeQueueDescriptor } from "../shared/http-job";
+import { decodeQueueDescriptor } from "../shared/queue-descriptor";
 import { UsageMeter } from "../shared/usage-meter";
 import axios from "axios";
 import { TokenRepo } from "../shared/token-repo";
@@ -7,6 +7,7 @@ import { Redis } from "ioredis";
 import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
 import type { Logger } from "../shared/logger";
+import { IncidentForwarder } from "../shared/incident-forwarder";
 
 export function replaceLocalhostWithDockerHost(url: string): string {
   if (url.startsWith("http://localhost")) {
@@ -27,6 +28,7 @@ export interface QuirrelWorkerConfig {
   concurrency?: number;
   disableTelemetry?: boolean;
   logger?: Logger;
+  incidentReceiver?: { endpoint: string; passphrase: string };
 }
 
 export async function createWorker({
@@ -36,7 +38,15 @@ export async function createWorker({
   concurrency = 100,
   disableTelemetry,
   logger,
+  incidentReceiver,
 }: QuirrelWorkerConfig) {
+  const incidentForwarder = incidentReceiver
+    ? new IncidentForwarder(
+        incidentReceiver.endpoint,
+        incidentReceiver.passphrase
+      )
+    : undefined;
+
   const redisClient = redisFactory();
   const telemetrist = disableTelemetry
     ? undefined
@@ -51,52 +61,67 @@ export async function createWorker({
 
   const owl = createOwl(redisFactory);
 
-  const worker = owl.createWorker(
-    async (job) => {
-      let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
-      const body = job.payload;
+  const worker = owl.createWorker(async (job) => {
+    let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
+    const body = job.payload;
 
-      const executionDone = logger?.startingExecution({
-        tokenId,
-        endpoint,
-        body,
-        id: job.id,
-      });
+    const executionDone = logger?.startingExecution({
+      tokenId,
+      endpoint,
+      body,
+      id: job.id,
+    });
 
-      const headers: Record<string, string> = {
-        "Content-Type": "text/plain",
-      };
+    const headers: Record<string, string> = {
+      "Content-Type": "text/plain",
+    };
 
-      if (tokenId) {
-        const token = await tokenRepo.getById(tokenId);
-        if (token) {
-          const signature = sign(body ?? "", token);
-          headers["x-quirrel-signature"] = signature;
-        }
+    if (tokenId) {
+      const token = await tokenRepo.getById(tokenId);
+      if (token) {
+        const signature = sign(body ?? "", token);
+        headers["x-quirrel-signature"] = signature;
       }
+    }
 
-      if (runningInDocker) {
-        endpoint = replaceLocalhostWithDockerHost(endpoint);
-      }
+    if (runningInDocker) {
+      endpoint = replaceLocalhostWithDockerHost(endpoint);
+    }
 
-      await axios.post(endpoint, body, {
-        headers,
-      });
+    const response = await axios.post(endpoint, body, {
+      headers,
+      validateStatus: () => true,
+    });
 
-      await usageMeter?.record(tokenId);
-
+    if (response.status >= 200 && response.status < 300) {
       executionDone?.();
 
       telemetrist?.dispatch("dispatch_job");
-    },
-    (job, error) => {
-      const { endpoint, tokenId } = decodeQueueDescriptor(job.queue);
+    } else {
+      await incidentForwarder?.dispatch(
+        {
+          endpoint,
+          tokenId,
+          payload: job.payload,
+          id: job.id,
+          runAt: job.runAt,
+        },
+        {
+          body: response.data,
+          status: response.status,
+        }
+      );
+
       logger?.executionErrored(
         { endpoint, tokenId, body: job.payload, id: job.id },
-        error
+        response.data
       );
+
+      telemetrist?.dispatch("execution_errored");
     }
-  );
+
+    await usageMeter?.record(tokenId);
+  });
 
   async function close() {
     await worker.close();
