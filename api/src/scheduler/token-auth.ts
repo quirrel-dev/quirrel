@@ -2,6 +2,7 @@ import { FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
 import { IncomingMessage } from "http";
 import { UsageMeter } from "../shared/usage-meter";
+import basicAuth from "basic-auth";
 
 interface TokenAuthService {
   authenticate(
@@ -22,6 +23,7 @@ declare module "fastify" {
 
 interface TokenAuthPluginOpts {
   auth: boolean;
+  passphrases: string[];
 }
 
 const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
@@ -36,13 +38,24 @@ const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
       return null;
     }
 
-    if (!authorizationHeader.startsWith("Bearer ")) {
-      return null;
+    if (authorizationHeader.startsWith("Bearer ")) {
+      const [_, token] = authorizationHeader.split("Bearer ");
+      const tokenId = await fastify.tokens.check(token);
+      return tokenId;
+    } else if (authorizationHeader.startsWith("Basic ")) {
+      const basicCredentials = basicAuth.parse(authorizationHeader);
+
+      if (!basicCredentials) {
+        return null;
+      }
+
+      const isRootUser = opts.passphrases.includes(basicCredentials.pass);
+      if (isRootUser) {
+        return basicCredentials.name;
+      }
     }
 
-    const [_, token] = authorizationHeader.split("Bearer ");
-    const tokenId = await fastify.tokens.check(token);
-    return tokenId;
+    return null;
   }
 
   async function authenticate(
