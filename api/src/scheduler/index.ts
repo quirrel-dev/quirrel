@@ -82,7 +82,10 @@ export async function createServer({
   app.register(redisPlugin, { redisFactory });
   app.register(owlPlugin);
 
-  app.register(tokenAuthPlugin, { auth: enableAuth });
+  app.register(tokenAuthPlugin, {
+    auth: enableAuth,
+    passphrases: passphrases ?? [],
+  });
 
   if (!disableTelemetry) {
     app.register(telemetry, { runningInDocker });
