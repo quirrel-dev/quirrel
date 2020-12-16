@@ -3,6 +3,7 @@ import { Transition } from "@tailwindui/react";
 
 interface ModalProps {
   show: boolean;
+  onRequestClose: () => void;
 }
 
 export function Modal(props: PropsWithChildren<ModalProps>) {
@@ -21,6 +22,7 @@ export function Modal(props: PropsWithChildren<ModalProps>) {
           leave="ease-in duration-200"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
+          onClick={props.onRequestClose}
         >
           <div className="fixed inset-0 transition-opacity">
             <div className="absolute inset-0 bg-gray-500 opacity-75" />
