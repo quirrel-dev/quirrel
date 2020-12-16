@@ -17,6 +17,7 @@ namespace Quirrel {
     completed: Quirrel.JobDescriptor[];
     invoke(job: Quirrel.JobDescriptor): Promise<void>;
     client: QuirrelClient;
+    setCredentials: (cred: { baseUrl: string; token?: string }) => void;
   }
 
   export namespace Activity {
@@ -71,24 +72,10 @@ const mockCtxValue: Quirrel.ContextValue = {
   completed: [],
   invoke: async () => {},
   client: null as any,
+  setCredentials: () => {},
 };
 
 const QuirrelCtx = React.createContext<Quirrel.ContextValue>(mockCtxValue);
-
-function uniqueDescriptors(
-  descr: Quirrel.JobDescriptor[]
-): Quirrel.JobDescriptor[] {
-  const alreadySeen = new Set<string>();
-  return descr.filter((descr) => {
-    const id = descr.endpoint + ";" + descr.id;
-    if (alreadySeen.has(id)) {
-      return false;
-    }
-
-    alreadySeen.add(id);
-    return true;
-  });
-}
 
 export function useQuirrel() {
   return useContext(QuirrelCtx);
@@ -99,7 +86,10 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   const [credentials, setCredentials] = useState<{
     baseUrl: string;
     token?: string;
-  }>();
+  }>({
+    baseUrl: "http://localhost:9181",
+    token: undefined,
+  });
 
   const [client, setClient] = useState<QuirrelClient>();
 
@@ -220,12 +210,6 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
     }
   );
 
-  useEffect(() => {
-    const baseUrl = "http://localhost:9181";
-    const token = undefined;
-    setCredentials({ baseUrl, token });
-  }, [setCredentials]);
-
   const invoke = useCallback(
     async (job: Quirrel.JobDescriptor) => {
       await client.invoke(job.endpoint, job.id);
@@ -234,49 +218,61 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   );
 
   useEffect(() => {
-    if (!credentials) {
-      return;
-    }
+    let cleanup: (() => void) | undefined;
 
-    let { baseUrl, token } = credentials;
-    if (!(baseUrl.startsWith("https://") || baseUrl.startsWith("http://"))) {
-      baseUrl = "https://" + baseUrl;
-    }
+    async function doIt() {
+      let { baseUrl, token } = credentials;
+      if (!(baseUrl.startsWith("https://") || baseUrl.startsWith("http://"))) {
+        baseUrl = "https://" + baseUrl;
+      }
 
-    const client = new QuirrelClient({
-      baseUrl,
-      token,
-    });
+      const client = new QuirrelClient({
+        baseUrl,
+        token,
+      });
 
-    setClient(client);
+      await new Promise<void>((resolve) => {
+        const intervalId = setInterval(async () => {
+          try {
+            await fetch(baseUrl + "/health");
+            clearInterval(intervalId);
+            resolve();
+          } catch {}
+        }, 500);
 
-    (async () => {
+        cleanup = () => clearInterval(intervalId);
+      });
+
+      setClient(client);
+
       for await (const jobs of client.get()) {
         dispatchActivity({ type: "dump", payload: jobs, date: Date.now() });
       }
-    })();
 
-    const isSecure = baseUrl.startsWith("https://");
-    const baseUrlWithoutProtocol = baseUrl.slice(isSecure ? 8 : 7);
-    const socket = new WebSocket(
-      `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`
-    );
-    socket.onopen = () => {
-      console.log("Connected successfully.");
-      setIsConnected(true);
-    };
-    socket.onclose = () => {
-      setIsConnected(false);
-    };
+      const isSecure = baseUrl.startsWith("https://");
+      const baseUrlWithoutProtocol = baseUrl.slice(isSecure ? 8 : 7);
+      const socket = new WebSocket(
+        `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`
+      );
+      socket.onopen = () => {
+        console.log("Connected successfully.");
+        setIsConnected(true);
+      };
+      socket.onclose = () => {
+        setIsConnected(false);
+      };
 
-    socket.onmessage = (evt) => {
-      const data = JSON.parse(evt.data);
-      dispatchActivity({ type: data[0], payload: data[1], date: Date.now() });
-    };
+      socket.onmessage = (evt) => {
+        const data = JSON.parse(evt.data);
+        dispatchActivity({ type: data[0], payload: data[1], date: Date.now() });
+      };
 
-    return () => {
-      socket.close();
-    };
+      cleanup = () => socket.close();
+    }
+
+    doIt();
+
+    return () => cleanup?.();
   }, [credentials, setIsConnected, dispatchActivity]);
 
   return (
@@ -287,6 +283,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         completed,
         invoke,
         client,
+        setCredentials,
       }}
     >
       {isConnected ? (
