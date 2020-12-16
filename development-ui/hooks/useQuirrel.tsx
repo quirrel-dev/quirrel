@@ -16,6 +16,7 @@ namespace Quirrel {
     pending: Quirrel.JobDescriptor[];
     completed: Quirrel.JobDescriptor[];
     invoke(job: Quirrel.JobDescriptor): Promise<void>;
+    delete(job: Quirrel.JobDescriptor): Promise<void>;
     client: QuirrelClient;
     credentials: { baseUrl: string; token?: string };
     setCredentials: (cred: { baseUrl: string; token?: string }) => void;
@@ -47,6 +48,11 @@ namespace Quirrel {
       payload: { id: string; endpoint: string };
       date: number;
     }
+    export interface Deleted {
+      type: "deleted";
+      payload: { id: string; endpoint: string };
+      date: number;
+    }
     export interface Requested {
       type: "requested";
       payload: { id: string; endpoint: string };
@@ -60,6 +66,7 @@ namespace Quirrel {
     | Activity.Requested
     | Activity.Invoked
     | Activity.Rescheduled
+    | Activity.Deleted
     | Activity.Started;
 
   export interface JobDescriptor extends JobDTO {
@@ -72,6 +79,7 @@ const mockCtxValue: Quirrel.ContextValue = {
   pending: [],
   completed: [],
   invoke: async () => {},
+  delete: async () => {},
   client: null as any,
   setCredentials: () => {},
   credentials: { baseUrl: "http://localhost:9181" },
@@ -170,6 +178,21 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
             }),
           };
         }
+        case "deleted": {
+          return {
+            ...prevState,
+            activity: [action, ...prevState.activity],
+            pending: prevState.pending.filter((pendingJob) => {
+              if (
+                pendingJob.id === action.payload.id &&
+                pendingJob.endpoint === action.payload.endpoint
+              ) {
+                return false
+              }
+              return true
+            }),
+          };
+        }
         case "rescheduled": {
           const rescheduledJob = prevState.completed.find(
             (job) =>
@@ -215,6 +238,13 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   const invoke = useCallback(
     async (job: Quirrel.JobDescriptor) => {
       await client.invoke(job.endpoint, job.id);
+    },
+    [client]
+  );
+
+  const deleteCallback = useCallback(
+    async (job: Quirrel.JobDescriptor) => {
+      await client.delete(job.endpoint, job.id);
     },
     [client]
   );
@@ -288,6 +318,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         client,
         setCredentials,
         credentials,
+        delete: deleteCallback,
       }}
     >
       {isConnected ? (
