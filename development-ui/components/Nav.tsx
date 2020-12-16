@@ -3,6 +3,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import React from "react";
 import { FeedbackFish } from "@feedback-fish/react";
+import { EndpointModal } from "./EndpointModal";
 
 const PillButton = React.forwardRef(
   (
@@ -75,12 +76,17 @@ export function Nav(props: NavProps) {
     <nav className="bg-orange-200">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex-shrink-0" style={{ width: "100px" }}>
+          <div
+            className="flex-shrink-0 flex items-center justify-between"
+            style={{ width: "180px" }}
+          >
             <img
               className="h-10 w-auto"
               src="/img/horn_transparent.png"
               alt="Quirrel Logo"
             />
+
+            <EndpointModal />
           </div>
           <div className="flex items-center">
             <div className="hidden md:block">
@@ -104,9 +110,9 @@ export function Nav(props: NavProps) {
               </div>
             </div>
           </div>
-          <div className="-mr-2 hidden md:flex" style={{ width: "100px" }}>
+          <div className="-mr-2 hidden md:flex justify-center" style={{ width: "180px" }}>
             <FeedbackFish projectId="97b5e3470471e7">
-              <a className="text-gray-600 hover:text-gray-400 px-3 block text-base font-medium cursor-pointer">
+              <a className="text-center text-gray-600 hover:text-gray-400 px-3 block text-base font-medium cursor-pointer">
                 Feedback
               </a>
             </FeedbackFish>

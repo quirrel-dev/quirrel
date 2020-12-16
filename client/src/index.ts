@@ -137,7 +137,7 @@ export interface EnqueueJobOpts {
   };
 }
 
-export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">
+export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">;
 
 export interface Job extends Omit<JobDTO, "runAt" | "body"> {
   /**
@@ -293,6 +293,7 @@ export class QuirrelClient {
           "Content-Type": "application/json",
           ...this.getAuthHeaders(),
         },
+        credentials: "omit",
         body: JSON.stringify({
           ...this.defaultJobOptions,
           body: stringifiedBody,

@@ -17,6 +17,7 @@ namespace Quirrel {
     completed: Quirrel.JobDescriptor[];
     invoke(job: Quirrel.JobDescriptor): Promise<void>;
     client: QuirrelClient;
+    credentials: { baseUrl: string; token?: string };
     setCredentials: (cred: { baseUrl: string; token?: string }) => void;
   }
 
@@ -73,6 +74,7 @@ const mockCtxValue: Quirrel.ContextValue = {
   invoke: async () => {},
   client: null as any,
   setCredentials: () => {},
+  credentials: { baseUrl: "http://localhost:9181" },
 };
 
 const QuirrelCtx = React.createContext<Quirrel.ContextValue>(mockCtxValue);
@@ -238,7 +240,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
             clearInterval(intervalId);
             resolve();
           } catch {}
-        }, 500);
+        }, 1000);
 
         cleanup = () => clearInterval(intervalId);
       });
@@ -252,13 +254,14 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       const isSecure = baseUrl.startsWith("https://");
       const baseUrlWithoutProtocol = baseUrl.slice(isSecure ? 8 : 7);
       const socket = new WebSocket(
-        `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`
+        `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`,
+        token || "ignored"
       );
       socket.onopen = () => {
         console.log("Connected successfully.");
         setIsConnected(true);
       };
-      socket.onclose = () => {
+      socket.onclose = (ev) => {
         setIsConnected(false);
       };
 
@@ -284,6 +287,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         invoke,
         client,
         setCredentials,
+        credentials,
       }}
     >
       {isConnected ? (

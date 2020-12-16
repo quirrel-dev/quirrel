@@ -122,6 +122,10 @@ module.exports = {
       },
     },
   },
-  variants: {},
+  variants: {
+    extend: {
+      opacity: ["disabled"],
+    },
+  },
   plugins: [],
 };
