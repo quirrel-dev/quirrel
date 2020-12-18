@@ -2,6 +2,8 @@ import Encryptor from "secure-e2ee";
 import { verify } from "secure-webhooks";
 import ms from "ms";
 import fetch from "cross-fetch";
+import * as z from "zod";
+import type { IsExact, AssertTrue } from "conditional-type-checks";
 
 const fallbackEndpoint =
   process.env.NODE_ENV === "production"
@@ -74,6 +76,44 @@ export interface JobDTO {
   };
 }
 
+const vercelMs = z
+  .string()
+  .regex(
+    /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i,
+    "Please provide a valid time span, according to https://github.com/vercel/ms"
+  );
+
+const timeDuration = z.union([z.number().positive(), vercelMs]);
+
+const cron = z
+  .string()
+  .regex(
+    /(@(yearly|monthly|weekly|daily|hourly))|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,7})/,
+    "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference."
+  );
+
+const EnqueueJobOptsSchema = z.object({
+  body: z.any().optional(),
+  id: z.string().optional(),
+  exclusive: z.boolean().optional(),
+  override: z.boolean().optional(),
+  delay: timeDuration.optional(),
+  runAt: z.date().optional(),
+  repeat: z
+    .object({
+      every: timeDuration.optional(),
+      times: z.number().nonnegative().optional(),
+      cron: cron.optional(),
+    })
+    .optional(),
+});
+
+type EnqueueJobOptsSchema = z.TypeOf<typeof EnqueueJobOptsSchema>;
+
+type EnqueueJobOptsSchemaMatchesDocs = AssertTrue<
+  IsExact<EnqueueJobOpts, EnqueueJobOptsSchema>
+>;
+
 export interface EnqueueJobOpts {
   /**
    * The job's payload.
@@ -137,7 +177,7 @@ export interface EnqueueJobOpts {
   };
 }
 
-export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">
+export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">;
 
 export interface Job extends Omit<JobDTO, "runAt" | "body"> {
   /**
@@ -261,6 +301,8 @@ export class QuirrelClient {
    * @param opts job options
    */
   async enqueue(endpoint: string, opts: EnqueueJobOpts): Promise<Job> {
+    opts = EnqueueJobOptsSchema.parse(opts);
+
     let delay: number | undefined = undefined;
 
     if ("delay" in opts && opts.delay) {
