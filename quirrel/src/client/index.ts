@@ -270,13 +270,11 @@ export class QuirrelClient<T> {
       }),
     });
 
-    const body = await res.json();
-
-    if (res.status !== 201) {
-      throw new Error(`Unexpected response: ${body}`);
+    if (res.status === 201) {
+      return this.toJob(await res.json());
     }
 
-    return this.toJob(body);
+    throw new Error(`Unexpected response: ${await res.text()}`);
   }
 
   private decryptAndDecodeBody(body: string): T {
