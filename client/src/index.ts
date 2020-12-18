@@ -346,6 +346,7 @@ export class QuirrelClient {
           "Content-Type": "application/json",
           ...this.getAuthHeaders(),
         },
+        credentials: "omit",
         body: JSON.stringify({
           ...this.defaultJobOptions,
           body: stringifiedBody,

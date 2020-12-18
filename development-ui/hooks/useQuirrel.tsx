@@ -16,7 +16,10 @@ namespace Quirrel {
     pending: Quirrel.JobDescriptor[];
     completed: Quirrel.JobDescriptor[];
     invoke(job: Quirrel.JobDescriptor): Promise<void>;
+    delete(job: Quirrel.JobDescriptor): Promise<void>;
     client: QuirrelClient;
+    credentials: { baseUrl: string; token?: string };
+    setCredentials: (cred: { baseUrl: string; token?: string }) => void;
   }
 
   export namespace Activity {
@@ -45,6 +48,11 @@ namespace Quirrel {
       payload: { id: string; endpoint: string };
       date: number;
     }
+    export interface Deleted {
+      type: "deleted";
+      payload: { id: string; endpoint: string };
+      date: number;
+    }
     export interface Requested {
       type: "requested";
       payload: { id: string; endpoint: string };
@@ -58,6 +66,7 @@ namespace Quirrel {
     | Activity.Requested
     | Activity.Invoked
     | Activity.Rescheduled
+    | Activity.Deleted
     | Activity.Started;
 
   export interface JobDescriptor extends JobDTO {
@@ -70,25 +79,13 @@ const mockCtxValue: Quirrel.ContextValue = {
   pending: [],
   completed: [],
   invoke: async () => {},
+  delete: async () => {},
   client: null as any,
+  setCredentials: () => {},
+  credentials: { baseUrl: "http://localhost:9181" },
 };
 
 const QuirrelCtx = React.createContext<Quirrel.ContextValue>(mockCtxValue);
-
-function uniqueDescriptors(
-  descr: Quirrel.JobDescriptor[]
-): Quirrel.JobDescriptor[] {
-  const alreadySeen = new Set<string>();
-  return descr.filter((descr) => {
-    const id = descr.endpoint + ";" + descr.id;
-    if (alreadySeen.has(id)) {
-      return false;
-    }
-
-    alreadySeen.add(id);
-    return true;
-  });
-}
 
 export function useQuirrel() {
   return useContext(QuirrelCtx);
@@ -99,7 +96,10 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   const [credentials, setCredentials] = useState<{
     baseUrl: string;
     token?: string;
-  }>();
+  }>({
+    baseUrl: "http://localhost:9181",
+    token: undefined,
+  });
 
   const [client, setClient] = useState<QuirrelClient>();
 
@@ -178,6 +178,21 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
             }),
           };
         }
+        case "deleted": {
+          return {
+            ...prevState,
+            activity: [action, ...prevState.activity],
+            pending: prevState.pending.filter((pendingJob) => {
+              if (
+                pendingJob.id === action.payload.id &&
+                pendingJob.endpoint === action.payload.endpoint
+              ) {
+                return false
+              }
+              return true
+            }),
+          };
+        }
         case "rescheduled": {
           const rescheduledJob = prevState.completed.find(
             (job) =>
@@ -220,12 +235,6 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
     }
   );
 
-  useEffect(() => {
-    const baseUrl = "http://localhost:9181";
-    const token = undefined;
-    setCredentials({ baseUrl, token });
-  }, [setCredentials]);
-
   const invoke = useCallback(
     async (job: Quirrel.JobDescriptor) => {
       await client.invoke(job.endpoint, job.id);
@@ -233,50 +242,70 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
     [client]
   );
 
+  const deleteCallback = useCallback(
+    async (job: Quirrel.JobDescriptor) => {
+      await client.delete(job.endpoint, job.id);
+    },
+    [client]
+  );
+
   useEffect(() => {
-    if (!credentials) {
-      return;
-    }
+    let cleanup: (() => void) | undefined;
 
-    let { baseUrl, token } = credentials;
-    if (!(baseUrl.startsWith("https://") || baseUrl.startsWith("http://"))) {
-      baseUrl = "https://" + baseUrl;
-    }
+    async function doIt() {
+      let { baseUrl, token } = credentials;
+      if (!(baseUrl.startsWith("https://") || baseUrl.startsWith("http://"))) {
+        baseUrl = "https://" + baseUrl;
+      }
 
-    const client = new QuirrelClient({
-      baseUrl,
-      token,
-    });
+      const client = new QuirrelClient({
+        baseUrl,
+        token,
+      });
 
-    setClient(client);
+      await new Promise<void>((resolve) => {
+        const intervalId = setInterval(async () => {
+          try {
+            await fetch(baseUrl + "/health");
+            clearInterval(intervalId);
+            resolve();
+          } catch {}
+        }, 1000);
 
-    (async () => {
+        cleanup = () => clearInterval(intervalId);
+      });
+
+      setClient(client);
+
       for await (const jobs of client.get()) {
         dispatchActivity({ type: "dump", payload: jobs, date: Date.now() });
       }
-    })();
 
-    const isSecure = baseUrl.startsWith("https://");
-    const baseUrlWithoutProtocol = baseUrl.slice(isSecure ? 8 : 7);
-    const socket = new WebSocket(
-      `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`
-    );
-    socket.onopen = () => {
-      console.log("Connected successfully.");
-      setIsConnected(true);
-    };
-    socket.onclose = () => {
-      setIsConnected(false);
-    };
+      const isSecure = baseUrl.startsWith("https://");
+      const baseUrlWithoutProtocol = baseUrl.slice(isSecure ? 8 : 7);
+      const socket = new WebSocket(
+        `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`,
+        token || "ignored"
+      );
+      socket.onopen = () => {
+        console.log("Connected successfully.");
+        setIsConnected(true);
+      };
+      socket.onclose = (ev) => {
+        setIsConnected(false);
+      };
 
-    socket.onmessage = (evt) => {
-      const data = JSON.parse(evt.data);
-      dispatchActivity({ type: data[0], payload: data[1], date: Date.now() });
-    };
+      socket.onmessage = (evt) => {
+        const data = JSON.parse(evt.data);
+        dispatchActivity({ type: data[0], payload: data[1], date: Date.now() });
+      };
 
-    return () => {
-      socket.close();
-    };
+      cleanup = () => socket.close();
+    }
+
+    doIt();
+
+    return () => cleanup?.();
   }, [credentials, setIsConnected, dispatchActivity]);
 
   return (
@@ -287,6 +316,9 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         completed,
         invoke,
         client,
+        setCredentials,
+        credentials,
+        delete: deleteCallback,
       }}
     >
       {isConnected ? (

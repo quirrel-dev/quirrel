@@ -31,7 +31,7 @@ export function Table<T>(props: TableProps<T>) {
                   {endOfRow && <th className="px-6 py-3 bg-gray-50"></th>}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-200 ">
                 {items.map((item) => (
                   <tr key={extractKey(item)}>
                     {columns.map((col) => {
