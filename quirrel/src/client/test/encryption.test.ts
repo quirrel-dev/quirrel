@@ -1,4 +1,4 @@
-import { QuirrelClient } from "../src";
+import { QuirrelClient } from "..";
 import { runQuirrel } from "../../api";
 import * as http from "http";
 import delay from "delay";

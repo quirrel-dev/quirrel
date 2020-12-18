@@ -1,4 +1,4 @@
-import { QuirrelClient } from "../src";
+import { QuirrelClient } from "..";
 
 describe("schema-check", () => {
   const quirrel = new QuirrelClient({

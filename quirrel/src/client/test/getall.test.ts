@@ -1,4 +1,4 @@
-import { Job, QuirrelClient } from "../src";
+import { Job, QuirrelClient } from "..";
 import { runQuirrel } from "../../api";
 import type { AddressInfo } from "net";
 import * as http from "http";
