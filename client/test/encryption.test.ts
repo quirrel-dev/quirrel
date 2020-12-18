@@ -13,13 +13,10 @@ test("encryption", async () => {
     logger: "none",
   });
 
-  const quirrel = new QuirrelClient({
-    baseUrl: getAddress(server.httpServer),
-    encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
-  });
-
   const encryptedBodies: string[] = [];
   const decryptedBodies: string[] = [];
+
+  let quirrel: QuirrelClient<any>;
 
   const endpoint = http
     .createServer((req) => {
@@ -29,20 +26,30 @@ test("encryption", async () => {
       });
       req.on("end", () => {
         encryptedBodies.push(body);
-        const { body: decryptedBody, isValid } = quirrel.verifyRequestSignature(
-          req.headers as any,
-          body
-        );
-        decryptedBodies.push(isValid ? decryptedBody : "-invalid");
+        quirrel
+          .respondTo(body, req.headers["x-quirrel-signature"] as string)
+          .then(({ status }) => {
+            if (status === 401) {
+              decryptedBodies.push("-invalid");
+            }
+          });
       });
     })
     .listen(0);
 
-  const endpointAddress = getAddress(endpoint);
-
-  await quirrel.enqueue(endpointAddress, {
-    body: "hello world",
+  quirrel = new QuirrelClient({
+    async handler(body) {
+      decryptedBodies.push(body);
+    },
+    route: "/lol",
+    config: {
+      applicationBaseUrl: getAddress(endpoint),
+      quirrelBaseUrl: getAddress(server.httpServer),
+      encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
+    },
   });
+
+  await quirrel.enqueue("hello world");
 
   await delay(200);
 

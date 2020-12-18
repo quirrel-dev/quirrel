@@ -21,30 +21,32 @@ test("getAll", async () => {
   });
 
   const quirrel = new QuirrelClient({
-    baseUrl: getAddress(server.httpServer),
-    encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
+    route: "",
+    async handler() {},
+    config: {
+      quirrelBaseUrl: getAddress(server.httpServer),
+      encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
+      applicationBaseUrl: "http://localhost",
+    },
   });
 
   const jobs = await Promise.all([
-    quirrel.enqueue("http://localhost", {
-      body: "hello world",
+    quirrel.enqueue("hello world", {
       delay: 20 * 1000,
     }),
-    quirrel.enqueue("http://localhost", {
-      body: "hello world",
+    quirrel.enqueue("hello world", {
       delay: 20 * 1000,
     }),
-    quirrel.enqueue("http://localhost", {
-      body: "hello world",
+    quirrel.enqueue("hello world", {
       delay: 20 * 1000,
     }),
   ]);
 
-  const iterator = quirrel.get("http://localhost");
+  const iterator = quirrel.get();
 
   const { value: fetchedJobs, done } = await iterator.next();
 
-  expect((fetchedJobs as Job[]).map((v) => JSON.stringify(v)).sort()).toEqual(
+  expect((fetchedJobs as Job<unknown>[]).map((v) => JSON.stringify(v)).sort()).toEqual(
     jobs.map((v) => JSON.stringify(v)).sort()
   );
   expect(done).toBe(false);
