@@ -3,9 +3,9 @@
 import { program } from "commander";
 import pack from "../../package.json";
 import open from "open";
-import { runQuirrel } from "./index";
+import { runQuirrel } from "../api";
 import IORedis = require("ioredis");
-import { createRedisFactory } from "./shared/create-redis";
+import { createRedisFactory } from "../api/shared/create-redis";
 
 async function isRedisConnectionIntact(redisUrl: string) {
   try {

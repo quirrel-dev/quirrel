@@ -16,7 +16,7 @@
     "node": "12 || 14"
   },
   "bin": {
-    "quirrel": "dist/src/cli.js"
+    "quirrel": "dist/src/cli/index.js"
   },
   "scripts": {
     "start": "node dist/src/cli.js",
