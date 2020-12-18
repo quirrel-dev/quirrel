@@ -1,6 +1,15 @@
+import type { IncomingMessage } from "http";
 import { FastifyPluginCallback } from "fastify";
 import fastifyWebsocket from "fastify-websocket";
 import { JobsRepo } from "../jobs-repo";
+
+// https://stackoverflow.com/questions/4361173/http-headers-in-websockets-client-api
+function workAroundWebsocketAuth(req: IncomingMessage) {
+  const authToken = req.headers["sec-websocket-protocol"];
+  if (!req.headers.authorization) {
+    req.headers.authorization = `Bearer ${authToken}`;
+  }
+}
 
 const activityPlugin: FastifyPluginCallback = (fastify, _opts, done) => {
   fastify.register(fastifyWebsocket);
@@ -8,6 +17,8 @@ const activityPlugin: FastifyPluginCallback = (fastify, _opts, done) => {
   const jobsRepo = new JobsRepo(fastify.redisFactory);
 
   fastify.get("/", { websocket: true }, async (connection, req) => {
+    workAroundWebsocketAuth(req);
+
     const tokenId = await fastify.tokenAuth.authenticate(req);
 
     if (!tokenId) {

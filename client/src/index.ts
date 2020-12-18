@@ -260,6 +260,7 @@ export class QuirrelClient<T> {
         "Content-Type": "application/json",
         ...this.authHeaders,
       },
+      credentials: "omit",
       body: JSON.stringify({
         ...this.defaultJobOptions,
         body: stringifiedBody,
