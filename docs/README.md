@@ -1,3 +1,3 @@
 # Quirrel Docs
 
-TODO: Migrate Docusaurus Here
+This Repo contains the Quirrel Docs.
