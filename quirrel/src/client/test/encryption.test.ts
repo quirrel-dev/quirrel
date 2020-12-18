@@ -1,5 +1,5 @@
 import { QuirrelClient } from "../src";
-import { runQuirrel } from "quirrel";
+import { runQuirrel } from "../../api";
 import * as http from "http";
 import delay from "delay";
 import Redis from "ioredis";

@@ -8,7 +8,7 @@ import health from "./routes/health";
 import queues from "./routes/queues";
 import usageRoute from "./routes/usage";
 import oas from "fastify-oas";
-import pack from "../../package.json";
+import pack from "../../../package.json";
 import basicAuthPlugin from "./basic-auth";
 import type { AddressInfo } from "net";
 import tokenAuthPlugin from "./token-auth";

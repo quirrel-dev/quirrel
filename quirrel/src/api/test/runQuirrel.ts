@@ -1,5 +1,5 @@
-import { QuirrelConfig, runQuirrel } from "../src";
-import { createRedisFactory } from "../src/shared/create-redis";
+import { QuirrelConfig, runQuirrel } from "..";
+import { createRedisFactory } from "../shared/create-redis";
 
 export async function run(
   backend: "Redis" | "Mock",

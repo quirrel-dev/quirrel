@@ -1,5 +1,5 @@
 import { Job, QuirrelClient } from "../src";
-import { runQuirrel } from "quirrel";
+import { runQuirrel } from "../../api";
 import type { AddressInfo } from "net";
 import * as http from "http";
 import Redis from "ioredis";
