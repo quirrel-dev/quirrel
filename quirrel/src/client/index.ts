@@ -251,7 +251,7 @@ export class QuirrelClient<T> {
     let stringifiedBody = JSON.stringify(payload);
 
     if (this.encryptor) {
-      stringifiedBody = this.encryptor.encrypt(stringifiedBody);
+      stringifiedBody = await this.encryptor.encrypt(stringifiedBody);
     }
 
     const res = await fetch(this.baseUrl, {
@@ -271,24 +271,24 @@ export class QuirrelClient<T> {
     });
 
     if (res.status === 201) {
-      return this.toJob(await res.json());
+      return await this.toJob(await res.json());
     }
 
     throw new Error(`Unexpected response: ${await res.text()}`);
   }
 
-  private decryptAndDecodeBody(body: string): T {
+  private async decryptAndDecodeBody(body: string): Promise<T> {
     if (this.encryptor) {
-      body = this.encryptor.decrypt(body);
+      body = await this.encryptor.decrypt(body);
     }
 
     return JSON.parse(body);
   }
 
-  private toJob(dto: JobDTO): Job<T> {
+  private async toJob(dto: JobDTO): Promise<Job<T>> {
     return {
       ...dto,
-      body: this.decryptAndDecodeBody(dto.body),
+      body: await this.decryptAndDecodeBody(dto.body),
       runAt: new Date(dto.runAt),
       delete: () => this.delete(dto.id),
       invoke: () => this.invoke(dto.id),
@@ -320,7 +320,7 @@ export class QuirrelClient<T> {
 
       cursor = newCursor;
 
-      yield jobs.map((dto) => this.toJob(dto));
+      yield await Promise.all(jobs.map((dto) => this.toJob(dto)));
     }
   }
 
@@ -338,7 +338,7 @@ export class QuirrelClient<T> {
     }
 
     if (res.status === 200) {
-      return this.toJob(await res.json());
+      return await this.toJob(await res.json());
     }
 
     throw new Error("Unexpected response: " + (await res.text()));
@@ -404,7 +404,7 @@ export class QuirrelClient<T> {
         };
       }
     }
-    const payload = this.decryptAndDecodeBody(body);
+    const payload = await this.decryptAndDecodeBody(body);
 
     console.log(`Received job to ${this.route}: `, payload);
 

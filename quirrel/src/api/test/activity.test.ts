@@ -34,7 +34,7 @@ function testAgainst(backend: "Redis" | "Mock") {
 
     let conn: websocket.connection | undefined;
 
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       client.on("connect", (connection) => {
         conn = connection;
 
