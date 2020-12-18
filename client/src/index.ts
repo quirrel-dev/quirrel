@@ -1,87 +1,60 @@
+import { Job, JobDTO } from "./job";
+import * as config from "./config";
+import { runBuildTimeChecks } from "./buildtime-checks";
+import * as z from "zod";
+import type { IsExact, AssertTrue } from "conditional-type-checks";
 import Encryptor from "secure-e2ee";
 import { verify } from "secure-webhooks";
 import ms from "ms";
 import fetch from "cross-fetch";
-import * as z from "zod";
-import type { IsExact, AssertTrue } from "conditional-type-checks";
 
-const url = z.transformer(z.string(), z.string().url(), (uri) => {
-  const hasProtocol = uri.startsWith("http://") || uri.startsWith("https://");
-  if (hasProtocol) {
-    return uri;
-  }
+export { Job };
 
-  return "https://" + uri;
-});
+if (process.env.NODE_ENV === "production") {
+  runBuildTimeChecks();
+}
 
-const fallbackEndpoint =
-  process.env.NODE_ENV === "production"
-    ? "https://api.quirrel.dev"
-    : "http://localhost:9181";
+type QuirrelJobHandler<T> = (job: T) => Promise<void>;
+export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">;
 
-const defaultBaseUrl = process.env.QUIRREL_URL ?? fallbackEndpoint;
-
-const defaultToken = process.env.QUIRREL_TOKEN;
-
-const defaultEncryptionSecret = process.env.QUIRREL_ENCRYPTION_SECRET;
-const defaultOldSecrets: string[] | null = JSON.parse(
-  process.env.QUIRREL_OLD_SECRETS ?? "null"
-);
-
-export interface JobDTO {
-  /**
-   * ID, used in conjunction with `endpoint` to identify the job.
-   */
-  readonly id: string;
-
-  /**
-   * Endpoint the job will be executed against.
-   * It's the HTTP address of your Queue.
-   */
-  readonly endpoint: string;
-
-  /**
-   * Stringified and potentially encrypted job payload.
-   */
-  readonly body: string;
-
-  /**
-   * Date that the job has been scheduled for.
-   * @implements ISO-8601
-   */
-  readonly runAt: string;
-
-  /**
-   * Guarantees that no other job (from the same queue)
-   * is executed while this job is being executed.
-   */
-  readonly exclusive: boolean;
-
-  /**
-   * Present if the job has been scheduled to repeat.
-   */
-  readonly repeat?: {
+interface CreateQuirrelClientArgs<T> {
+  route: string;
+  handler: QuirrelJobHandler<T>;
+  defaultJobOptions?: DefaultJobOptions;
+  config?: {
     /**
-     * Interval at which the job is executed.
+     * @default http://localhost:9181 (in dev)
+     * Recommended way to set this: process.env.QUIRREL_BASE_URL
      */
-    readonly every?: number;
+    applicationBaseUrl?: string;
 
     /**
-     * Maximum number of repetitions to execute.
+     * Overrides URL of the Quirrel Endpoint.
+     * @default https://api.quirrel.dev or http://localhost:9181
+     * Recommended way to set this: process.env.QUIRREL_URL
      */
-    readonly times?: number;
+    quirrelBaseUrl?: string;
 
     /**
-     * Cron expression that's used for scheduling.
-     * @see https://github.com/harrisiirak/cron-parser
+     * Bearer Secret for authenticating with Quirrel.
+     * Obtain on quirrel.dev or using the API of a self-hosted instance.
+     * Recommended way to set this: process.env.QUIRREL_TOKEN
      */
-    readonly cron?: string;
+    token?: string;
 
     /**
-     * What repetition the next execution will be.
-     * Starts at 1, increments with every execution.
+     * Secret used for end-to-end encryption.
+     * Needs to be 32 characters long.
+     * Recommended way to set this: process.env.QUIRREL_ENCRYPTION_SECRET
      */
-    readonly count: number;
+    encryptionSecret?: string;
+
+    /**
+     * Old Secrets that have been rotated out.
+     * @see https://docs.quirrel.dev/docs/faq#my-encryption-secret-has-been-leaked-what-now
+     * Recommended way to set this: process.env.QUIRREL_OLD_SECRETS
+     */
+    oldSecrets?: string[];
   };
 }
 
@@ -102,7 +75,6 @@ const cron = z
   );
 
 const EnqueueJobOptsSchema = z.object({
-  body: z.any().optional(),
   id: z.string().optional(),
   exclusive: z.boolean().optional(),
   override: z.boolean().optional(),
@@ -124,11 +96,6 @@ type EnqueueJobOptsSchemaMatchesDocs = AssertTrue<
 >;
 
 export interface EnqueueJobOpts {
-  /**
-   * The job's payload.
-   */
-  body?: any;
-
   /**
    * Can be used to make a job easier to manage.
    * If there's already a job with the same ID, this job will be trashed.
@@ -186,122 +153,81 @@ export interface EnqueueJobOpts {
   };
 }
 
-export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">;
-
-export interface Job extends Omit<JobDTO, "runAt" | "body"> {
-  /**
-   * Date that the job has been scheduled for.
-   * If it's a repeated job, this is the date for the next execution.
-   */
-  readonly runAt: Date;
-  /**
-   * Job payload.
-   */
-  readonly body: unknown;
-
-  /**
-   * Delete this job.
-   * @returns false if the job already has been deleted.
-   */
-  delete(): Promise<boolean>;
-
-  /**
-   * Schdule this job for immediate execution.
-   * If it's a repeated job, the next executions will be scheduled normally.
-   * @returns false if the job has been deleted in the meantime.
-   */
-  invoke(): Promise<boolean>;
-}
-
-type SignatureCheckResult<T> =
-  | { isValid: true; body: T }
-  | {
-      isValid: false;
-      body: null;
-    };
-
-interface QuirrelClientOpts {
-  /**
-   * URL of the Quirrel Endpoint.
-   * @default https://api.quirrel.dev or http://localhost:9181
-   */
-  baseUrl?: string;
-
-  /**
-   * Bearer Secret for authenticating with Quirrel.
-   * Obtain on quirrel.dev or using the API of a self-hosted instance.
-   */
-  token?: string;
-
-  /**
-   * Secret used for end-to-end encryption.
-   * Needs to be 32 characters long.
-   */
-  encryptionSecret?: string;
-
-  /**
-   * Old Secrets that have been rotated out.
-   * @see https://docs.quirrel.dev/faq#my-encryption-secret-has-been-leaked-what-now
-   */
-  oldSecrets?: string[];
-
-  defaultJobOptions?: DefaultJobOptions;
-}
-
-export class QuirrelClient {
-  private readonly encryptor: Encryptor | undefined;
-
-  private readonly token;
-  private readonly baseUrl;
-  private readonly defaultJobOptions: DefaultJobOptions;
-
-  /**
-   * Constructs a new Quirrel Client.
-   * @param opts
-   */
-  constructor(opts: QuirrelClientOpts = {}) {
-    const enrichedOpts: QuirrelClientOpts = {
-      baseUrl: defaultBaseUrl,
-      token: defaultToken,
-      encryptionSecret: defaultEncryptionSecret,
-      oldSecrets: defaultOldSecrets ?? undefined,
-      ...opts,
-    };
-    if (enrichedOpts.encryptionSecret) {
-      const decryptionSecrets = [enrichedOpts.encryptionSecret];
-      if (enrichedOpts.oldSecrets) {
-        decryptionSecrets.push(...enrichedOpts.oldSecrets);
-      }
-
-      this.encryptor = new Encryptor(
-        enrichedOpts.encryptionSecret,
-        decryptionSecrets
-      );
-    }
-
-    this.token = enrichedOpts.token;
-    this.baseUrl = enrichedOpts.baseUrl;
-    this.defaultJobOptions = opts.defaultJobOptions ?? {};
+function parseDuration(value: number | string | undefined): number | undefined {
+  if (!value) {
+    return undefined;
   }
 
-  private getAuthHeaders(): Record<string, string> {
-    if (this.token) {
-      return {
-        Authorization: `Bearer ${this.token}`,
-      };
-    } else {
-      return {};
-    }
+  if (typeof value === "string") {
+    return ms(value);
   }
 
-  private toJob(dto: JobDTO): Job {
-    return {
-      ...dto,
-      body: this.decryptBody(dto.body),
-      runAt: new Date(dto.runAt),
-      delete: () => this.delete(dto.endpoint, dto.id),
-      invoke: () => this.invoke(dto.endpoint, dto.id),
-    };
+  return value;
+}
+
+function runAtToDelay(value: Date) {
+  return +value - Date.now();
+}
+
+function getEncryptor(
+  encryptionSecret: string | undefined,
+  oldSecrets: string[] = []
+) {
+  if (!encryptionSecret) {
+    return undefined;
+  }
+
+  return new Encryptor(encryptionSecret, [encryptionSecret, ...oldSecrets]);
+}
+
+function prefixUriToUrl(uri: string): string {
+  if (uri.startsWith("http://") || uri.startsWith("https://")) {
+    return uri;
+  }
+  return "https://" + uri;
+}
+
+function getAuthHeaders(
+  token: string | undefined
+): { Authorization: string } | {} {
+  if (!token) {
+    return {};
+  }
+
+  return { Authorization: `Bearer ${token}` };
+}
+
+export class QuirrelClient<T> {
+  private handler;
+  private route;
+  private defaultJobOptions;
+  private encryptor;
+  private authHeaders;
+  private baseUrl;
+  private token;
+
+  constructor(args: CreateQuirrelClientArgs<T>) {
+    this.handler = args.handler;
+    this.defaultJobOptions = args.defaultJobOptions;
+
+    const token = args.config?.token ?? config.getQuirrelToken();
+    this.authHeaders = getAuthHeaders(token);
+
+    const quirrelBaseUrl =
+      args.config?.quirrelBaseUrl ?? config.getQuirrelBaseUrl();
+    const applicationBaseUrl = prefixUriToUrl(
+      args.config?.applicationBaseUrl ?? config.getApplicationBaseUrl()!
+    );
+    this.baseUrl =
+      quirrelBaseUrl +
+      "/queues/" +
+      encodeURIComponent(applicationBaseUrl + "/" + args.route);
+    this.token = args.config?.token ?? config.getQuirrelToken();
+    this.route = args.route;
+    this.encryptor = getEncryptor(
+      args.config?.encryptionSecret ?? config.getEncryptionSecret(),
+      args.config?.oldSecrets ?? config.getOldEncryptionSecrets() ?? undefined
+    );
   }
 
   /**
@@ -309,61 +235,66 @@ export class QuirrelClient {
    * @param endpoint endpoint to execute the job against
    * @param opts job options
    */
-  async enqueue(endpoint: string, opts: EnqueueJobOpts): Promise<Job> {
-    endpoint = url.parse(endpoint);
-
+  async enqueue(payload: T, opts: EnqueueJobOpts = {}): Promise<Job<T>> {
     opts = EnqueueJobOptsSchema.parse(opts);
 
-    let delay: number | undefined = undefined;
-
-    if ("delay" in opts && opts.delay) {
-      if (typeof opts.delay === "string") {
-        delay = ms(opts.delay);
-      } else {
-        delay = opts.delay;
-      }
-    }
+    let delay = parseDuration(opts.delay);
 
     if ("runAt" in opts && opts.runAt) {
-      delay = +opts.runAt - Date.now();
+      delay = runAtToDelay(opts.runAt);
     }
 
-    if (typeof opts.repeat?.every === "string") {
-      opts.repeat.every = ms(opts.repeat.every);
+    if (opts.repeat) {
+      opts.repeat.every = parseDuration(opts.repeat?.every);
     }
 
-    let stringifiedBody = JSON.stringify(opts.body);
+    let stringifiedBody = JSON.stringify(payload);
 
     if (this.encryptor) {
       stringifiedBody = this.encryptor.encrypt(stringifiedBody);
     }
 
-    const res = await fetch(
-      this.baseUrl + "/queues/" + encodeURIComponent(endpoint),
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...this.getAuthHeaders(),
-        },
-        credentials: "omit",
-        body: JSON.stringify({
-          ...this.defaultJobOptions,
-          body: stringifiedBody,
-          delay,
-          id: opts.id,
-          repeat: opts.repeat,
-        }),
-      }
-    );
-
-    if (res.status !== 201) {
-      throw new Error(`Unexpected response: ${res.body}`);
-    }
+    const res = await fetch(this.baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.authHeaders,
+      },
+      credentials: "omit",
+      body: JSON.stringify({
+        ...this.defaultJobOptions,
+        body: stringifiedBody,
+        delay,
+        id: opts.id,
+        repeat: opts.repeat,
+      }),
+    });
 
     const body = await res.json();
 
+    if (res.status !== 201) {
+      throw new Error(`Unexpected response: ${body}`);
+    }
+
     return this.toJob(body);
+  }
+
+  private decryptAndDecodeBody(body: string): T {
+    if (this.encryptor) {
+      body = this.encryptor.decrypt(body);
+    }
+
+    return JSON.parse(body);
+  }
+
+  private toJob(dto: JobDTO): Job<T> {
+    return {
+      ...dto,
+      body: this.decryptAndDecodeBody(dto.body),
+      runAt: new Date(dto.runAt),
+      delete: () => this.delete(dto.id),
+      invoke: () => this.invoke(dto.id),
+    };
   }
 
   /**
@@ -374,22 +305,13 @@ export class QuirrelClient {
    *   // do smth
    * }
    */
-  async *get(endpoint?: string) {
-    endpoint = url.optional().parse(endpoint);
-
+  async *get(): AsyncGenerator<Job<T>[]> {
     let cursor: number | null = 0;
 
     while (cursor !== null) {
-      const res = await fetch(
-        this.baseUrl +
-          "/queues" +
-          (!!endpoint ? "/" + encodeURIComponent(endpoint!) : "") +
-          "?cursor=" +
-          cursor,
-        {
-          headers: this.getAuthHeaders(),
-        }
-      );
+      const res = await fetch(this.baseUrl + "?cursor=" + cursor, {
+        headers: this.authHeaders,
+      });
 
       const json = await res.json();
 
@@ -408,15 +330,10 @@ export class QuirrelClient {
    * Get a specific job.
    * @returns null if no job was found.
    */
-  async getById(endpoint: string, id: string): Promise<Job | null> {
-    endpoint = url.parse(endpoint);
-
-    const res = await fetch(
-      this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
-      {
-        headers: this.getAuthHeaders(),
-      }
-    );
+  async getById(id: string): Promise<Job<T> | null> {
+    const res = await fetch(this.baseUrl + "/" + id, {
+      headers: this.authHeaders,
+    });
 
     if (res.status === 404) {
       return null;
@@ -426,23 +343,18 @@ export class QuirrelClient {
       return this.toJob(await res.json());
     }
 
-    throw new Error("Unexpected response: " + res.body);
+    throw new Error("Unexpected response: " + (await res.text()));
   }
 
   /**
    * Schedule a job for immediate execution.
-   * @returns null if job could not be found.
+   * @returns false if job could not be found.
    */
-  async invoke(endpoint: string, id: string): Promise<boolean> {
-    endpoint = url.parse(endpoint);
-
-    const res = await fetch(
-      this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-      }
-    );
+  async invoke(id: string): Promise<boolean> {
+    const res = await fetch(this.baseUrl + "/" + id, {
+      method: "POST",
+      headers: this.authHeaders,
+    });
 
     if (res.status === 404) {
       return false;
@@ -452,23 +364,18 @@ export class QuirrelClient {
       return true;
     }
 
-    throw new Error("Unexpected response: " + res.body);
+    throw new Error("Unexpected response: " + (await res.text()));
   }
 
   /**
    * Delete a job, preventing it from executing.
-   * @returns null if job could not be found.
+   * @returns false if job could not be found.
    */
-  async delete(endpoint: string, id: string): Promise<boolean> {
-    endpoint = url.parse(endpoint);
-
-    const res = await fetch(
-      this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
-      {
-        method: "DELETE",
-        headers: this.getAuthHeaders(),
-      }
-    );
+  async delete(id: string): Promise<boolean> {
+    const res = await fetch(this.baseUrl + "/" + id, {
+      method: "DELETE",
+      headers: this.authHeaders,
+    });
 
     if (res.status === 404) {
       return false;
@@ -481,42 +388,42 @@ export class QuirrelClient {
     throw new Error("Unexpected response: " + res.body);
   }
 
-  /**
-   * Verify an incoming request for correct signature
-   * and decrypt / decode the body.
-   */
-  verifyRequestSignature<T = any>(
-    headers: { "x-quirrel-signature": string },
-    body: string
-  ): SignatureCheckResult<T> {
+  async respondTo(
+    body: string,
+    signature: string
+  ): Promise<{
+    status: number;
+    headers: Record<string, string>;
+    body: string;
+  }> {
     if (process.env.NODE_ENV === "production") {
-      if (!this.token) {
-        throw new Error("No token specified.");
-      }
-
-      const valid = verify(body, this.token, headers["x-quirrel-signature"]);
+      const valid = verify(body, this.token!, signature);
       if (!valid) {
         return {
-          isValid: false,
-          body: null,
+          status: 401,
+          headers: {},
+          body: "Signature invalid.",
         };
       }
     }
+    const payload = this.decryptAndDecodeBody(body);
 
-    return {
-      isValid: true,
-      body: this.decryptBody(body),
-    };
-  }
+    console.log(`Received job to ${this.route}: `, payload);
 
-  /**
-   * Decrypt and decode the body.
-   */
-  decryptBody(body: string) {
-    if (this.encryptor) {
-      body = this.encryptor.decrypt(body);
+    try {
+      await this.handler(payload);
+
+      return {
+        status: 200,
+        headers: {},
+        body: "OK",
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        headers: {},
+        body: String(error),
+      };
     }
-
-    return JSON.parse(body);
   }
 }

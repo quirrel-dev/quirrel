@@ -23,12 +23,7 @@ test("encryption", async () => {
     logger: "none",
   });
 
-  const quirrel = new QuirrelClient({
-    baseUrl: getAddress(server.httpServer),
-  });
-
-  const encryptedBodies: string[] = [];
-  const decryptedBodies: string[] = [];
+  const bodies: string[] = [];
 
   const endpoint = http
     .createServer((req) => {
@@ -37,27 +32,27 @@ test("encryption", async () => {
         body += data;
       });
       req.on("end", () => {
-        encryptedBodies.push(body);
-        const { body: decryptedBody, isValid } = quirrel.verifyRequestSignature(
-          req.headers as any,
-          body
-        );
-        decryptedBodies.push(isValid ? decryptedBody : "-invalid");
+        bodies.push(body);
       });
     })
     .listen(0);
 
-  const endpointAddress = getAddress(endpoint);
+  const quirrel = new QuirrelClient({
+    async handler() {},
+    route: "",
+    config: {
+      quirrelBaseUrl: getAddress(server.httpServer),
+      applicationBaseUrl: getAddress(endpoint),
+    },
+  });
 
-  await quirrel.enqueue(endpointAddress, {
-    body: "hello world",
+  await quirrel.enqueue("hello world", {
     delay: "1s",
   });
 
   await delay(1500);
 
-  expect(decryptedBodies).toHaveLength(1);
-  expect(decryptedBodies).toEqual(["hello world"]);
+  expect(bodies).toHaveLength(1);
 
   server.close();
   endpoint.close();
