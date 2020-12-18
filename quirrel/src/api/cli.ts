@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import pack from "../package.json";
+import pack from "../../package.json";
 import open from "open";
 import { runQuirrel } from "./index";
 import IORedis = require("ioredis");
