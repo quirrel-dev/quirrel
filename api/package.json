@@ -27,7 +27,8 @@
     "prepack": "npm run build"
   },
   "devDependencies": {
-    "@types/ioredis": "^4.17.7",
+    "@types/basic-auth": "^1.1.3",
+    "@types/ioredis": "4.17.7",
     "@types/jest": "^26.0.13",
     "@types/pino": "^6.3.3",
     "@types/redis": "^2.8.27",
@@ -49,10 +50,11 @@
     "@sentry/node": "^5.26.0",
     "@sentry/tracing": "^5.26.0",
     "axios": "^0.20.0",
+    "basic-auth": "^2.0.1",
     "chalk": "^4.1.0",
     "commander": "^6.1.0",
     "cron-parser": "^2.16.3",
-    "fastify": "^3.7.0",
+    "fastify": "^3.9.2",
     "fastify-basic-auth": "^1.0.1",
     "fastify-blipp": "^3.0.0",
     "fastify-cors": "^4.1.0",

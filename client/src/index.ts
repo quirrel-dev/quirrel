@@ -2,6 +2,17 @@ import Encryptor from "secure-e2ee";
 import { verify } from "secure-webhooks";
 import ms from "ms";
 import fetch from "cross-fetch";
+import * as z from "zod";
+import type { IsExact, AssertTrue } from "conditional-type-checks";
+
+const url = z.transformer(z.string(), z.string().url(), (uri) => {
+  const hasProtocol = uri.startsWith("http://") || uri.startsWith("https://");
+  if (hasProtocol) {
+    return uri;
+  }
+
+  return "https://" + uri;
+});
 
 const fallbackEndpoint =
   process.env.NODE_ENV === "production"
@@ -73,6 +84,44 @@ export interface JobDTO {
     readonly count: number;
   };
 }
+
+const vercelMs = z
+  .string()
+  .regex(
+    /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i,
+    "Please provide a valid time span, according to https://github.com/vercel/ms"
+  );
+
+const timeDuration = z.union([z.number().positive(), vercelMs]);
+
+const cron = z
+  .string()
+  .regex(
+    /(@(yearly|monthly|weekly|daily|hourly))|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,7})/,
+    "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference."
+  );
+
+const EnqueueJobOptsSchema = z.object({
+  body: z.any().optional(),
+  id: z.string().optional(),
+  exclusive: z.boolean().optional(),
+  override: z.boolean().optional(),
+  delay: timeDuration.optional(),
+  runAt: z.date().optional(),
+  repeat: z
+    .object({
+      every: timeDuration.optional(),
+      times: z.number().nonnegative().optional(),
+      cron: cron.optional(),
+    })
+    .optional(),
+});
+
+type EnqueueJobOptsSchema = z.TypeOf<typeof EnqueueJobOptsSchema>;
+
+type EnqueueJobOptsSchemaMatchesDocs = AssertTrue<
+  IsExact<EnqueueJobOpts, EnqueueJobOptsSchema>
+>;
 
 export interface EnqueueJobOpts {
   /**
@@ -261,6 +310,10 @@ export class QuirrelClient {
    * @param opts job options
    */
   async enqueue(endpoint: string, opts: EnqueueJobOpts): Promise<Job> {
+    endpoint = url.parse(endpoint);
+
+    opts = EnqueueJobOptsSchema.parse(opts);
+
     let delay: number | undefined = undefined;
 
     if ("delay" in opts && opts.delay) {
@@ -305,7 +358,7 @@ export class QuirrelClient {
     );
 
     if (res.status !== 201) {
-      throw new Error(`Unexpected status: ${res.status}`);
+      throw new Error(`Unexpected response: ${res.body}`);
     }
 
     const body = await res.json();
@@ -322,6 +375,8 @@ export class QuirrelClient {
    * }
    */
   async *get(endpoint?: string) {
+    endpoint = url.optional().parse(endpoint);
+
     let cursor: number | null = 0;
 
     while (cursor !== null) {
@@ -354,6 +409,8 @@ export class QuirrelClient {
    * @returns null if no job was found.
    */
   async getById(endpoint: string, id: string): Promise<Job | null> {
+    endpoint = url.parse(endpoint);
+
     const res = await fetch(
       this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       {
@@ -369,7 +426,7 @@ export class QuirrelClient {
       return this.toJob(await res.json());
     }
 
-    throw new Error("Unexpected response: " + res.status);
+    throw new Error("Unexpected response: " + res.body);
   }
 
   /**
@@ -377,6 +434,8 @@ export class QuirrelClient {
    * @returns null if job could not be found.
    */
   async invoke(endpoint: string, id: string): Promise<boolean> {
+    endpoint = url.parse(endpoint);
+
     const res = await fetch(
       this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       {
@@ -393,7 +452,7 @@ export class QuirrelClient {
       return true;
     }
 
-    throw new Error("Unexpected response: " + res.status);
+    throw new Error("Unexpected response: " + res.body);
   }
 
   /**
@@ -401,6 +460,8 @@ export class QuirrelClient {
    * @returns null if job could not be found.
    */
   async delete(endpoint: string, id: string): Promise<boolean> {
+    endpoint = url.parse(endpoint);
+
     const res = await fetch(
       this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       {
@@ -417,7 +478,7 @@ export class QuirrelClient {
       return true;
     }
 
-    throw new Error("Unexpected response: " + res.status);
+    throw new Error("Unexpected response: " + res.body);
   }
 
   /**

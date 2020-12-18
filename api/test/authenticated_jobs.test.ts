@@ -93,6 +93,27 @@ function testAgainst(backend: "Redis" | "Mock") {
         .auth("ignored", passphrase)
         .expect(200, {});
     });
+
+    test("admin impersonation", async () => {
+      const { text: token } = await request(quirrel)
+        .put("/tokens/this.is.a.project")
+        .auth("ignored", passphrase)
+        .expect(201);
+
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .auth("this.is.a.project", passphrase)
+        .send({
+          body: JSON.stringify({ foo: "bar" }),
+        })
+        .expect(201);
+
+      await delay(300);
+
+      expect(lastBody).toEqual('{"foo":"bar"}');
+      expect(lastSignature).toMatch(/v=(\d+),d=([\da-f]+)/);
+      expect(verify(lastBody, token, lastSignature)).toBe(true);
+    });
   });
 }
 
