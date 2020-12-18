@@ -5,6 +5,15 @@ import fetch from "cross-fetch";
 import * as z from "zod";
 import type { IsExact, AssertTrue } from "conditional-type-checks";
 
+const url = z.transformer(z.string(), z.string().url(), (uri) => {
+  const hasProtocol = uri.startsWith("http://") || uri.startsWith("https://");
+  if (hasProtocol) {
+    return uri;
+  }
+
+  return "https://" + uri;
+});
+
 const fallbackEndpoint =
   process.env.NODE_ENV === "production"
     ? "https://api.quirrel.dev"
@@ -301,6 +310,8 @@ export class QuirrelClient {
    * @param opts job options
    */
   async enqueue(endpoint: string, opts: EnqueueJobOpts): Promise<Job> {
+    endpoint = url.parse(endpoint);
+
     opts = EnqueueJobOptsSchema.parse(opts);
 
     let delay: number | undefined = undefined;
@@ -363,6 +374,8 @@ export class QuirrelClient {
    * }
    */
   async *get(endpoint?: string) {
+    endpoint = url.optional().parse(endpoint);
+
     let cursor: number | null = 0;
 
     while (cursor !== null) {
@@ -395,6 +408,8 @@ export class QuirrelClient {
    * @returns null if no job was found.
    */
   async getById(endpoint: string, id: string): Promise<Job | null> {
+    endpoint = url.parse(endpoint);
+
     const res = await fetch(
       this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       {
@@ -418,6 +433,8 @@ export class QuirrelClient {
    * @returns null if job could not be found.
    */
   async invoke(endpoint: string, id: string): Promise<boolean> {
+    endpoint = url.parse(endpoint);
+
     const res = await fetch(
       this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       {
@@ -442,6 +459,8 @@ export class QuirrelClient {
    * @returns null if job could not be found.
    */
   async delete(endpoint: string, id: string): Promise<boolean> {
+    endpoint = url.parse(endpoint);
+
     const res = await fetch(
       this.baseUrl + "/queues/" + encodeURIComponent(endpoint) + "/" + id,
       {

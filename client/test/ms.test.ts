@@ -5,8 +5,13 @@ import * as http from "http";
 import delay from "delay";
 import Redis from "ioredis";
 
-function getAddress(server: http.Server): string {
-  const { address, port } = server.address() as AddressInfo;
+export function getAddress(server: http.Server): string {
+  let { address, port } = server.address() as AddressInfo;
+
+  if (address === "::") {
+    address = "localhost";
+  }
+
   return `http://${address}:${port}`;
 }
 

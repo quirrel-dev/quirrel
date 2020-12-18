@@ -2,7 +2,6 @@ import { QuirrelClient } from "../src";
 
 describe("schema-check", () => {
   const quirrel = new QuirrelClient({
-    baseUrl: "anything",
     encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
   });
 
