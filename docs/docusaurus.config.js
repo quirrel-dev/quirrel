@@ -134,7 +134,7 @@ module.exports = {
           routeBasePath: "/",
           sidebarPath: require.resolve("./sidebars.js"),
           editUrl:
-            "https://github.com/quirrel-dev/docs.quirrel.dev/edit/master/",
+            "https://github.com/quirrel-dev/quirrel/edit/master/docs/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
