@@ -304,7 +304,7 @@ export class QuirrelClient {
     );
 
     if (res.status !== 201) {
-      throw new Error(`Unexpected status: ${res.status}`);
+      throw new Error(`Unexpected response: ${res.body}`);
     }
 
     const body = await res.json();
@@ -368,7 +368,7 @@ export class QuirrelClient {
       return this.toJob(await res.json());
     }
 
-    throw new Error("Unexpected response: " + res.status);
+    throw new Error("Unexpected response: " + res.body);
   }
 
   /**
@@ -392,7 +392,7 @@ export class QuirrelClient {
       return true;
     }
 
-    throw new Error("Unexpected response: " + res.status);
+    throw new Error("Unexpected response: " + res.body);
   }
 
   /**
@@ -416,7 +416,7 @@ export class QuirrelClient {
       return true;
     }
 
-    throw new Error("Unexpected response: " + res.status);
+    throw new Error("Unexpected response: " + res.body);
   }
 
   /**
