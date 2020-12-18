@@ -1,2 +1,2 @@
-web: node dist/src/scheduler/main.js
-worker: node dist/src/worker/main.js
+web: node dist/src/api/scheduler/main.js
+worker: node dist/src/api/worker/main.js

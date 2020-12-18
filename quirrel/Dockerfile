@@ -13,4 +13,4 @@ RUN npm run-script build
 ENV RUNNING_IN_DOCKER true
 
 EXPOSE 9181
-CMD node dist/src/main.js
+CMD node dist/src/api/main.js
