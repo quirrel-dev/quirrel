@@ -47,7 +47,7 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         base-path: quirrel
-        path-to-lcov: ./coverage/lcov.info
+        path-to-lcov: quirrel/coverage/lcov.info
   
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
