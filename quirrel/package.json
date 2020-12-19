@@ -7,8 +7,10 @@
   },
   "license": "MIT",
   "files": [
-    "dist/src",
-    "dist/package.json"
+    "dist",
+    "*.d.ts",
+    "*.js",
+    "!jest.config.js"
   ],
   "main": "dist/src/index.js",
   "version": "0.10.1",

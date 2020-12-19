@@ -5,3 +5,5 @@ dist/
 
 /*.js
 /*.d.ts
+
+*.tgz

@@ -8,5 +8,5 @@
     "declaration": true,
     "esModuleInterop": true
   },
-  "exclude": ["dist", "*.d.ts"]
+  "exclude": ["dist", "./*.d.ts"]
 }
