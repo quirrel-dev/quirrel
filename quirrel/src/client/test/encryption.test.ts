@@ -1,17 +1,11 @@
 import { QuirrelClient } from "..";
-import { runQuirrel } from "../../api";
+import { run } from "../../api/test/runQuirrel";
 import * as http from "http";
 import delay from "delay";
-import Redis from "ioredis";
 import { getAddress } from "./ms.test";
 
 test("encryption", async () => {
-  const server = await runQuirrel({
-    port: 0,
-    redisFactory: () => new Redis(process.env.REDIS_URL),
-    disableTelemetry: true,
-    logger: "none",
-  });
+  const server = await run("Mock");
 
   const encryptedBodies: string[] = [];
   const decryptedBodies: string[] = [];
@@ -44,7 +38,7 @@ test("encryption", async () => {
     route: "/lol",
     config: {
       applicationBaseUrl: getAddress(endpoint),
-      quirrelBaseUrl: getAddress(server.httpServer),
+      quirrelBaseUrl: getAddress(server.server),
       encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
     },
   });
@@ -57,6 +51,6 @@ test("encryption", async () => {
   expect(encryptedBodies[0].startsWith("ddb7:")).toBe(true);
   expect(decryptedBodies).toEqual(["hello world"]);
 
-  server.close();
+  server.teardown();
   endpoint.close();
 });

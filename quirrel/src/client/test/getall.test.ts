@@ -1,30 +1,15 @@
 import { Job, QuirrelClient } from "..";
-import { runQuirrel } from "../../api";
-import type { AddressInfo } from "net";
-import * as http from "http";
-import Redis from "ioredis";
-
-function getAddress(server: http.Server): string {
-  const { address, port } = server.address() as AddressInfo;
-  return `http://${address}:${port}`;
-}
+import { run } from "../../api/test/runQuirrel";
+import { getAddress } from "./ms.test";
 
 test("getAll", async () => {
-  const redis = new Redis(process.env.REDIS_URL);
-  await redis.flushall();
-
-  const server = await runQuirrel({
-    port: 0,
-    redisFactory: () => redis.duplicate(),
-    disableTelemetry: true,
-    logger: "none",
-  });
+  const server = await run("Mock");
 
   const quirrel = new QuirrelClient({
     route: "",
     async handler() {},
     config: {
-      quirrelBaseUrl: getAddress(server.httpServer),
+      quirrelBaseUrl: getAddress(server.server),
       encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
       applicationBaseUrl: "http://localhost",
     },
@@ -46,12 +31,12 @@ test("getAll", async () => {
 
   const { value: fetchedJobs, done } = await iterator.next();
 
-  expect((fetchedJobs as Job<unknown>[]).map((v) => JSON.stringify(v)).sort()).toEqual(
-    jobs.map((v) => JSON.stringify(v)).sort()
-  );
+  expect(
+    (fetchedJobs as Job<unknown>[]).map((v) => JSON.stringify(v)).sort()
+  ).toEqual(jobs.map((v) => JSON.stringify(v)).sort());
   expect(done).toBe(false);
 
   expect((await iterator.next()).done).toBe(true);
 
-  server.close();
+  server.teardown();
 });

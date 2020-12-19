@@ -1,9 +1,8 @@
 import { QuirrelClient } from "..";
-import { runQuirrel } from "../../api";
+import { run } from "../../api/test/runQuirrel";
 import type { AddressInfo } from "net";
 import * as http from "http";
 import delay from "delay";
-import Redis from "ioredis";
 
 export function getAddress(server: http.Server): string {
   let { address, port } = server.address() as AddressInfo;
@@ -16,12 +15,7 @@ export function getAddress(server: http.Server): string {
 }
 
 test("encryption", async () => {
-  const server = await runQuirrel({
-    port: 0,
-    redisFactory: () => new Redis(process.env.REDIS_URL),
-    disableTelemetry: true,
-    logger: "none",
-  });
+  const server = await run("Mock");
 
   const bodies: string[] = [];
 
@@ -41,7 +35,7 @@ test("encryption", async () => {
     async handler() {},
     route: "",
     config: {
-      quirrelBaseUrl: getAddress(server.httpServer),
+      quirrelBaseUrl: getAddress(server.server),
       applicationBaseUrl: getAddress(endpoint),
     },
   });
@@ -54,6 +48,6 @@ test("encryption", async () => {
 
   expect(bodies).toHaveLength(1);
 
-  server.close();
+  server.teardown();
   endpoint.close();
 });
