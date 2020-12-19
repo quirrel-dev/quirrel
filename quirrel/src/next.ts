@@ -6,8 +6,13 @@ import {
   DefaultJobOptions,
   QuirrelJobHandler,
 } from "./client";
+import { registerDevelopmentDefaults } from "./client/config";
 
 export { Job, EnqueueJobOpts, DefaultJobOptions, QuirrelJobHandler };
+
+registerDevelopmentDefaults({
+  applicationBaseUrl: "http://localhost:3000",
+});
 
 export type Queue<Payload> = Omit<QuirrelClient<Payload>, "respondTo">;
 

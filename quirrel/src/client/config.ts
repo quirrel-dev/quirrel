@@ -35,3 +35,13 @@ export function getApplicationBaseUrl(): string | undefined {
 
   return "https://" + baseUrl;
 }
+
+export function registerDevelopmentDefaults({
+  applicationBaseUrl,
+}: {
+  applicationBaseUrl: string;
+}) {
+  if (process.env.NODE_ENV !== "production" && !process.env.QUIRREL_BASE_URL) {
+    process.env.QUIRREL_BASE_URL = applicationBaseUrl;
+  }
+}
