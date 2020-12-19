@@ -4,9 +4,10 @@ import {
   EnqueueJobOpts,
   Job,
   DefaultJobOptions,
+  QuirrelJobHandler,
 } from "./client";
 
-export { Job, EnqueueJobOpts, DefaultJobOptions };
+export { Job, EnqueueJobOpts, DefaultJobOptions, QuirrelJobHandler };
 
 export type Queue<Payload> = Omit<QuirrelClient<Payload>, "respondTo">;
 

@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === "production") {
   runBuildTimeChecks();
 }
 
-type QuirrelJobHandler<T> = (job: T) => Promise<void>;
+export type QuirrelJobHandler<T> = (job: T) => Promise<void>;
 export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">;
 
 interface CreateQuirrelClientArgs<T> {
