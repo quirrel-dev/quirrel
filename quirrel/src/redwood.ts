@@ -3,9 +3,10 @@ import {
   EnqueueJobOpts,
   Job,
   DefaultJobOptions,
+  QuirrelJobHandler,
 } from "./client";
 
-export { Job, EnqueueJobOpts, DefaultJobOptions };
+export { Job, EnqueueJobOpts, DefaultJobOptions, QuirrelJobHandler };
 
 interface RedwoodEvent {
   body: string;
@@ -25,7 +26,7 @@ export interface Queue<Payload>
 
 export function Queue<Payload>(
   route: string,
-  handler: (payload: Payload) => Promise<void>,
+  handler: QuirrelJobHandler<Payload>,
   defaultJobOptions?: DefaultJobOptions
 ): Queue<Payload> {
   const quirrel = new QuirrelClient({
@@ -52,4 +53,8 @@ export function Queue<Payload>(
       };
     },
   };
+}
+
+export function CronJob(route: string, handler: QuirrelJobHandler<void>) {
+  return Queue(route, handler) as unknown;
 }

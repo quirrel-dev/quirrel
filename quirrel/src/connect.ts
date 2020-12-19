@@ -1,6 +1,14 @@
 import connect from "connect";
-import { DefaultJobOptions, QuirrelClient, QuirrelJobHandler } from "./client";
+import {
+  DefaultJobOptions,
+  QuirrelClient,
+  QuirrelJobHandler,
+  EnqueueJobOpts,
+  Job,
+} from "./client";
 import bodyParser from "body-parser";
+
+export { DefaultJobOptions, QuirrelJobHandler, EnqueueJobOpts, Job };
 
 export type Queue<Payload> = connect.Server &
   Omit<QuirrelClient<Payload>, "respondTo">;
@@ -45,4 +53,8 @@ export function Queue<Payload>(
   server.invoke = (id) => quirrel.invoke(id);
 
   return server;
+}
+
+export function CronJob(route: string, handler: QuirrelJobHandler<void>) {
+  return Queue(route, handler) as unknown;
 }
