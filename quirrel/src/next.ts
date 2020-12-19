@@ -57,6 +57,10 @@ export function Queue<Payload>(
   return nextApiHandler;
 }
 
-export function CronJob(route: string, handler: QuirrelJobHandler<void>) {
+export function CronJob(
+  route: string,
+  cronSchedule: string,
+  handler: QuirrelJobHandler<void>
+) {
   return Queue(route, handler) as unknown;
 }

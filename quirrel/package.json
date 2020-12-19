@@ -72,6 +72,7 @@
     "fastify-oas": "^3.0.3",
     "fastify-plugin": "^2.3.3",
     "fastify-websocket": "^2.0.7",
+    "globby": "^11.0.1",
     "ioredis": "^4.19.2",
     "ioredis-mock": "^5.1.0",
     "ms": "^2.1.3",
