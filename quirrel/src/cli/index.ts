@@ -6,6 +6,7 @@ import open from "open";
 import { runQuirrel } from "../api";
 import IORedis = require("ioredis");
 import { createRedisFactory } from "../api/shared/create-redis";
+import { registerCron } from "./register-cron";
 
 async function isRedisConnectionIntact(redisUrl: string) {
   try {
@@ -87,6 +88,17 @@ program
     console.log("Opening Quirrel UI ...");
 
     open("https://ui.quirrel.dev", { app: getChromeName() });
+  });
+
+program
+  .command("register-cron [cwd]")
+  .description("Detects CronJob() calls and registers them with Quirrel.")
+  .option("-d, --dry-run", "List detected jobs, don't register them.", false)
+  .action(async (cwd = process.cwd(), { dryRun }: { dryRun: boolean }) => {
+    await registerCron({
+      dryRun,
+      cwd,
+    });
   });
 
 program.parse(process.argv);
