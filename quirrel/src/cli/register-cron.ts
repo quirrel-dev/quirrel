@@ -21,6 +21,7 @@ async function readFiles(cwd: string, paths: string[]) {
 interface DetectedCronJob {
   route: string;
   schedule: string;
+  framework: string;
 }
 
 function detectQuirrelCronJob(file: string): DetectedCronJob | null {
@@ -47,6 +48,7 @@ function detectQuirrelCronJob(file: string): DetectedCronJob | null {
   return {
     route: jobName,
     schedule: cronSchedule,
+    framework: clientFramework,
   };
 }
 
