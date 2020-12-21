@@ -33,7 +33,11 @@ export function Queue<Payload>(
   const server = connect() as Queue<Payload>;
 
   server.use(bodyParser.text());
-  server.use(async (req, res) => {
+  server.use(async (req, res, next) => {
+    if (req.url !== ("/" + route)) {
+      return next();
+    }
+
     const { body, status, headers } = await quirrel.respondTo(
       req.body,
       req.headers["x-quirrel-signature"] as string
@@ -44,6 +48,7 @@ export function Queue<Payload>(
       res.setHeader(header, value);
     }
     res.write(body);
+    res.end();
   });
 
   server.enqueue = (payload, opts) => quirrel.enqueue(payload, opts);
