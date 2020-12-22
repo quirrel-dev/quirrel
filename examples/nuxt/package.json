@@ -11,7 +11,8 @@
   "dependencies": {
     "@nuxt/typescript-runtime": "^2.0.0",
     "core-js": "^3.6.5",
-    "nuxt": "^2.14.6"
+    "nuxt": "^2.14.6",
+    "quirrel": "file:../../quirrel"
   },
   "devDependencies": {
     "@nuxt/types": "^2.14.6",
