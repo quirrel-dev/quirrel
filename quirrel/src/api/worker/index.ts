@@ -1,6 +1,6 @@
 import { decodeQueueDescriptor } from "../shared/queue-descriptor";
 import { UsageMeter } from "../shared/usage-meter";
-import axios from "axios";
+import fetch from "cross-fetch";
 import { TokenRepo } from "../shared/token-repo";
 import { sign } from "secure-webhooks";
 import { Redis } from "ioredis";
@@ -88,9 +88,10 @@ export async function createWorker({
       endpoint = replaceLocalhostWithDockerHost(endpoint);
     }
 
-    const response = await axios.post(endpoint, body, {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      body,
       headers,
-      validateStatus: () => true,
     });
 
     if (response.status >= 200 && response.status < 300) {
@@ -98,6 +99,8 @@ export async function createWorker({
 
       telemetrist?.dispatch("dispatch_job");
     } else {
+      const responseBody = await response.text();
+
       await incidentForwarder?.dispatch(
         {
           endpoint,
@@ -107,14 +110,14 @@ export async function createWorker({
           runAt: job.runAt,
         },
         {
-          body: response.data,
+          body: responseBody,
           status: response.status,
         }
       );
 
       logger?.executionErrored(
         { endpoint, tokenId, body: job.payload, id: job.id },
-        response.data
+        responseBody
       );
 
       telemetrist?.dispatch("execution_errored");

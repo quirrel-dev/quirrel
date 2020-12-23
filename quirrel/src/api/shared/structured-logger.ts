@@ -17,12 +17,9 @@ export class StructuredLogger implements Logger {
 
   executionErrored(
     job: { tokenId: string; id: string; endpoint: string; body: string },
-    error: Error
+    error: string
   ): void {
-    this.pino.error(
-      { error: error.toString(), job },
-      "Caught error during execution"
-    );
+    this.pino.error({ error, job }, "Caught error during execution");
   }
   jobCreated(job: {
     id: string;

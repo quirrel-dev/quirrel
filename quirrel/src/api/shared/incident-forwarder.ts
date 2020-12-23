@@ -1,15 +1,10 @@
-import axios from "axios";
+import fetch from "cross-fetch";
 
 export class IncidentForwarder {
-  private axios;
-  constructor(incidentEndpoint: string, passphrase: string) {
-    this.axios = axios.create({
-      baseURL: incidentEndpoint,
-      headers: {
-        Authorization: `Bearer ${passphrase}`,
-      },
-    });
-  }
+  constructor(
+    private readonly incidentEndpoint: string,
+    private readonly passphrase: string
+  ) {}
 
   async dispatch(
     job: {
@@ -22,10 +17,17 @@ export class IncidentForwarder {
     incident: { status: number; body: string }
   ) {
     try {
-      await this.axios.post("", {
-        type: "incident",
-        job,
-        incident,
+      fetch(this.incidentEndpoint, {
+        method: "POST",
+        body: JSON.stringify({
+          type: "incident",
+          job,
+          incident,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.passphrase}`,
+        },
       });
     } catch (error) {
       console.error("Incident receiver is down: ", error);

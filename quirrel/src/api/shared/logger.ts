@@ -19,7 +19,7 @@ export interface Logger {
     tokenId: string;
     endpoint: string;
     body: string;
-  }, error: Error): void;
+  }, error: string): void;
   // ...
 }
 

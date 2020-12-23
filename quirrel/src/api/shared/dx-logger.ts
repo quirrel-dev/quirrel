@@ -32,7 +32,7 @@ Listening on {yellow ${address}}.`.trim()
 
   executionErrored(
     job: { tokenId: string; id: string; endpoint: string; body: string },
-    error: Error
+    error: string
   ): void {
     console.error("Caught error during execution:", error, job);
   }
