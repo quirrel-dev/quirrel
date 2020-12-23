@@ -20,13 +20,11 @@ test("encryption", async () => {
       });
       req.on("end", () => {
         encryptedBodies.push(body);
-        quirrel
-          .respondTo(body, req.headers["x-quirrel-signature"] as string)
-          .then(({ status }) => {
-            if (status === 401) {
-              decryptedBodies.push("-invalid");
-            }
-          });
+        quirrel.respondTo(body, req.headers).then(({ status }) => {
+          if (status === 401) {
+            decryptedBodies.push("-invalid");
+          }
+        });
       });
     })
     .listen(0);

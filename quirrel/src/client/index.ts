@@ -7,6 +7,7 @@ import Encryptor from "secure-e2ee";
 import { verify } from "secure-webhooks";
 import ms from "ms";
 import fetch from "cross-fetch";
+import type { IncomingHttpHeaders } from "http";
 
 export { Job };
 
@@ -23,7 +24,6 @@ interface CreateQuirrelClientArgs<T> {
   defaultJobOptions?: DefaultJobOptions;
   config?: {
     /**
-     * @default http://localhost:9181 (in dev)
      * Recommended way to set this: process.env.QUIRREL_BASE_URL
      */
     applicationBaseUrl?: string;
@@ -392,13 +392,22 @@ export class QuirrelClient<T> {
 
   async respondTo(
     body: string,
-    signature: string
+    headers: IncomingHttpHeaders
   ): Promise<{
     status: number;
     headers: Record<string, string>;
     body: string;
   }> {
     if (process.env.NODE_ENV === "production") {
+      const signature = headers["x-quirrel-signature"];
+      if (typeof signature !== "string") {
+        return {
+          status: 401,
+          headers: {},
+          body: "Signature missing.",
+        };
+      }
+
       const valid = verify(body, this.token!, signature);
       if (!valid) {
         return {

@@ -40,7 +40,7 @@ export function Queue<Payload>(
   async function redwoodHandler(event: RedwoodEvent): Promise<RedwoodResponse> {
     const { body, headers, status } = await quirrel.respondTo(
       event.body,
-      event.headers["x-quirrel-signature"]
+      event.headers
     );
     return {
       statusCode: status,

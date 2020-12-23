@@ -34,13 +34,13 @@ export function Queue<Payload>(
 
   server.use(bodyParser.text());
   server.use(async (req, res, next) => {
-    if (req.url !== ("/" + route)) {
+    if (req.url !== "/" + route) {
       return next();
     }
 
     const { body, status, headers } = await quirrel.respondTo(
       req.body,
-      req.headers["x-quirrel-signature"] as string
+      req.headers as Record<string, string>
     );
 
     res.statusCode = status;

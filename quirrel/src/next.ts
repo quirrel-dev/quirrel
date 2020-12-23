@@ -32,10 +32,7 @@ export function Queue<Payload>(
   });
 
   async function nextApiHandler(req: NextApiRequest, res: NextApiResponse) {
-    const response = await quirrel.respondTo(
-      req.body,
-      req.headers["x-quirrel-signature"] as string
-    );
+    const response = await quirrel.respondTo(req.body, req.headers);
     res.status(response.status);
     for (const [header, value] of Object.entries(response.headers)) {
       res.setHeader(header, value);
