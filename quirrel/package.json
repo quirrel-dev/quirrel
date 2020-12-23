@@ -81,6 +81,7 @@
     "open": "^7.3.0",
     "parse-duration": "^0.4.4",
     "pino": "^6.7.0",
+    "plausible-telemetry": "^0.1.0",
     "secure-e2ee": "^0.2.0",
     "secure-webhooks": "^0.2.0",
     "uuid": "^8.3.0",
