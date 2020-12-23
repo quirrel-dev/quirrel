@@ -3,5 +3,6 @@ module.exports = {
   testEnvironment: "node",
   testPathIgnorePatterns: [
     "/dist"
-  ]
+  ],
+  modulePathIgnorePatterns: ['<rootDir>/dist']
 };

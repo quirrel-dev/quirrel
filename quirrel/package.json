@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "node dist/src/cli/index.js",
-    "test": "DISABLE_TELEMETRY=true jest --runInBand --forceExit",
+    "test": "DISABLE_TELEMETRY=true jest",
     "build": "run-s build:schemas build:proxies build:tsc",
     "build:schemas": "json2ts -i src/api/scheduler/schemas/ -o src/api/scheduler/types/",
     "build:tsc": "tsc",
