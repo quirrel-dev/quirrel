@@ -3,7 +3,7 @@ import fastify from "fastify";
 import delay from "delay";
 import request from "supertest";
 import websocket from "websocket";
-import { AddressInfo } from "ws";
+import type { AddressInfo } from "net";
 
 jest.setTimeout(20 * 1000);
 

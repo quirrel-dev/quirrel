@@ -1,7 +1,6 @@
 import { run } from "./runQuirrel";
-import fastify, { FastifyInstance } from "fastify";
+import fastify from "fastify";
 import delay from "delay";
-import type http from "http";
 import request from "supertest";
 
 function testAgainst(backend: "Redis" | "Mock") {
@@ -78,11 +77,11 @@ function testAgainst(backend: "Redis" | "Mock") {
         {
           type: "incident",
           incident: {
-            body: {
+            body: JSON.stringify({
+              statusCode: 500,
               error: "Internal Server Error",
               message: "Something broke!",
-              statusCode: 500,
-            },
+            }),
             status: 500,
           },
           job: {
