@@ -5,8 +5,13 @@ import {
   DefaultJobOptions,
   QuirrelJobHandler,
 } from "./client";
+import { registerDevelopmentDefaults } from "./client/config";
 
 export { Job, EnqueueJobOpts, DefaultJobOptions, QuirrelJobHandler };
+
+registerDevelopmentDefaults({
+  applicationBaseUrl: "http://localhost:8911",
+});
 
 interface RedwoodEvent {
   body: string;
@@ -19,40 +24,43 @@ interface RedwoodResponse {
   headers: Record<string, string>;
 }
 
-export interface Queue<Payload>
-  extends Omit<QuirrelClient<Payload>, "respondTo"> {
-  handler(event: RedwoodEvent): Promise<RedwoodResponse>;
-}
+export type Queue<Payload> = Omit<QuirrelClient<Payload>, "respondTo">;
 
 export function Queue<Payload>(
   route: string,
   handler: QuirrelJobHandler<Payload>,
   defaultJobOptions?: DefaultJobOptions
 ): Queue<Payload> {
-  const quirrel = new QuirrelClient({
+  const quirrel = new QuirrelClient<Payload>({
+    defaultJobOptions,
     handler,
     route,
-    defaultJobOptions,
   });
 
-  return {
-    delete: (jobId) => quirrel.delete(jobId),
-    invoke: (jobId) => quirrel.invoke(jobId),
-    get: () => quirrel.get(),
-    getById: (jobId) => quirrel.getById(jobId),
-    enqueue: (payload, meta) => quirrel.enqueue(payload, meta),
-    async handler(event) {
-      const { body, headers, status } = await quirrel.respondTo(
-        event.body,
-        event.headers["x-quirrel-signature"]
-      );
-      return {
-        statusCode: status,
-        body,
-        headers,
-      };
-    },
-  };
+  async function redwoodHandler(event: RedwoodEvent): Promise<RedwoodResponse> {
+    const { body, headers, status } = await quirrel.respondTo(
+      event.body,
+      event.headers["x-quirrel-signature"]
+    );
+    return {
+      statusCode: status,
+      body,
+      headers,
+    };
+  }
+
+  redwoodHandler.enqueue = (payload: Payload, opts: EnqueueJobOpts) =>
+    quirrel.enqueue(payload, opts);
+
+  redwoodHandler.delete = (jobId: string) => quirrel.delete(jobId);
+
+  redwoodHandler.invoke = (jobId: string) => quirrel.invoke(jobId);
+
+  redwoodHandler.get = () => quirrel.get();
+
+  redwoodHandler.getById = (jobId: string) => quirrel.getById(jobId);
+
+  return redwoodHandler;
 }
 
 export function CronJob(
