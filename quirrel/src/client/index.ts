@@ -236,6 +236,10 @@ export class QuirrelClient<T> {
    * @param opts job options
    */
   async enqueue(payload: T, opts: EnqueueJobOpts = {}): Promise<Job<T>> {
+    if (typeof payload === "undefined") {
+      throw new Error("Passing `undefined` as Payload is not allowed.");
+    }
+
     opts = EnqueueJobOptsSchema.parse(opts);
 
     let delay = parseDuration(opts.delay);

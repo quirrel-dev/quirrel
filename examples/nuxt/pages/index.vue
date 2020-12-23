@@ -1,22 +1,28 @@
 <template>
-  <form>
+  <form v-on:submit.prevent="sendMessage">
     <h1>
       Send a greeting!
     </h1>
 
     <label>
       Name
-      <input name="name" />
+      <input required name="name" v-model="name" />
     </label>
 
     <button type="submit">Enqueue</button>
   </form>
 </template>
 
-<script lang="ts">
-import Vue from 'vue'
-
-export default Vue.extend({})
+<script>
+export default {
+  data: () => ({
+    name: ""
+  }),
+  methods: {
+    sendMessage() {
+      fetch("/api/enqueueGreeting", { method: "POST", body: this.name })
+      this.name = ""
+    }
+  }
+};
 </script>
-<style>
-</style>

@@ -32,9 +32,7 @@ export default {
   build: {},
 
   serverMiddleware: [
-    {
-      path: "/api/someQueue",
-      handler: "~/api/someQueue.ts"
-    }
+    "~/api/greetingsQueue.ts",
+    "~/api/enqueueGreeting.ts"
   ]
 };
