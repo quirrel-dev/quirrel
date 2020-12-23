@@ -1,20 +1,9 @@
-# nuxt
+# Quirrel x Nuxt Example
 
-## Build Setup
+This folder contains an example Nuxt application that uses Quirrel.
 
-```bash
-# install dependencies
-$ npm install
+Touched files:
 
-# serve with hot reload at localhost:3000
-$ npm run dev
-
-# build for production and launch server
-$ npm run build
-$ npm run start
-
-# generate static project
-$ npm run generate
-```
-
-For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
+- [`pages/index.vue`](./pages/index.vue)
+- [`api/enqueueGreeting.ts`](./api/enqueueGreeting.ts)
+- [`api/greetingsQueue.ts`](./api/greetingsQueue.ts)
