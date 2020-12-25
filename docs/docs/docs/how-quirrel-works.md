@@ -9,7 +9,7 @@ If you want to learn even more about it, feel free to read [the sources](https:/
 
 On a schematic level, Quirrel works as following:
 
-1. Your application calls the Quirrel server with a request that goes like "In 5 minutes, call me back at https://my-application.com/api/queues/myQueue and supply payload `{ "foo": "bar"}`"
+1. Your application calls the Quirrel server with a request that goes like "In 5 minutes, call me back at https://my-application.com/api/queues/myQueue and supply payload `{ "foo": "bar" }`
 2. Quirrel takes this job and gives it to the scheduler (more about that below).
 3. After 5 minutes elapsed, the job is ready for execution and the scheduler passes it back to the Quirrel server.
 4. The Quirrel server then makes an HTTP request to the specified location with the specified payload attached.
@@ -49,4 +49,4 @@ The initialisation vector works similar to salts for password hashing, making it
 Quirrel uses its own, tailor-made job scheduling library called [Owl](https://github.com/quirrel-dev/owl).
 It makes heavy use of Redis' Sorted Sets and Pub/Sub and should scale quite well.
 
-More information on the job scheduler can be found in Owl's [README](https://github.com/quirrel-dev/owl/blob/main/README.md)
+More information on the job scheduler can be found in Owl's [README](https://github.com/quirrel-dev/owl/blob/main/README.md).

@@ -15,15 +15,13 @@ There are three main environment variables you need to specify in your deploymen
 After setting these variables, you can deploy your application and Quirrel should be working.
 If it doesn't, feel free to [reach out](mailto:troubleshooting@quirrel.dev).
 
-::: note
+:::note
 If you're on Vercel, you can connect `QUIRREL_BASE_URL` to your `VERCEL_URL`.
 Only do this for preview environments, _not for production_!
 `QUIRREL_BASE_URL` is used to determine the deployment that your jobs should be executed on.
 If you set it to `VERCEL_URL`, that means all jobs will be executed on the exact deployment that they were
 created on, excluding them from future bugfixes.
 :::
-
-## Using VERCEL_URL for QUIRREL_BASE_URL
 
 ## Hosted vs On-Prem
 

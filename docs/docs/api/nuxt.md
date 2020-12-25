@@ -1,21 +1,31 @@
 ---
-title: Vercel Serverless Functions
+title: Nuxt.js
 ---
 
 ```ts
-// api/someQueue.ts
-import { Queue } from "quirrel/vercel";
+// api/someQueue.js
+import { Queue } from "quirrel/nuxt";
 
 export default Queue(
-  "api/someQueue",
+  "someQueue",
   async (job) => {
     // do something
   }
 );
 ```
 
+```js
+// nuxt.config.js
+export default {
+  serverMiddleware: [
+    // will register the queue with Nuxt
+    "~/api/someQueue.js",
+  ]
+}
+```
+
 Creates a new Queue.
-Make sure to export it from a [Serverless Function](https://vercel.com/docs/serverless-functions/introduction#an-example-node.js-serverless-function), otherwise it won't work.
+Make sure to export it from a [Server Middleware](https://nuxtjs.org/docs/2.x/configuration-glossary/configuration-servermiddleware), otherwise it won't work.
 
 #### Parameters
 

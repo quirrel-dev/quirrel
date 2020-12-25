@@ -1,21 +1,27 @@
 ---
-title: Vercel Serverless Functions
+title: Express / Connect
 ---
 
 ```ts
-// api/someQueue.ts
-import { Queue } from "quirrel/vercel";
+import { Queue } from "quirrel/connect";
+import Express from "express";
 
-export default Queue(
-  "api/someQueue",
+const app = Express()
+
+const someQueue = Queue(
+  "someQueue",
   async (job) => {
     // do something
   }
-);
+)
+
+app.use(someQueue)
+
+app.listen(3000)
 ```
 
 Creates a new Queue.
-Make sure to export it from a [Serverless Function](https://vercel.com/docs/serverless-functions/introduction#an-example-node.js-serverless-function), otherwise it won't work.
+Since there's no convention for Express's default development port, you'll have to specify `QUIRREL_BASE_URL`.
 
 #### Parameters
 

@@ -3,7 +3,7 @@ title: Introduction
 slug: /docs
 ---
 
-Welcome to the Quirrel docs 🎉  
+Welcome to the Quirrel Docs 🎉  
 
 These pages aim to guide your usage of Quirrel and answer all questions you might have.
 If there's anything missing or unclear, make sure to put it in the "Feedback" form that's accessible via the menu bar.
@@ -29,5 +29,5 @@ Possible use-cases for Quirrel include:
 - sending your users a "how was your first week?" email one week after signup
 - fetching some data on a (cron) schedule
 
-Quirrel currently has support for Next.js and Blitz.js, with integrations for other frameworks coming in the future.
+Quirrel has support for a wide range of frameworks, including Next.js and Blitz.
 

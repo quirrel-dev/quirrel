@@ -1,21 +1,23 @@
 ---
-title: Vercel Serverless Functions
+title: Redwood
 ---
 
 ```ts
-// api/someQueue.ts
-import { Queue } from "quirrel/vercel";
+// api/src/functions/someQueue.js
+import { Queue } from "quirrel/redwood";
 
-export default Queue(
-  "api/someQueue",
-  async (job) => {
+export const handler = Queue(
+  "someQueue",
+  async (name) => {
     // do something
   }
 );
+
+export default handler;
 ```
 
 Creates a new Queue.
-Make sure to export it from a [Serverless Function](https://vercel.com/docs/serverless-functions/introduction#an-example-node.js-serverless-function), otherwise it won't work.
+Make sure to export it from a [Serverless Function](https://redwoodjs.com/docs/serverless-functions), otherwise it won't work.
 
 #### Parameters
 

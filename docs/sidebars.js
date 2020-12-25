@@ -17,7 +17,14 @@ module.exports = {
       type: "category",
       label: "Frameworks",
       collapsed: false,
-      items: ["api/next", "api/blitz", "api/vercel"],
+      items: [
+        "api/next",
+        "api/blitz",
+        "api/redwood",
+        "api/nuxt",
+        "api/express",
+        "api/vercel",
+      ],
     },
   ],
 };

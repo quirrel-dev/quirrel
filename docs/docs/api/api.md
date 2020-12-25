@@ -7,7 +7,7 @@ This is the common API Reference for the Quirrel client.
 
 ## `Queue`
 
-Depending on the frameowkr, creating a queue works a bit different.
+Depending on the framework, creating a queue works a bit different.
 Take a look at the sidebar to find a guide for your framework.
 
 ### `.enqueue`
