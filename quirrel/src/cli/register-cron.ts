@@ -10,6 +10,7 @@ async function grepForJavascriptFiles(directory: string) {
     cwd: directory,
     gitignore: true,
     dot: true,
+    ignore: ["node_modules"],
   });
 }
 
