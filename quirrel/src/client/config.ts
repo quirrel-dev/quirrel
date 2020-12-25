@@ -52,7 +52,7 @@ export function registerDevelopmentDefaults({
 }: {
   applicationBaseUrl: string;
 }) {
-  if (isProduction && !process.env.QUIRREL_BASE_URL) {
+  if (!isProduction && !process.env.QUIRREL_BASE_URL) {
     process.env.QUIRREL_BASE_URL = applicationBaseUrl;
   }
 }
