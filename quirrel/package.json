@@ -15,7 +15,8 @@
   "main": "dist/src/index.js",
   "version": "1.0.0-alpha-3",
   "engines": {
-    "node": "12 || 14 || 15"
+    "node": "12 || 14 || 15",
+    "npm": "7"
   },
   "bin": {
     "quirrel": "dist/src/cli/index.js"
