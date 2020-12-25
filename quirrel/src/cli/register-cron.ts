@@ -56,15 +56,30 @@ function detectQuirrelCronJob(file: string): DetectedCronJob | null {
   };
 }
 
+function uniqueByRoute(jobs: DetectedCronJob[]) {
+  const alreadySeen = new Set<string>();
+  return jobs.filter((job) => {
+    if (alreadySeen.has(job.route)) {
+      return false;
+    }
+
+    alreadySeen.add(job.route);
+
+    return true;
+  });
+}
+
 async function detectCronJobs(
   cwd: string = process.cwd()
 ): Promise<DetectedCronJob[]> {
   const filePaths = await grepForJavascriptFiles(cwd);
   const fileContents = await readFiles(cwd, filePaths);
+
   const cronJobs = fileContents
     .map(detectQuirrelCronJob)
     .filter((v): v is DetectedCronJob => !!v);
-  return cronJobs;
+
+  return uniqueByRoute(cronJobs);
 }
 
 interface RegisterCronArgs {
