@@ -94,11 +94,21 @@ program
   .command("register-cron [cwd]")
   .description("Detects CronJob() calls and registers them with Quirrel.")
   .option("-d, --dry-run", "List detected jobs, don't register them.", false)
-  .action(async (cwd = process.cwd(), { dryRun }: { dryRun: boolean }) => {
-    await registerCron({
-      dryRun,
-      cwd,
-    });
-  });
+  .option("-p, --production", "Use production config.", false)
+  .action(
+    async (
+      cwd = process.cwd(),
+      { dryRun, production }: { dryRun: boolean; production: boolean }
+    ) => {
+      if (production) {
+        process.env.NODE_ENV = "production";
+      }
+
+      await registerCron({
+        dryRun,
+        cwd,
+      });
+    }
+  );
 
 program.parse(process.argv);
