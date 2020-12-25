@@ -9,11 +9,21 @@ There are three main environment variables you need to specify in your deploymen
 | Variable                    | Meaning                                                                 | Where to get                                                                                                                                                                     |
 | --------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `QUIRREL_TOKEN`             | access token for the Quirrel server.                                    | Create a new Project + Client in the [Dashboard](https://quirrel.dev/dashboard).                                                                                                 |
-| `QUIRREL_BASE_URL`          | The base URL of your deployment, without trailing slashes.              | You probably know this. Something like `https://my-application.com`.                                                                                                             |
+| `QUIRREL_BASE_URL`          | The base URL of your deployment.                                        | You probably know this. Something like `my-application.com`.                                                                                                                     |
 | `QUIRREL_ENCRYPTION_SECRET` | A 32-character-long secret used for end-to-end encryption of your jobs. | Can be generated using `openssl rand -hex 16` or [random.org](https://www.random.org/strings/?num=2&len=16&digits=on&upperalpha=on&loweralpha=on&unique=on&format=html&rnd=new). |
 
 After setting these variables, you can deploy your application and Quirrel should be working.
 If it doesn't, feel free to [reach out](mailto:troubleshooting@quirrel.dev).
+
+::: note
+If you're on Vercel, you can connect `QUIRREL_BASE_URL` to your `VERCEL_URL`.
+Only do this for preview environments, _not for production_!
+`QUIRREL_BASE_URL` is used to determine the deployment that your jobs should be executed on.
+If you set it to `VERCEL_URL`, that means all jobs will be executed on the exact deployment that they were
+created on, excluding them from future bugfixes.
+:::
+
+## Using VERCEL_URL for QUIRREL_BASE_URL
 
 ## Hosted vs On-Prem
 
