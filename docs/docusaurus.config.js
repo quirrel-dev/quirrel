@@ -61,7 +61,7 @@ module.exports = {
           position: "right",
         },
         {
-          href: "https://github.com/quirrel-dev",
+          href: "https://github.com/quirrel-dev/quirrel",
           label: "GitHub",
           position: "right",
         },
