@@ -15,7 +15,7 @@ function checkEncryptionSecret() {
 function checkBaseUrl() {
   const baseUrl = getApplicationBaseUrl();
   if (!baseUrl) {
-    throw new Error("Please specify `QUIRREL_ENCRYPTION_SECRET`.");
+    throw new Error("Please specify `QUIRREL_BASE_URL`.");
   }
 }
 

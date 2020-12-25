@@ -180,13 +180,6 @@ function getEncryptor(
   return new Encryptor(encryptionSecret, [encryptionSecret, ...oldSecrets]);
 }
 
-function prefixUriToUrl(uri: string): string {
-  if (uri.startsWith("http://") || uri.startsWith("https://")) {
-    return uri;
-  }
-  return "https://" + uri;
-}
-
 function getAuthHeaders(
   token: string | undefined
 ): { Authorization: string } | {} {
@@ -215,7 +208,7 @@ export class QuirrelClient<T> {
 
     const quirrelBaseUrl =
       args.config?.quirrelBaseUrl ?? config.getQuirrelBaseUrl();
-    const applicationBaseUrl = prefixUriToUrl(
+    const applicationBaseUrl = config.prefixWithProtocol(
       args.config?.applicationBaseUrl ?? config.getApplicationBaseUrl()!
     );
     this.baseUrl =
@@ -387,7 +380,7 @@ export class QuirrelClient<T> {
       return true;
     }
 
-    throw new Error("Unexpected response: " + res.body);
+    throw new Error("Unexpected response: " + await res.text());
   }
 
   async respondTo(
