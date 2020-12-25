@@ -67,7 +67,7 @@ const vercelMs = z
 
 const timeDuration = z.union([z.number().positive(), vercelMs]);
 
-const cron = z
+export const cron = z
   .string()
   .regex(
     /(@(yearly|monthly|weekly|daily|hourly))|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,7})/,

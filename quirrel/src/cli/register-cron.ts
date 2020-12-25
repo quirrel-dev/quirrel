@@ -3,6 +3,7 @@ import globby from "globby";
 import * as path from "path";
 import { QuirrelClient } from "../client";
 import Table from "easy-table";
+import { cron } from "../client/index";
 
 async function grepForJavascriptFiles(directory: string) {
   return await globby(["**/*.[jt]s", "**/*.[jt]sx"], {
@@ -22,6 +23,7 @@ interface DetectedCronJob {
   route: string;
   schedule: string;
   framework: string;
+  isValid: boolean;
 }
 
 function detectQuirrelCronJob(file: string): DetectedCronJob | null {
@@ -49,6 +51,7 @@ function detectQuirrelCronJob(file: string): DetectedCronJob | null {
     route: jobName,
     schedule: cronSchedule,
     framework: clientFramework,
+    isValid: cron.check(cronSchedule),
   };
 }
 
@@ -75,15 +78,30 @@ function printDetectedJobs(jobs: DetectedCronJob[]) {
 
   for (const job of jobs) {
     t.cell("Route", job.route);
-    t.cell("Schedule", job.schedule);
+    if (job.isValid) {
+      t.cell("Schedule", job.schedule);
+    } else {
+      t.cell("Schedule", job.schedule + " (invalid, skipping)");
+    }
+
     t.newRow();
   }
 
   console.log(t.toString());
 }
 
+function requireFrameworkClientForDevelopmentDefaults(framework: string) {
+  require(`../${framework}`);
+}
+
 async function registerJobsWithQuirrel(jobs: DetectedCronJob[]) {
   for (const job of jobs) {
+    if (!job.isValid) {
+      continue;
+    }
+
+    requireFrameworkClientForDevelopmentDefaults(job.framework);
+
     const client = new QuirrelClient({
       async handler() {},
       route: job.route,
