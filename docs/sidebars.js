@@ -15,7 +15,7 @@ module.exports = {
     "api/api",
     {
       type: "category",
-      label: "Clients",
+      label: "Frameworks",
       collapsed: false,
       items: ["api/next", "api/blitz", "api/vercel"],
     },
