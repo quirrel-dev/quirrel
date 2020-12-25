@@ -1,4 +1,10 @@
-const isProduction = process.env.NODE_ENV === "production";
+function isProduction() {
+  if (process.env.VERCEL && process.env.CI) {
+    return true;
+  }
+
+  return process.env.NODE_ENV === "production";
+}
 
 export function withoutTrailingSlash(url: string): string {
   if (url.endsWith("/")) {
@@ -22,7 +28,7 @@ export function getQuirrelBaseUrl(): string | undefined {
     return prefixWithProtocol(withoutTrailingSlash(fromEnvironment));
   }
 
-  return isProduction ? "https://api.quirrel.dev" : "http://localhost:9181";
+  return isProduction() ? "https://api.quirrel.dev" : "http://localhost:9181";
 }
 
 export function getQuirrelToken(): string | undefined {
@@ -52,7 +58,7 @@ export function registerDevelopmentDefaults({
 }: {
   applicationBaseUrl: string;
 }) {
-  if (!isProduction && !process.env.QUIRREL_BASE_URL) {
+  if (!isProduction() && !process.env.QUIRREL_BASE_URL) {
     process.env.QUIRREL_BASE_URL = applicationBaseUrl;
   }
 }
