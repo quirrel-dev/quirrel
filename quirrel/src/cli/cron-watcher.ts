@@ -1,29 +1,70 @@
-import type { FastifyInstance } from "fastify";
 import { Gaze } from "gaze";
-import { QuirrelClient } from "../client/index";
+import { cron, QuirrelClient } from "../client/index";
 import * as fs from "fs/promises";
-import {
-  detectQuirrelCronJob,
-  requireFrameworkClientForDevelopmentDefaults,
-  DetectedCronJob,
-} from "./register-cron";
 import globby from "globby";
+import type { FastifyInstance } from "fastify";
+import { makeFetchMockConnectedTo } from "./fetch-mock";
 
-export class CronWatcher {
+export function requireFrameworkClientForDevelopmentDefaults(
+  framework: string
+) {
+  require(`../${framework}`);
+}
+
+export interface DetectedCronJob {
+  route: string;
+  schedule: string;
+  framework: string;
+  isValid: boolean;
+}
+
+export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
+  const quirrelImport = /"quirrel\/(.*)"/.exec(file);
+  if (!quirrelImport) {
+    return null;
+  }
+
+  const clientFramework = quirrelImport[1];
+  const isNextBased = ["blitz", "next"].includes(clientFramework);
+
+  const jobNameResult = /CronJob\(['"](.*)["'],\s*["'](.*)["']/.exec(file);
+  if (!jobNameResult) {
+    return null;
+  }
+
+  let jobName = jobNameResult[1];
+  const cronSchedule = jobNameResult[2];
+
+  if (isNextBased && !jobName.startsWith("api/")) {
+    jobName = "api/" + jobName;
+  }
+
+  return {
+    route: jobName,
+    schedule: cronSchedule,
+    framework: clientFramework,
+    isValid: cron.check(cronSchedule),
+  };
+}
+
+export class CronDetector {
   private gaze: any;
 
   constructor(
-    private readonly quirrel: FastifyInstance,
-    private readonly cwd: string
-  ) {
-    globby(["**/*.[jt]s", "**/*.[jt]sx"], {
+    private readonly cwd: string,
+    private readonly connectedTo?: FastifyInstance,
+    private readonly dryRun?: boolean
+  ) {}
+
+  public async readExisting() {
+    const files = await globby(["**/*.[jt]s", "**/*.[jt]sx"], {
       cwd: this.cwd,
       gitignore: true,
       dot: true,
       ignore: ["node_modules"],
-    }).then((files) => {
-      files.forEach((file) => this.on("added")(file));
     });
+
+    files.forEach(this.on("added"));
   }
 
   public startWatching() {
@@ -36,21 +77,25 @@ export class CronWatcher {
     this.gaze.on("added", this.on("added"));
   }
 
-  private pathToCronJob: Partial<Record<string, DetectedCronJob>> = {};
+  private pathToCronJob = new Map<string, DetectedCronJob>();
+
+  public getDetectedJobs(): Iterable<DetectedCronJob> {
+    return this.pathToCronJob.values();
+  }
 
   private on(fileChangeType: "changed" | "deleted" | "added") {
     return async (filePath: string) => {
-      const previousCron = this.pathToCronJob[filePath];
+      const previousCron = this.pathToCronJob.get(filePath);
 
       const contents = await fs.readFile(filePath, "utf-8");
       const job = detectQuirrelCronJob(contents);
 
       if (!job) {
         if (previousCron) {
-          delete this.pathToCronJob[filePath];
+          this.pathToCronJob.delete(filePath);
 
           const client = this.getConnectedClient(previousCron);
-          await client.delete("@cron");
+          await client?.delete("@cron");
         }
 
         return;
@@ -65,9 +110,9 @@ export class CronWatcher {
       const client = this.getConnectedClient(job);
 
       if (fileChangeType === "deleted") {
-        delete this.pathToCronJob[filePath];
+        this.pathToCronJob.delete(filePath);
 
-        await client.delete("@cron");
+        await client?.delete("@cron");
       }
 
       if (fileChangeType === "added" || fileChangeType === "changed") {
@@ -75,8 +120,8 @@ export class CronWatcher {
           return;
         }
 
-        this.pathToCronJob[filePath] = job;
-        await client.enqueue(null, {
+        this.pathToCronJob.set(filePath, job);
+        await client?.enqueue(null, {
           id: "@cron",
           override: true,
           repeat: {
@@ -88,30 +133,18 @@ export class CronWatcher {
   }
 
   private getConnectedClient(job: DetectedCronJob) {
+    if (this.dryRun) {
+      return undefined;
+    }
+
     requireFrameworkClientForDevelopmentDefaults(job.framework);
 
     return new QuirrelClient({
       async handler() {},
       route: job.route,
-      fetch: async (url, conf) => {
-        const [, , , , path] = /(http:\/\/)(.*?)(:\d+)?(\/.*)/.exec(
-          url as string
-        )!;
-
-        const response = await this.quirrel.inject({
-          method: conf?.method as any,
-          headers: conf?.headers as any,
-          payload: conf?.body as any,
-          path,
-        });
-
-        return {
-          status: response.statusCode,
-          statusText: response.statusMessage,
-          text: async () => response.payload,
-          json: async () => response.json(),
-        } as any;
-      },
+      fetch: this.connectedTo
+        ? makeFetchMockConnectedTo(this.connectedTo)
+        : undefined,
     });
   }
 
