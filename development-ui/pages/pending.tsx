@@ -23,7 +23,7 @@ export default function Pending() {
           },
           {
             title: "Run At",
-            render: (job) => job.runAt,
+            render: (job) => job.runAt.toISOString(),
           },
         ]}
         endOfRow={(job) => (
