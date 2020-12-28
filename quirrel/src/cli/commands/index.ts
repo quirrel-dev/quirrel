@@ -23,6 +23,7 @@ export default function registerRun(program: Command) {
     .option("-h, --host <host>", "host to bind on", "localhost")
     .option("-p, --port <port>", "port to bind on", "9181")
     .option("-r, --redis-url <redis-url>", "enables the redis backend")
+    .option("--no-cron", "Disable cron job detection", false)
     .option(
       "--passphrase <passphrase>",
       "secure the server with a passphrase",
@@ -34,11 +35,13 @@ export default function registerRun(program: Command) {
         passphrase,
         host,
         port,
+        cron,
       }: {
         redisUrl?: string;
         passphrase: string[];
         host: string;
         port: string;
+        cron: boolean;
       }) => {
         if (redisUrl) {
           if (!(await isRedisConnectionIntact(redisUrl))) {
@@ -57,17 +60,22 @@ export default function registerRun(program: Command) {
           logger: "dx",
         });
 
-        const cronDetector = new CronDetector(
-          process.cwd(),
-          quirrel.server.app
-        );
-        await cronDetector.readExisting();
+        let stopWatching: () => void;
 
-        const watcher = cronDetector.startWatching();
+        if (cron) {
+          const cronDetector = new CronDetector(
+            process.cwd(),
+            quirrel.server.app
+          );
+          await cronDetector.readExisting();
+
+          const watcher = cronDetector.startWatching();
+          stopWatching = watcher.stop;
+        }
 
         process.on("SIGINT", async () => {
           await quirrel.close();
-          watcher.stop();
+          stopWatching?.();
           process.exit();
         });
       }

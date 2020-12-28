@@ -80,7 +80,7 @@ export class CronDetector {
       ignore: ["node_modules"],
     });
 
-    files.forEach(this.on("added"));
+    await Promise.all(files.map(this.on("added")));
   }
 
   public startWatching() {
