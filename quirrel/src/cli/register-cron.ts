@@ -1,5 +1,5 @@
 import Table from "easy-table";
-import { CronDetector, DetectedCronJob } from "./cron-watcher";
+import { CronDetector, DetectedCronJob } from "./cron-detector";
 
 function printDetectedJobs(jobs: Iterable<DetectedCronJob>) {
   console.log("Detected the following Jobs:\n");
