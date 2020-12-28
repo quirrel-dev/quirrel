@@ -67,14 +67,18 @@ function testAgainst(backend: "Redis" | "Mock") {
       await sendTo("http://my-url.com/2");
       await sendTo("http://my-url.com/3");
 
-      await request(quirrel)
+      const { body } = await request(quirrel)
         .get("/queues/")
         .send({ body: JSON.stringify({ foo: "bar" }) })
-        .expect(200, [
+        .expect(200);
+
+      expect(body.sort()).toEqual(
+        [
           "http://my-url.com/1",
           "http://my-url.com/2",
           "http://my-url.com/3",
-        ]);
+        ].sort()
+      );
     });
 
     describe("retrieve delayed jobs", () => {
