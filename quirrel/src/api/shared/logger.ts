@@ -1,9 +1,21 @@
+import { JobDTO } from "../../client/job";
 import { DxLogger } from "./dx-logger";
 import { StructuredLogger } from "./structured-logger";
 
 export interface Logger {
   started(address: string, telemetryEnabled: boolean): void;
-  jobCreated(job: { id: string, body: string, tokenId: string, endpoint: string }): void;
+  jobCreated(
+    job: JobDTO & {
+      tokenId: string;
+    }
+  ): void;
+  jobDeleted(
+    job: {
+      endpoint: string;
+      id: string;
+      tokenId: string;
+    }
+  ): void;
   /**
    * @returns function to call when execution is done
    */
@@ -14,20 +26,21 @@ export interface Logger {
     body: string;
   }): () => void;
 
-  executionErrored(job: {
-    id: string;
-    tokenId: string;
-    endpoint: string;
-    body: string;
-  }, error: string): void;
+  executionErrored(
+    job: {
+      id: string;
+      tokenId: string;
+      endpoint: string;
+      body: string;
+    },
+    error: string
+  ): void;
   // ...
 }
 
 export type LoggerType = "dx" | "structured" | "none";
 
-export function getLogger(
-  type: LoggerType
-): Logger | undefined {
+export function getLogger(type: LoggerType): Logger | undefined {
   switch (type) {
     case "none":
       return undefined;

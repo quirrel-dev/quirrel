@@ -20,14 +20,14 @@ async function readFiles(cwd: string, paths: string[]) {
   );
 }
 
-interface DetectedCronJob {
+export interface DetectedCronJob {
   route: string;
   schedule: string;
   framework: string;
   isValid: boolean;
 }
 
-function detectQuirrelCronJob(file: string): DetectedCronJob | null {
+export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
   const quirrelImport = /"quirrel\/(.*)"/.exec(file);
   if (!quirrelImport) {
     return null;
@@ -106,7 +106,9 @@ function printDetectedJobs(jobs: DetectedCronJob[]) {
   console.log(t.toString());
 }
 
-function requireFrameworkClientForDevelopmentDefaults(framework: string) {
+export function requireFrameworkClientForDevelopmentDefaults(
+  framework: string
+) {
   require(`../${framework}`);
 }
 

@@ -7,6 +7,7 @@ import { runQuirrel } from "../api";
 import IORedis = require("ioredis");
 import { createRedisFactory } from "../api/shared/create-redis";
 import { registerCron } from "./register-cron";
+import { CronWatcher } from "./cron-watcher";
 
 async function isRedisConnectionIntact(redisUrl: string) {
   try {
@@ -61,8 +62,13 @@ program
         logger: "dx",
       });
 
+      const cronWatcher = new CronWatcher(quirrel.server.app, process.cwd());
+
+      cronWatcher.startWatching();
+
       process.on("SIGINT", async () => {
         await quirrel.close();
+        cronWatcher.close();
         process.exit();
       });
     }

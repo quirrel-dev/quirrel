@@ -1,5 +1,6 @@
 import { Logger } from "./logger";
 import chalk from "chalk";
+import { JobDTO } from "../../client/job";
 
 function getQueueName(endpoint: string) {
   return new URL(endpoint).pathname;
@@ -36,20 +37,47 @@ Listening on {yellow ${address}}.`.trim()
   ): void {
     console.error("Caught error during execution:", error, job);
   }
-  jobCreated(job: {
-    id: string;
-    body: string;
-    tokenId: string;
-    endpoint: string;
-  }): void {
+  jobCreated(
+    job: JobDTO & {
+      tokenId: string;
+    }
+  ): void {
+    if (job.id === "@cron") {
+      console.log(
+        chalk`
+⏰Registered a Cron Job
+   {gray endpoint:} {yellow ${getQueueName(job.endpoint)}}
+   {gray schedule:} {yellow ${job.repeat?.cron}}`
+      );
+
+      return;
+    }
+
     console.log(
       chalk`
 📝Created Job
-  {gray queue:} {yellow ${getQueueName(job.endpoint)}}
-     {gray id:} {yellow ${job.id}}
-   {gray body:} {yellow ${job.body}}`
+   {gray queue:} {yellow ${getQueueName(job.endpoint)}}
+      {gray id:} {yellow ${job.id}}
+    {gray body:} {yellow ${job.body}}`
     );
   }
+
+  jobDeleted(
+    job: JobDTO & {
+      tokenId: string;
+    }
+  ): void {
+    if (job.id === "@cron") {
+      console.log(
+        chalk`
+⏰Unregistered a Cron Job
+   {gray endpoint:} {yellow ${getQueueName(job.endpoint)}}`
+      );
+
+      return;
+    }
+  }
+  
   startingExecution(job: {
     id: string;
     tokenId: string;
