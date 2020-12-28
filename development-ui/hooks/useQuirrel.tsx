@@ -4,11 +4,16 @@ import React, {
   useContext,
   useEffect,
   useReducer,
+  useRef,
   useState,
 } from "react";
 import { BaseLayout } from "../layouts/BaseLayout";
-import { QuirrelClient, Job } from "quirrel";
+import { QuirrelClient, Job } from "quirrel/dist/src/client";
 import _ from "lodash";
+
+type JobDTO = Omit<Job<any>, "invoke" | "delete" | "runAt"> & {
+  runAt: string;
+};
 
 namespace Quirrel {
   export interface ContextValue {
@@ -24,7 +29,7 @@ namespace Quirrel {
   export namespace Activity {
     export interface Scheduled {
       type: "scheduled";
-      payload: Job<any>;
+      payload: JobDTO;
       date: number;
     }
     export interface Started {
@@ -39,7 +44,7 @@ namespace Quirrel {
     }
     export interface Rescheduled {
       type: "rescheduled";
-      payload: { id: string; endpoint: string; runAt: Date };
+      payload: { id: string; endpoint: string; runAt: string };
       date: number;
     }
     export interface Invoked {
@@ -68,7 +73,7 @@ namespace Quirrel {
     | Activity.Deleted
     | Activity.Started;
 
-  export interface JobDescriptor extends Job<any> {
+  export interface JobDescriptor extends JobDTO {
     started: boolean;
   }
 }
@@ -99,9 +104,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
     token: undefined,
   });
 
-  const [getClient, setGetClient] = useState<
-    (endpoint: string) => QuirrelClient<any>
-  >();
+  const clientGetter = useRef<(endpoint: string) => QuirrelClient<any>>();
 
   const [{ activity, pending, completed }, dispatchActivity] = useReducer(
     (
@@ -111,15 +114,15 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       >,
       action:
         | Quirrel.Activity
-        | { type: "dump"; payload: Job<any>[]; date: number }
+        | { type: "dump"; payload: JobDTO[]; date: number }
     ): Pick<Quirrel.ContextValue, "activity" | "pending" | "completed"> => {
       switch (action.type) {
         case "dump": {
           return {
             ...prevState,
             pending: [
-              ...action.payload.map((j) => ({
-                ...j,
+              ...action.payload.map((job) => ({
+                ...job,
                 started: false,
               })),
               ...prevState.pending,
@@ -152,7 +155,6 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
             pending: [
               {
                 ...action.payload,
-                body: action.payload.body as string,
                 started: false,
               },
               ...prevState.pending,
@@ -170,7 +172,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
               ) {
                 return {
                   ...pendingJob,
-                  runAt: new Date(),
+                  runAt: new Date().toISOString(),
                 };
               }
 
@@ -199,16 +201,12 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
               job.id === action.payload.id &&
               job.endpoint === action.payload.endpoint
           );
+
+          rescheduledJob.runAt = action.payload.runAt;
           return {
             completed: _.without(prevState.completed, rescheduledJob),
             activity: [action, ...prevState.activity],
-            pending: [
-              {
-                ...rescheduledJob,
-                runAt: action.payload.runAt,
-              },
-              ...prevState.pending,
-            ],
+            pending: [rescheduledJob, ...prevState.pending],
           };
         }
         case "completed": {
@@ -237,18 +235,18 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
   const invoke = useCallback(
     async (job: Quirrel.JobDescriptor) => {
-      const client = getClient(job.endpoint);
+      const client = clientGetter.current?.(job.endpoint);
       await client.invoke(job.id);
     },
-    [getClient]
+    [clientGetter]
   );
 
   const deleteCallback = useCallback(
     async (job: Quirrel.JobDescriptor) => {
-      const client = getClient(job.endpoint);
+      const client = clientGetter.current?.(job.endpoint);
       await client.delete(job.id);
     },
-    [getClient]
+    [clientGetter]
   );
 
   useEffect(() => {
@@ -261,11 +259,13 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       }
 
       const getClient = (endpoint: string) => {
-        const [
-          ,
-          applicationBaseUrl,
-          route,
-        ] = /(?:https?:\/\/)?.*?(:\d+)?(\/.*)/.exec(endpoint)!;
+        const result = /((?:https?:\/\/)?.*?)(?::\d+)?\/(.*)/.exec(endpoint);
+        if (!result) {
+          alert("Not a valid endpoint: " + endpoint);
+          return;
+        }
+        const [, applicationBaseUrl, route] = result;
+
         return new QuirrelClient({
           async handler() {},
           route,
@@ -289,7 +289,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         cleanup = () => clearInterval(intervalId);
       });
 
-      setGetClient(getClient);
+      clientGetter.current = getClient;
 
       const endpointsRes = await fetch(baseUrl + "/queues/", {
         headers: {
@@ -297,12 +297,19 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         },
       });
 
-      const endpoints = await endpointsRes.json();
+      const endpoints: string[] = await endpointsRes.json();
 
       for (const endpoint of endpoints) {
         const client = getClient(endpoint);
         for await (const jobs of client.get()) {
-          dispatchActivity({ type: "dump", payload: jobs, date: Date.now() });
+          dispatchActivity({
+            type: "dump",
+            payload: jobs.map((j) => ({
+              ...j,
+              runAt: j.runAt.toISOString(),
+            })),
+            date: Date.now(),
+          });
         }
       }
 
