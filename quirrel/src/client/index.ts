@@ -198,6 +198,7 @@ export class QuirrelClient<T> {
   private defaultJobOptions;
   private encryptor;
   private authHeaders;
+  private quirrelBaseUrl;
   private baseUrl;
   private token;
   private fetch;
@@ -214,6 +215,7 @@ export class QuirrelClient<T> {
     const applicationBaseUrl = config.prefixWithProtocol(
       args.config?.applicationBaseUrl ?? config.getApplicationBaseUrl()!
     );
+    this.quirrelBaseUrl = quirrelBaseUrl;
     this.baseUrl =
       quirrelBaseUrl +
       "/queues/" +
@@ -226,6 +228,17 @@ export class QuirrelClient<T> {
     );
 
     this.fetch = args.fetch ?? fetch;
+  }
+
+  async makeRequest(uri: string, init?: RequestInit) {
+    return await this.fetch(this.quirrelBaseUrl + uri, {
+      credentials: "omit",
+      ...init,
+      headers: {
+        ...this.authHeaders,
+        ...init?.headers,
+      },
+    });
   }
 
   /**

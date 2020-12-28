@@ -50,7 +50,7 @@ Create a new [API Route](https://nextjs.org/docs/api-routes/introduction) at `pa
 import { Queue } from "@quirrel/next"
 
 export default Queue(
-  "queues/email", // 👈 the location it's reachable on, sans api/
+  "api/queues/email", // 👈 the route it's reachable on
   async job => {
     await email.send( ... )
   }

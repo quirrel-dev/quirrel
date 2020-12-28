@@ -5,9 +5,7 @@ import globby from "globby";
 import type { FastifyInstance } from "fastify";
 import { makeFetchMockConnectedTo } from "./fetch-mock";
 
-export function requireFrameworkClientForDevelopmentDefaults(
-  framework: string
-) {
+function requireFrameworkClientForDevelopmentDefaults(framework: string) {
   require(`../${framework}`);
 }
 
@@ -25,7 +23,6 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
   }
 
   const clientFramework = quirrelImport[1];
-  const isNextBased = ["blitz", "next"].includes(clientFramework);
 
   const jobNameResult = /CronJob\(['"](.*)["'],\s*["'](.*)["']/.exec(file);
   if (!jobNameResult) {
@@ -34,10 +31,6 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 
   let jobName = jobNameResult[1];
   const cronSchedule = jobNameResult[2];
-
-  if (isNextBased && !jobName.startsWith("api/")) {
-    jobName = "api/" + jobName;
-  }
 
   return {
     route: jobName,
@@ -97,10 +90,10 @@ export class CronDetector {
     };
   }
 
-  private pathToCronJob = new Map<string, DetectedCronJob>();
+  private pathToCronJob: Record<string, DetectedCronJob> = {};
 
-  public getDetectedJobs(): Iterable<DetectedCronJob> {
-    return this.pathToCronJob.values();
+  public getDetectedJobs(): DetectedCronJob[] {
+    return Object.values(this.pathToCronJob);
   }
 
   private async onNewJob(job: DetectedCronJob, filePath: string) {
@@ -108,14 +101,14 @@ export class CronDetector {
   }
 
   private async onJobRemoved(job: DetectedCronJob, filePath: string) {
-    this.pathToCronJob.delete(filePath);
+    delete this.pathToCronJob[filePath];
 
     const client = this.getQuirrelClient(job);
     await client?.delete("@cron");
   }
 
   private async onJobChanged(job: DetectedCronJob, filePath: string) {
-    this.pathToCronJob.set(filePath, job);
+    this.pathToCronJob[filePath] = job;
 
     const client = this.getQuirrelClient(job);
     await client?.enqueue(null, {
@@ -129,7 +122,7 @@ export class CronDetector {
 
   private on(fileChangeType: "changed" | "deleted" | "added") {
     return async (filePath: string) => {
-      const previousJob = this.pathToCronJob.get(filePath);
+      const previousJob = this.pathToCronJob[filePath];
 
       if (fileChangeType === "deleted" && previousJob) {
         return await this.onJobRemoved(previousJob, filePath);

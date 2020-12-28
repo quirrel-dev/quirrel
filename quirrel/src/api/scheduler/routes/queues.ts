@@ -37,7 +37,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       if (job) {
         fastify.logger?.jobCreated({ ...job, tokenId });
 
-        await queueRepo.add(tokenId, endpoint);
+        await queueRepo.add(endpoint, tokenId);
       }
 
       reply.status(201).send(job);
