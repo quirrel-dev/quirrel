@@ -10,7 +10,7 @@ export function Queue<Payload>(
   path: string,
   handler: connect.QuirrelJobHandler<Payload>,
   defaultJobOptions?: connect.DefaultJobOptions
-): Omit<QuirrelClient<Payload>, "respondTo"> {
+): Omit<QuirrelClient<Payload>, "respondTo" | "makeRequest"> {
   const client = connect.Queue(path, handler, defaultJobOptions);
 
   (client as any).path = path;

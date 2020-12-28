@@ -24,7 +24,7 @@ interface RedwoodResponse {
   headers: Record<string, string>;
 }
 
-export type Queue<Payload> = Omit<QuirrelClient<Payload>, "respondTo">;
+export type Queue<Payload> = Omit<QuirrelClient<Payload>, "respondTo" | "makeRequest">;
 
 export function Queue<Payload>(
   route: string,

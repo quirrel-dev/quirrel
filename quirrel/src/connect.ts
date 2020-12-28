@@ -11,7 +11,7 @@ import bodyParser from "body-parser";
 export { DefaultJobOptions, QuirrelJobHandler, EnqueueJobOpts, Job };
 
 export type Queue<Payload> = connect.Server &
-  Omit<QuirrelClient<Payload>, "respondTo">;
+  Omit<QuirrelClient<Payload>, "respondTo" | "makeRequest">;
 
 declare module "connect" {
   export interface IncomingMessage {
