@@ -23,7 +23,6 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
   }
 
   const clientFramework = quirrelImport[1];
-  const isNextBased = ["blitz", "next"].includes(clientFramework);
 
   const jobNameResult = /CronJob\(['"](.*)["'],\s*["'](.*)["']/.exec(file);
   if (!jobNameResult) {
@@ -32,10 +31,6 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 
   let jobName = jobNameResult[1];
   const cronSchedule = jobNameResult[2];
-
-  if (isNextBased && !jobName.startsWith("api/")) {
-    jobName = "api/" + jobName;
-  }
 
   return {
     route: jobName,

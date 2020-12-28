@@ -21,10 +21,6 @@ export function Queue<Payload>(
   handler: (payload: Payload) => Promise<void>,
   defaultJobOptions?: DefaultJobOptions
 ): Queue<Payload> {
-  if (!route.startsWith("api/")) {
-    route = "api/" + route;
-  }
-
   const quirrel = new QuirrelClient<Payload>({
     defaultJobOptions,
     handler,
