@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { BaseLayout } from "../layouts/BaseLayout";
-import { QuirrelClient, Job } from "quirrel/dist/src/client";
+import { QuirrelClient, Job } from "quirrel/client";
 import _ from "lodash";
 
 type JobDTO = Omit<Job<any>, "invoke" | "delete" | "runAt"> & {
