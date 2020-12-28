@@ -6,7 +6,8 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "declaration": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "downlevelIteration": true
   },
   "exclude": ["dist", "./*.d.ts"]
 }

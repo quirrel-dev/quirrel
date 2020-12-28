@@ -130,6 +130,7 @@ export async function createServer({
 
   return {
     server: app.server,
+    app,
     port,
     async close() {
       app.log.info("Closing.");

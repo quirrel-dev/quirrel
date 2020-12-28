@@ -138,6 +138,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const result = await jobsRepo.delete(request.tokenId, endpoint, id);
 
+      if (result === "deleted") {
+        fastify.logger?.jobDeleted({ endpoint, id, tokenId: request.tokenId });
+      }
+
       switch (result) {
         case "deleted":
           return reply.status(204).send();
