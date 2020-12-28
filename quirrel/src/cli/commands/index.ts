@@ -57,14 +57,17 @@ export default function registerRun(program: Command) {
           logger: "dx",
         });
 
-        const cronWatcher = new CronDetector(process.cwd(), quirrel.server.app);
-        await cronWatcher.readExisting();
+        const cronDetector = new CronDetector(
+          process.cwd(),
+          quirrel.server.app
+        );
+        await cronDetector.readExisting();
 
-        cronWatcher.startWatching();
+        const watcher = cronDetector.startWatching();
 
         process.on("SIGINT", async () => {
           await quirrel.close();
-          cronWatcher.close();
+          watcher.stop();
           process.exit();
         });
       }

@@ -56,6 +56,22 @@ export class CronDetector {
     private readonly dryRun?: boolean
   ) {}
 
+  private getQuirrelClient(job: DetectedCronJob) {
+    if (this.dryRun) {
+      return undefined;
+    }
+
+    requireFrameworkClientForDevelopmentDefaults(job.framework);
+
+    return new QuirrelClient({
+      async handler() {},
+      route: job.route,
+      fetch: this.connectedTo
+        ? makeFetchMockConnectedTo(this.connectedTo)
+        : undefined,
+    });
+  }
+
   public async readExisting() {
     const files = await globby(["**/*.[jt]s", "**/*.[jt]sx"], {
       cwd: this.cwd,
@@ -75,6 +91,10 @@ export class CronDetector {
     this.gaze.on("changed", this.on("changed"));
     this.gaze.on("deleted", this.on("deleted"));
     this.gaze.on("added", this.on("added"));
+
+    return {
+      stop: () => this.gaze.close(),
+    };
   }
 
   private pathToCronJob = new Map<string, DetectedCronJob>();
@@ -83,72 +103,62 @@ export class CronDetector {
     return this.pathToCronJob.values();
   }
 
-  private on(fileChangeType: "changed" | "deleted" | "added") {
-    return async (filePath: string) => {
-      const previousCron = this.pathToCronJob.get(filePath);
-
-      const contents = await fs.readFile(filePath, "utf-8");
-      const job = detectQuirrelCronJob(contents);
-
-      if (!job) {
-        if (previousCron) {
-          this.pathToCronJob.delete(filePath);
-
-          const client = this.getConnectedClient(previousCron);
-          await client?.delete("@cron");
-        }
-
-        return;
-      }
-
-      if (!job.isValid) {
-        console.error(`
-🚨 Encountered invalid cron expression: ${job.schedule}`);
-        return;
-      }
-
-      const client = this.getConnectedClient(job);
-
-      if (fileChangeType === "deleted") {
-        this.pathToCronJob.delete(filePath);
-
-        await client?.delete("@cron");
-      }
-
-      if (fileChangeType === "added" || fileChangeType === "changed") {
-        if (previousCron?.schedule === job.schedule) {
-          return;
-        }
-
-        this.pathToCronJob.set(filePath, job);
-        await client?.enqueue(null, {
-          id: "@cron",
-          override: true,
-          repeat: {
-            cron: job.schedule,
-          },
-        });
-      }
-    };
+  private async onNewJob(job: DetectedCronJob, filePath: string) {
+    await this.onJobChanged(job, filePath);
   }
 
-  private getConnectedClient(job: DetectedCronJob) {
-    if (this.dryRun) {
-      return undefined;
-    }
+  private async onJobRemoved(job: DetectedCronJob, filePath: string) {
+    this.pathToCronJob.delete(filePath);
 
-    requireFrameworkClientForDevelopmentDefaults(job.framework);
+    const client = this.getQuirrelClient(job);
+    await client?.delete("@cron");
+  }
 
-    return new QuirrelClient({
-      async handler() {},
-      route: job.route,
-      fetch: this.connectedTo
-        ? makeFetchMockConnectedTo(this.connectedTo)
-        : undefined,
+  private async onJobChanged(job: DetectedCronJob, filePath: string) {
+    this.pathToCronJob.set(filePath, job);
+
+    const client = this.getQuirrelClient(job);
+    await client?.enqueue(null, {
+      id: "@cron",
+      override: true,
+      repeat: {
+        cron: job.schedule,
+      },
     });
   }
 
-  public close() {
-    this.gaze.close();
+  private on(fileChangeType: "changed" | "deleted" | "added") {
+    return async (filePath: string) => {
+      const previousJob = this.pathToCronJob.get(filePath);
+
+      if (fileChangeType === "deleted" && previousJob) {
+        return await this.onJobRemoved(previousJob, filePath);
+      }
+
+      const contents = await fs.readFile(filePath, "utf-8");
+      const newJob = detectQuirrelCronJob(contents);
+
+      if (!newJob) {
+        if (previousJob) {
+          await this.onJobRemoved(previousJob, filePath);
+        }
+
+        return;
+      }
+
+      if (!newJob.isValid) {
+        console.error(`
+🚨Encountered invalid cron expression: ${newJob.schedule}`);
+        return;
+      }
+
+      if (!previousJob && newJob) {
+        return await this.onNewJob(newJob, filePath);
+      }
+
+      if (previousJob && newJob) {
+        return await this.onJobChanged(newJob, filePath);
+      }
+    };
   }
 }
