@@ -55,6 +55,32 @@ function testAgainst(backend: "Redis" | "Mock") {
       expect(lastBody).toEqual('{"foo":"bar"}');
     });
 
+    test("queue list", async () => {
+      async function sendTo(endpoint: string) {
+        await request(quirrel)
+          .post("/queues/" + encodeURIComponent(endpoint))
+          .send({ body: JSON.stringify({ foo: "bar" }) })
+          .expect(201);
+      }
+
+      await sendTo("http://my-url.com/1");
+      await sendTo("http://my-url.com/2");
+      await sendTo("http://my-url.com/3");
+
+      const { body } = await request(quirrel)
+        .get("/queues/")
+        .send({ body: JSON.stringify({ foo: "bar" }) })
+        .expect(200);
+
+      expect(body.sort()).toEqual(
+        [
+          "http://my-url.com/1",
+          "http://my-url.com/2",
+          "http://my-url.com/3",
+        ].sort()
+      );
+    });
+
     describe("retrieve delayed jobs", () => {
       test("all", async () => {
         const {
