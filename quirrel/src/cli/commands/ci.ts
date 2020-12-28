@@ -1,24 +1,92 @@
 import { Command } from "commander";
 import Table from "easy-table";
+import { QuirrelClient } from "../../client";
+import { getApplicationBaseUrl } from "../../client/config";
+import type { JobDTO } from "../../client/job";
 import { CronDetector, DetectedCronJob } from "../cron-detector";
 
-function printDetectedJobs(jobs: Iterable<DetectedCronJob>) {
-  console.log("Detected the following Jobs:\n");
+function printDetectedJobs(jobs: DetectedCronJob[]) {
+  console.log(
+    Table.print(
+      jobs.map((j) => ({
+        Route: j.route,
+        Schedule: j.isValid ? j.schedule : j.schedule + " (invalid, skipping)",
+      }))
+    )
+  );
+}
 
-  const t = new Table();
+async function getOldJobs() {
+  const quirrel = new QuirrelClient({
+    async handler() {},
+    route: "",
+  });
 
-  for (const job of jobs) {
-    t.cell("Route", job.route);
-    if (job.isValid) {
-      t.cell("Schedule", job.schedule);
-    } else {
-      t.cell("Schedule", job.schedule + " (invalid, skipping)");
-    }
+  const endpointsRes = await quirrel.makeRequest("/queues/");
+  const endpoints = (await endpointsRes.json()) as string[];
 
-    t.newRow();
+  const jobs: JobDTO[] = [];
+
+  await Promise.all(
+    endpoints.map(async (endpoint) => {
+      const jobRes = await quirrel.makeRequest(
+        `/queues/${encodeURIComponent(endpoint)}/${encodeURIComponent("@cron")}`
+      );
+
+      if (jobRes.status !== 200) {
+        return;
+      }
+
+      jobs.push(await jobRes.json());
+    })
+  );
+
+  return jobs;
+}
+
+function computeObsoleteJobs(oldJobs: JobDTO[], newJobs: DetectedCronJob[]) {
+  const applicationBaseUrl = getApplicationBaseUrl();
+
+  const oldJobsAsDetected = oldJobs.map(
+    (j): DetectedCronJob => ({
+      framework: "doesn't matter",
+      isValid: true,
+      route: j.endpoint.slice(applicationBaseUrl.length + 1),
+      schedule: j.repeat!.cron!,
+    })
+  );
+
+  return oldJobsAsDetected.filter(
+    (oldJob) => !newJobs.some((newJob) => newJob.route === oldJob.route)
+  );
+}
+
+async function dealWithObsoleteJobs(
+  oldJobs: JobDTO[],
+  newJobs: DetectedCronJob[],
+  dryRun: boolean
+) {
+  const obsoleteJobs = computeObsoleteJobs(oldJobs, newJobs);
+
+  if (obsoleteJobs.length === 0) {
+    return;
   }
 
-  console.log(t.toString());
+  console.log("The following jobs are obsolete and will be removed:\n");
+  printDetectedJobs(obsoleteJobs);
+
+  if (!dryRun) {
+    await Promise.all(
+      obsoleteJobs.map(async (obsoleteJob) => {
+        const client = new QuirrelClient({
+          async handler() {},
+          route: obsoleteJob.route,
+        });
+
+        await client.delete("@cron");
+      })
+    );
+  }
 }
 
 export default async function registerCI(program: Command) {
@@ -36,17 +104,22 @@ export default async function registerCI(program: Command) {
           process.env.NODE_ENV = "production";
         }
 
+        const oldJobs = await getOldJobs();
+
         const detector = new CronDetector(cwd, undefined, dryRun);
         await detector.readExisting();
 
         const jobs = detector.getDetectedJobs();
 
+        console.log("Detected the following Jobs:\n");
         printDetectedJobs(jobs);
+
+        await dealWithObsoleteJobs(oldJobs, jobs, dryRun);
 
         if (dryRun) {
           console.log("Skipping registration.");
         } else {
-          console.log("Successfully registered with Quirrel.");
+          console.log("Successfully updated.");
         }
       }
     );
