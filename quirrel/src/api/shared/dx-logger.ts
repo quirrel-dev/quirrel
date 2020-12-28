@@ -77,7 +77,7 @@ Listening on {yellow ${address}}.`.trim()
       return;
     }
   }
-  
+
   startingExecution(job: {
     id: string;
     tokenId: string;
