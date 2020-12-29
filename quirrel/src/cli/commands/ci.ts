@@ -107,9 +107,11 @@ export default async function registerCI(program: Command) {
         const oldJobs = await getOldJobs();
 
         const detector = new CronDetector(cwd, undefined, dryRun);
-        await detector.readExisting();
+        await detector.awaitReady();
 
         const jobs = detector.getDetectedJobs();
+
+        await detector.close();
 
         console.log("Detected the following Jobs:\n");
         printDetectedJobs(jobs);

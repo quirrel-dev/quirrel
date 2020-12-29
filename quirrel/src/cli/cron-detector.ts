@@ -1,9 +1,8 @@
-import { Gaze } from "gaze";
 import { cron, QuirrelClient } from "../client/index";
 import * as fs from "fs/promises";
-import globby from "globby";
 import type { FastifyInstance } from "fastify";
 import { makeFetchMockConnectedTo } from "./fetch-mock";
+import * as chokidar from "chokidar";
 
 function requireFrameworkClientForDevelopmentDefaults(framework: string) {
   require(`../${framework}`);
@@ -41,13 +40,39 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 }
 
 export class CronDetector {
-  private gaze: any;
+  private watcher: chokidar.FSWatcher;
+  private ready = false;
 
   constructor(
     private readonly cwd: string,
     private readonly connectedTo?: FastifyInstance,
     private readonly dryRun?: boolean
-  ) {}
+  ) {
+    this.watcher = chokidar.watch(["**/*.[jt]s", "**/*.[jt]sx"], {
+      ignored: ["node_modules"],
+    });
+
+    this.watcher.on("add", this.on("added"));
+    this.watcher.on("change", this.on("changed"));
+    this.watcher.on("unlink", this.on("deleted"));
+    this.watcher.on("ready", () => {
+      this.ready = true;
+    });
+  }
+
+  public async close() {
+    await this.watcher.close();
+  }
+
+  public async awaitReady() {
+    if (this.ready) {
+      return;
+    }
+
+    await new Promise((resolve) => {
+      this.watcher.on("ready", resolve);
+    });
+  }
 
   private getQuirrelClient(job: DetectedCronJob) {
     if (this.dryRun) {
@@ -63,31 +88,6 @@ export class CronDetector {
         ? makeFetchMockConnectedTo(this.connectedTo)
         : undefined,
     });
-  }
-
-  public async readExisting() {
-    const files = await globby(["**/*.[jt]s", "**/*.[jt]sx"], {
-      cwd: this.cwd,
-      gitignore: true,
-      dot: true,
-      ignore: ["node_modules"],
-    });
-
-    await Promise.all(files.map(this.on("added")));
-  }
-
-  public startWatching() {
-    this.gaze = new Gaze(["**/*.[jt]s", "**/*.[jt]sx"], {
-      cwd: this.cwd,
-    });
-
-    this.gaze.on("changed", this.on("changed"));
-    this.gaze.on("deleted", this.on("deleted"));
-    this.gaze.on("added", this.on("added"));
-
-    return {
-      stop: () => this.gaze.close(),
-    };
   }
 
   private pathToCronJob: Record<string, DetectedCronJob> = {};
