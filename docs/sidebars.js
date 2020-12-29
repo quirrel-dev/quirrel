@@ -13,7 +13,6 @@ module.exports = {
     "docs/faq",
   ],
   docs: [
-    "api/index",
     {
       type: "category",
       label: "API Reference",

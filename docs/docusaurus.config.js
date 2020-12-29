@@ -50,7 +50,7 @@ module.exports = {
           position: "left",
         },
         {
-          to: "/api",
+          to: "/api/queue",
           activeBasePath: "api",
           label: "API",
           position: "left",

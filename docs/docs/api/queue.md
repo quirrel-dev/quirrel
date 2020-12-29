@@ -1,9 +1,7 @@
 ---
 title: Queue
+hide_title: true
 ---
-
-This is the common API Reference for the Quirrel client.
-
 ## `Queue`
 
 Depending on the framework, creating a queue works a bit different.
