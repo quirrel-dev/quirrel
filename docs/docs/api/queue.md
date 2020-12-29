@@ -1,6 +1,5 @@
 ---
-title: API Reference
-slug: /api
+title: Queue
 ---
 
 This is the common API Reference for the Quirrel client.

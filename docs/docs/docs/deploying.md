@@ -15,7 +15,16 @@ There are three main environment variables you need to specify in your deploymen
 After setting these variables, you can deploy your application and Quirrel should be working.
 If it doesn't, feel free to [reach out](mailto:troubleshooting@quirrel.dev).
 
-:::note
+:::note Cron Jobs
+If you're using [CronJobs()](/api/cronjob), make sure to run `quirrel ci` during the deploy process.
+
+```json
+"scripts": { "vercel-build": "npm run build && quirrel ci" }
+```
+
+:::
+
+:::note VERCEL_URL
 If you're on Vercel, you can connect `QUIRREL_BASE_URL` to your `VERCEL_URL`.
 Only do this for preview environments, _not for production_!
 `QUIRREL_BASE_URL` is used to determine the deployment that your jobs should be executed on.

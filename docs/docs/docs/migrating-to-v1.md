@@ -6,7 +6,7 @@ On 4th of January, Quirrel 1.0 was released.
 
 What's new?
 
-- new, heavily improved `CronJob`
+- new, heavily improved [`CronJob`](/api/cronjob)
 - there are new clients for:
   - [Redwood](/api/redwood)
   - [Nuxt.js](/api/nuxt)
@@ -37,5 +37,5 @@ To migrate your project to v1, follow these steps:
      }
    )
    ```
-1. Optional: Transition your self-made cron jobs to Quirrel's new `CronJob()`
+1. Optional: Transition your self-made cron jobs to Quirrel's new [`CronJob()`](/api/cronjob)
 

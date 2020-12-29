@@ -1,5 +1,5 @@
 module.exports = {
-  docs: [
+  home: [
     "docs/introduction",
     {
       type: "category",
@@ -12,8 +12,14 @@ module.exports = {
     "docs/how-quirrel-works",
     "docs/faq",
   ],
-  api: [
-    "api/api",
+  docs: [
+    "api/index",
+    {
+      type: "category",
+      label: "API Reference",
+      collapsed: false,
+      items: ["api/queue", "api/cronjob"],
+    },
     {
       type: "category",
       label: "Frameworks",
