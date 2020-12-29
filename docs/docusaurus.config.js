@@ -44,7 +44,7 @@ module.exports = {
       hideOnScroll: true,
       items: [
         {
-          to: "/docs",
+          to: "/",
           activeBasePath: "docs",
           label: "Docs",
           position: "left",
@@ -79,7 +79,7 @@ module.exports = {
             },
             {
               label: "Deploy",
-              to: "/docs/deploying",
+              to: "/deploying",
             },
           ],
         },
@@ -133,8 +133,7 @@ module.exports = {
         docs: {
           routeBasePath: "/",
           sidebarPath: require.resolve("./sidebars.js"),
-          editUrl:
-            "https://github.com/quirrel-dev/quirrel/edit/master/docs/",
+          editUrl: "https://github.com/quirrel-dev/quirrel/edit/master/docs/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),

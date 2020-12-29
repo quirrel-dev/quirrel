@@ -1,6 +1,6 @@
 ---
 title: Introduction
-slug: /docs
+slug: /
 ---
 
 Welcome to the Quirrel Docs 🎉  
@@ -16,7 +16,7 @@ The Quirrel Docs are divided into three main sections:
 - *API* (reachable via the menu bar) is for development. It talks about the meaning of all the different Quirrel parameters.
 - *Deploying* (on the sidebar) is for when your project goes live. It guides you through making the right settings with your hosting provider.
 
-Additionally, there's [How Quirrel Works](docs/how-quirrel-works) if you want to get an understanding of the system and an [FAQ](docs/faq) for all things that don't fall into one of the other categories.
+Additionally, there's [How Quirrel Works](how-quirrel-works) if you want to get an understanding of the system and an [FAQ](faq) for all things that don't fall into one of the other categories.
 
 ## Wtf is "Quirrel"?
 
