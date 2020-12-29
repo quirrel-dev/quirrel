@@ -8,6 +8,7 @@ module.exports = {
       items: ["docs/getting-started/next-js", "docs/getting-started/blitz-js"],
     },
     "docs/deploying",
+    "docs/migrating-to-v1",
     "docs/how-quirrel-works",
     "docs/faq",
   ],

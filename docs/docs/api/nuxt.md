@@ -2,8 +2,7 @@
 title: Nuxt.js
 ---
 
-```ts
-// api/someQueue.js
+```ts title="api/someQueue.js"
 import { Queue } from "quirrel/nuxt";
 
 export default Queue(
@@ -14,8 +13,7 @@ export default Queue(
 );
 ```
 
-```js
-// nuxt.config.js
+```js title="nuxt.config.js"
 export default {
   serverMiddleware: [
     // will register the queue with Nuxt

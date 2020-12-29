@@ -2,8 +2,7 @@
 title: Vercel Serverless Functions
 ---
 
-```ts
-// api/someQueue.ts
+```ts title="api/someQueue.ts"
 import { Queue } from "quirrel/vercel";
 
 export default Queue(

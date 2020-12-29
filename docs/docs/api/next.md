@@ -2,8 +2,7 @@
 title: Next.js
 ---
 
-```ts
-// pages/api/someQueue.ts
+```ts title="pages/api/someQueue.ts"
 import { Queue } from "quirrel/next";
 
 export default Queue(

@@ -2,8 +2,7 @@
 title: Blitz.js
 ---
 
-```ts
-// app/api/someQueue.ts
+```ts title="app/api/someQueue.ts"
 import { Queue } from "quirrel/blitz";
 
 export default Queue(

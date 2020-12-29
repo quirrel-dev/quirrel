@@ -2,8 +2,7 @@
 title: Redwood
 ---
 
-```ts
-// api/src/functions/someQueue.js
+```ts title="api/src/functions/someQueue.js"
 import { Queue } from "quirrel/redwood";
 
 export const handler = Queue(
