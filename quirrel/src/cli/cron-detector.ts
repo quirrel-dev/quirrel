@@ -1,5 +1,5 @@
 import { cron, QuirrelClient } from "../client/index";
-import * as fs from "fs/promises";
+import { promises as fs } from "fs";
 import type { FastifyInstance } from "fastify";
 import { makeFetchMockConnectedTo } from "./fetch-mock";
 import * as chokidar from "chokidar";
