@@ -4,6 +4,7 @@ import { QuirrelClient } from "../../client";
 import { getApplicationBaseUrl } from "../../client/config";
 import type { JobDTO } from "../../client/job";
 import { CronDetector, DetectedCronJob } from "../cron-detector";
+import * as z from "zod";
 
 function printDetectedJobs(jobs: DetectedCronJob[]) {
   console.log(
@@ -22,8 +23,11 @@ async function getOldJobs() {
     route: "",
   });
 
-  const endpointsRes = await quirrel.makeRequest("/queues/");
-  const endpoints = (await endpointsRes.json()) as string[];
+  const endpointsResponse = await quirrel.makeRequest("/queues/");
+  const endpointsResult = z
+    .array(z.string())
+    .safeParse(await endpointsResponse.json());
+  const endpoints = endpointsResult.success ? endpointsResult.data : [];
 
   const jobs: JobDTO[] = [];
 
