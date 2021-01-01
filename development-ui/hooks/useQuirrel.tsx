@@ -259,7 +259,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       }
 
       const getClient = (endpoint: string) => {
-        const result = /((?:https?:\/\/)?.*?)(?::\d+)?\/(.*)/.exec(endpoint);
+        const result = /((?:https?:\/\/)?.*?(?::\d+)?)\/(.*)/.exec(endpoint);
         if (!result) {
           alert("Not a valid endpoint: " + endpoint);
           return;
