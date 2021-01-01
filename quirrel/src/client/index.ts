@@ -1,6 +1,5 @@
 import { Job, JobDTO } from "./job";
 import * as config from "./config";
-import { runBuildTimeChecks } from "./buildtime-checks";
 import * as z from "zod";
 import type { IsExact, AssertTrue } from "conditional-type-checks";
 import Encryptor from "secure-e2ee";
@@ -10,10 +9,6 @@ import fetch from "cross-fetch";
 import type { IncomingHttpHeaders } from "http";
 
 export { Job };
-
-if (process.env.NODE_ENV === "production") {
-  runBuildTimeChecks();
-}
 
 export type QuirrelJobHandler<T> = (job: T) => Promise<void>;
 export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">;
