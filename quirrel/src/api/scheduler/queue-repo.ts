@@ -34,7 +34,7 @@ export class QueueRepo {
     do {
       const result = await this.jobsRepo.findAll({
         count: 1000,
-        cursor: 0,
+        cursor,
       });
 
       cursor = result.cursor;
