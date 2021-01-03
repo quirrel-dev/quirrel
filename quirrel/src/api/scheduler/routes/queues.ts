@@ -10,9 +10,11 @@ import { QueuesEndpointParams } from "../types/queues/endpoint-params";
 import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 
 import { JobsRepo } from "../jobs-repo";
+import { QueueRepo } from "../queue-repo";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = new JobsRepo(fastify.redisFactory);
+  const queueRepo = new QueueRepo(fastify.redis, jobsRepo);
 
   fastify.addHook("preValidation", fastify.tokenAuthPreValidation);
 
@@ -27,37 +29,27 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     async (request, reply) => {
       fastify.telemetrist?.dispatch("enqueue");
 
-      const job = await jobsRepo.enqueue(
-        request.tokenId,
-        request.params.endpoint,
-        request.body
-      );
+      const { tokenId, body } = request;
+      const { endpoint } = request.params;
+
+      const job = await jobsRepo.enqueue(tokenId, endpoint, body);
 
       if (job) {
-        fastify.logger?.jobCreated({ ...job, tokenId: request.tokenId });
+        fastify.logger?.jobCreated({ ...job, tokenId });
+
+        await queueRepo.add(endpoint, tokenId);
       }
 
       reply.status(201).send(job);
     }
   );
 
-  fastify.get<{
-    Querystring: SCANQuerystringParams;
-  }>("/", {
-    schema: {
-      querystring: SCANQueryStringSchema,
-    },
+  fastify.get("/", {
     async handler(request, reply) {
-      fastify.telemetrist?.dispatch("scan_all");
+      fastify.telemetrist?.dispatch("get_queues");
+      const queues = await queueRepo.get(request.tokenId);
 
-      const { cursor, jobs } = await jobsRepo.findByTokenId(request.tokenId, {
-        cursor: request.query.cursor ?? 0,
-      });
-
-      reply.status(200).send({
-        cursor: cursor === 0 ? null : cursor,
-        jobs,
-      });
+      reply.status(200).send(queues);
     },
   });
 
@@ -137,6 +129,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       const { endpoint, id } = request.params;
 
       const result = await jobsRepo.delete(request.tokenId, endpoint, id);
+
+      if (result === "deleted") {
+        fastify.logger?.jobDeleted({ endpoint, id, tokenId: request.tokenId });
+      }
 
       switch (result) {
         case "deleted":

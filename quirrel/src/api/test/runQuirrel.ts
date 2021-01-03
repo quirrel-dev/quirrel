@@ -7,7 +7,9 @@ export async function run(
   incidentReceiver?: QuirrelConfig["incidentReceiver"]
 ) {
   const redisFactory = createRedisFactory(
-    backend === "Redis" ? process.env.REDIS_URL : undefined
+    backend === "Redis"
+      ? process.env.REDIS_URL ?? "redis://localhost:6379"
+      : undefined
   );
   const { httpServer, close } = await runQuirrel({
     port: 0,

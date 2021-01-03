@@ -14,17 +14,13 @@ registerDevelopmentDefaults({
   applicationBaseUrl: "http://localhost:3000",
 });
 
-export type Queue<Payload> = Omit<QuirrelClient<Payload>, "respondTo">;
+export type Queue<Payload> = Omit<QuirrelClient<Payload>, "respondTo" | "makeRequest">;
 
 export function Queue<Payload>(
   route: string,
   handler: (payload: Payload) => Promise<void>,
   defaultJobOptions?: DefaultJobOptions
 ): Queue<Payload> {
-  if (!route.startsWith("api/")) {
-    route = "api/" + route;
-  }
-
   const quirrel = new QuirrelClient<Payload>({
     defaultJobOptions,
     handler,

@@ -1,6 +1,5 @@
 import { Job, JobDTO } from "./job";
 import * as config from "./config";
-import { runBuildTimeChecks } from "./buildtime-checks";
 import * as z from "zod";
 import type { IsExact, AssertTrue } from "conditional-type-checks";
 import Encryptor from "secure-e2ee";
@@ -10,10 +9,6 @@ import fetch from "cross-fetch";
 import type { IncomingHttpHeaders } from "http";
 
 export { Job };
-
-if (process.env.NODE_ENV === "production") {
-  runBuildTimeChecks();
-}
 
 export type QuirrelJobHandler<T> = (job: T) => Promise<void>;
 export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">;
@@ -56,6 +51,8 @@ interface CreateQuirrelClientArgs<T> {
      */
     oldSecrets?: string[];
   };
+
+  fetch?: typeof fetch;
 }
 
 const vercelMs = z
@@ -67,7 +64,7 @@ const vercelMs = z
 
 const timeDuration = z.union([z.number().positive(), vercelMs]);
 
-const cron = z
+export const cron = z
   .string()
   .regex(
     /(@(yearly|monthly|weekly|daily|hourly))|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,7})/,
@@ -180,13 +177,6 @@ function getEncryptor(
   return new Encryptor(encryptionSecret, [encryptionSecret, ...oldSecrets]);
 }
 
-function prefixUriToUrl(uri: string): string {
-  if (uri.startsWith("http://") || uri.startsWith("https://")) {
-    return uri;
-  }
-  return "https://" + uri;
-}
-
 function getAuthHeaders(
   token: string | undefined
 ): { Authorization: string } | {} {
@@ -203,8 +193,10 @@ export class QuirrelClient<T> {
   private defaultJobOptions;
   private encryptor;
   private authHeaders;
+  private quirrelBaseUrl;
   private baseUrl;
   private token;
+  private fetch;
 
   constructor(args: CreateQuirrelClientArgs<T>) {
     this.handler = args.handler;
@@ -215,9 +207,10 @@ export class QuirrelClient<T> {
 
     const quirrelBaseUrl =
       args.config?.quirrelBaseUrl ?? config.getQuirrelBaseUrl();
-    const applicationBaseUrl = prefixUriToUrl(
+    const applicationBaseUrl = config.prefixWithProtocol(
       args.config?.applicationBaseUrl ?? config.getApplicationBaseUrl()!
     );
+    this.quirrelBaseUrl = quirrelBaseUrl;
     this.baseUrl =
       quirrelBaseUrl +
       "/queues/" +
@@ -228,6 +221,19 @@ export class QuirrelClient<T> {
       args.config?.encryptionSecret ?? config.getEncryptionSecret(),
       args.config?.oldSecrets ?? config.getOldEncryptionSecrets() ?? undefined
     );
+
+    this.fetch = args.fetch ?? fetch;
+  }
+
+  async makeRequest(uri: string, init?: RequestInit) {
+    return await this.fetch(this.quirrelBaseUrl + uri, {
+      credentials: "omit",
+      ...init,
+      headers: {
+        ...this.authHeaders,
+        ...init?.headers,
+      },
+    });
   }
 
   /**
@@ -258,7 +264,7 @@ export class QuirrelClient<T> {
       stringifiedBody = await this.encryptor.encrypt(stringifiedBody);
     }
 
-    const res = await fetch(this.baseUrl, {
+    const res = await this.fetch(this.baseUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -311,7 +317,7 @@ export class QuirrelClient<T> {
     let cursor: number | null = 0;
 
     while (cursor !== null) {
-      const res = await fetch(this.baseUrl + "?cursor=" + cursor, {
+      const res = await this.fetch(this.baseUrl + "?cursor=" + cursor, {
         headers: this.authHeaders,
       });
 
@@ -333,7 +339,7 @@ export class QuirrelClient<T> {
    * @returns null if no job was found.
    */
   async getById(id: string): Promise<Job<T> | null> {
-    const res = await fetch(this.baseUrl + "/" + id, {
+    const res = await this.fetch(this.baseUrl + "/" + id, {
       headers: this.authHeaders,
     });
 
@@ -353,7 +359,7 @@ export class QuirrelClient<T> {
    * @returns false if job could not be found.
    */
   async invoke(id: string): Promise<boolean> {
-    const res = await fetch(this.baseUrl + "/" + id, {
+    const res = await this.fetch(this.baseUrl + "/" + id, {
       method: "POST",
       headers: this.authHeaders,
     });
@@ -374,7 +380,7 @@ export class QuirrelClient<T> {
    * @returns false if job could not be found.
    */
   async delete(id: string): Promise<boolean> {
-    const res = await fetch(this.baseUrl + "/" + id, {
+    const res = await this.fetch(this.baseUrl + "/" + id, {
       method: "DELETE",
       headers: this.authHeaders,
     });
@@ -387,7 +393,7 @@ export class QuirrelClient<T> {
       return true;
     }
 
-    throw new Error("Unexpected response: " + res.body);
+    throw new Error("Unexpected response: " + (await res.text()));
   }
 
   async respondTo(

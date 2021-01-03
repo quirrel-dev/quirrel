@@ -1,6 +1,7 @@
 import { Logger } from "./logger";
 import * as uuid from "uuid";
 import pino from "pino";
+import { JobDTO } from "../../client/job";
 
 export class StructuredLogger implements Logger {
   public readonly pino = pino();
@@ -21,13 +22,15 @@ export class StructuredLogger implements Logger {
   ): void {
     this.pino.error({ error, job }, "Caught error during execution");
   }
-  jobCreated(job: {
-    id: string;
-    body: string;
-    tokenId: string;
-    endpoint: string;
-  }): void {
+  jobCreated(
+    job: JobDTO & {
+      tokenId: string;
+    }
+  ): void {
     this.pino.info({ job }, "Created job.");
+  }
+  jobDeleted(job: { endpoint: string; id: string; tokenId: string }): void {
+    this.pino.info({ job }, "Deleted job.");
   }
   startingExecution(job: {
     id: string;

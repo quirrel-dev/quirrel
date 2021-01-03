@@ -13,16 +13,17 @@
     "!jest.config.js"
   ],
   "main": "dist/src/index.js",
-  "version": "1.0.0-alpha-1",
+  "version": "1.0.0-alpha-2-4",
   "engines": {
-    "node": "12 || 14 || 15"
+    "node": "12 || 14 || 15",
+    "npm": "7"
   },
   "bin": {
     "quirrel": "dist/src/cli/index.js"
   },
   "scripts": {
     "start": "node dist/src/cli/index.js",
-    "test": "DISABLE_TELEMETRY=true jest --forceExit",
+    "test": "DISABLE_TELEMETRY=true jest --forceExit --runInBand",
     "build": "run-s build:schemas build:proxies build:tsc",
     "build:schemas": "json2ts -i src/api/scheduler/schemas/ -o src/api/scheduler/types/",
     "build:tsc": "tsc",
@@ -60,6 +61,7 @@
     "basic-auth": "^2.0.1",
     "body-parser": "^1.19.0",
     "chalk": "^4.1.0",
+    "chokidar": "^3.4.3",
     "commander": "^6.1.0",
     "conditional-type-checks": "^1.0.5",
     "connect": "^3.7.0",
@@ -73,7 +75,6 @@
     "fastify-oas": "^3.0.3",
     "fastify-plugin": "^2.3.3",
     "fastify-websocket": "^2.0.7",
-    "globby": "^11.0.1",
     "ioredis": "^4.19.2",
     "ioredis-mock": "^5.1.0",
     "ms": "^2.1.3",

@@ -45,12 +45,11 @@ This is all we need to create our first Queue!
 
 Create a new [API Route](https://nextjs.org/docs/api-routes/introduction) at `pages/api/queues/email.js` and paste the following: 
 
-```js
-// pages/api/queues/email.js
+```js title="pages/api/queues/email.js"
 import { Queue } from "@quirrel/next"
 
 export default Queue(
-  "queues/email", // 👈 the location it's reachable on, sans api/
+  "api/queues/email", // 👈 the route it's reachable on
   async job => {
     await email.send( ... )
   }

@@ -1,23 +1,36 @@
 module.exports = {
-  docs: [
-    "docs/introduction",
+  home: [
+    "introduction",
     {
       type: "category",
       label: "Getting Started",
       collapsed: false,
-      items: ["docs/getting-started/next-js", "docs/getting-started/blitz-js"],
+      items: ["getting-started/next-js", "getting-started/blitz-js"],
     },
-    "docs/deploying",
-    "docs/how-quirrel-works",
-    "docs/faq",
+    "deploying",
+    "migrating-to-v1",
+    "how-quirrel-works",
+    "faq",
   ],
-  api: [
-    "api/api",
+  docs: [
     {
       type: "category",
-      label: "Clients",
+      label: "API Reference",
       collapsed: false,
-      items: ["api/next", "api/blitz", "api/vercel"],
+      items: ["api/queue", "api/cronjob"],
+    },
+    {
+      type: "category",
+      label: "Frameworks",
+      collapsed: false,
+      items: [
+        "api/next",
+        "api/blitz",
+        "api/redwood",
+        "api/nuxt",
+        "api/express",
+        "api/vercel",
+      ],
     },
   ],
 };

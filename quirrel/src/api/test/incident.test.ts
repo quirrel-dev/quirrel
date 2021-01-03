@@ -71,7 +71,7 @@ function testAgainst(backend: "Redis" | "Mock") {
         })
         .expect(201);
 
-      await delay(50);
+      await delay(100);
 
       expect(incidentReceiverBodies).toEqual([
         {

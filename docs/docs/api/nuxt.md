@@ -1,20 +1,29 @@
 ---
-title: Next.js
+title: Nuxt.js
 ---
 
-```ts title="pages/api/someQueue.ts"
-import { Queue } from "quirrel/next";
+```ts title="api/someQueue.js"
+import { Queue } from "quirrel/nuxt";
 
 export default Queue(
-    "api/someQueue",
-    async (job) => {
-        // do something
-    }
+  "someQueue",
+  async (job) => {
+    // do something
+  }
 );
 ```
 
+```js title="nuxt.config.js"
+export default {
+  serverMiddleware: [
+    // will register the queue with Nuxt
+    "~/api/someQueue.js",
+  ]
+}
+```
+
 Creates a new Queue.
-Make sure to export it from an [API Route](https://nextjs.org/docs/api-routes/introduction), otherwise it won't work.
+Make sure to export it from a [Server Middleware](https://nuxtjs.org/docs/2.x/configuration-glossary/configuration-servermiddleware), otherwise it won't work.
 
 #### Parameters
 

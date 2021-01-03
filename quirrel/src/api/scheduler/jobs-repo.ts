@@ -79,6 +79,25 @@ export class JobsRepo {
     };
   }
 
+  public async findAll({ count, cursor }: PaginationOpts) {
+    const { newCursor, jobs } = await this.producer.scanQueuePattern(
+      encodeQueueDescriptor("*", "*"),
+      cursor,
+      count
+    );
+
+    return {
+      cursor: newCursor,
+      jobs: jobs.map((job) => {
+        const { tokenId } = decodeQueueDescriptor(job.queue);
+        return {
+          ...JobsRepo.toJobDTO(job),
+          tokenId,
+        };
+      }),
+    };
+  }
+
   public async findByTokenId(
     byTokenId: string,
     { count, cursor }: PaginationOpts

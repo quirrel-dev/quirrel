@@ -1,20 +1,22 @@
 ---
-title: Next.js
+title: Redwood
 ---
 
-```ts title="pages/api/someQueue.ts"
-import { Queue } from "quirrel/next";
+```ts title="api/src/functions/someQueue.js"
+import { Queue } from "quirrel/redwood";
 
-export default Queue(
-    "api/someQueue",
-    async (job) => {
-        // do something
-    }
+export const handler = Queue(
+  "someQueue",
+  async (name) => {
+    // do something
+  }
 );
+
+export default handler;
 ```
 
 Creates a new Queue.
-Make sure to export it from an [API Route](https://nextjs.org/docs/api-routes/introduction), otherwise it won't work.
+Make sure to export it from a [Serverless Function](https://redwoodjs.com/docs/serverless-functions), otherwise it won't work.
 
 #### Parameters
 

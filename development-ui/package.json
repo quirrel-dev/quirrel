@@ -1,7 +1,4 @@
 {
-  "name": "development-ui",
-  "version": "0.9.0",
-  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,13 +6,13 @@
   },
   "dependencies": {
     "@feedback-fish/react": "^1.1.0",
-    "@quirrel/client": "^0.9.0",
     "@tailwindui/react": "^0.1.1",
     "autoprefixer": "^10.1.0",
     "clsx": "^1.1.1",
     "lodash": "^4.17.20",
     "next": "^10.0.3",
     "postcss": "^8.2.1",
+    "quirrel": "^1.0.0-alpha-2-1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "tailwindcss": "^2.0.2"

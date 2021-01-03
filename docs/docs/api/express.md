@@ -1,20 +1,27 @@
 ---
-title: Next.js
+title: Express / Connect
 ---
 
-```ts title="pages/api/someQueue.ts"
-import { Queue } from "quirrel/next";
+```ts
+import { Queue } from "quirrel/connect";
+import Express from "express";
 
-export default Queue(
-    "api/someQueue",
-    async (job) => {
-        // do something
-    }
-);
+const app = Express()
+
+const someQueue = Queue(
+  "someQueue",
+  async (job) => {
+    // do something
+  }
+)
+
+app.use(someQueue)
+
+app.listen(3000)
 ```
 
 Creates a new Queue.
-Make sure to export it from an [API Route](https://nextjs.org/docs/api-routes/introduction), otherwise it won't work.
+Since there's no convention for Express's default development port, you'll have to specify `QUIRREL_BASE_URL`.
 
 #### Parameters
 
