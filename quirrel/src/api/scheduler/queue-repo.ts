@@ -28,7 +28,7 @@ export class QueueRepo {
       return;
     }
 
-    const tokenIdToEndpoints: Record<string, string[]> = {};
+    const tokenIdToEndpoints: Record<string, Set<string>> = {};
 
     let cursor = 0;
     do {
@@ -41,10 +41,10 @@ export class QueueRepo {
 
       result.jobs.forEach(({ endpoint, tokenId }) => {
         if (!tokenIdToEndpoints[tokenId]) {
-          tokenIdToEndpoints[tokenId] = [];
+          tokenIdToEndpoints[tokenId] = new Set();
         }
 
-        tokenIdToEndpoints[tokenId].push(endpoint);
+        tokenIdToEndpoints[tokenId].add(endpoint);
       });
     } while (cursor !== 0);
 
