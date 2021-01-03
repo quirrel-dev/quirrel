@@ -94,7 +94,7 @@ function testAgainst(backend: "Redis" | "Mock") {
       await sendTo("http://my-url.com/3");
 
       await redis.del("queues:by-token:anonymous");
-      await redis.del("queues:by-token:anonymous:is-migrated");
+      await redis.del("queues-migrated");
 
       const { body } = await request(quirrel)
         .get("/queues/")
