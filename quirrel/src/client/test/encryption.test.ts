@@ -41,7 +41,13 @@ test("encryption", async () => {
     },
   });
 
-  await quirrel.enqueue("hello world");
+  const job = await quirrel.enqueue("hello world");
+
+  const jobAgainButFetched = await quirrel.getById(job.id);
+  expect(jobAgainButFetched).not.toBeNull();
+
+  const nonExistantJob = await quirrel.getById("non-existant");
+  expect(nonExistantJob).toBeNull();
 
   await delay(200);
 
