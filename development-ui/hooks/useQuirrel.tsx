@@ -22,8 +22,12 @@ namespace Quirrel {
     completed: Quirrel.JobDescriptor[];
     invoke(job: Quirrel.JobDescriptor): Promise<void>;
     delete(job: Quirrel.JobDescriptor): Promise<void>;
-    credentials: { baseUrl: string; token?: string };
-    setCredentials: (cred: { baseUrl: string; token?: string }) => void;
+    credentials: { baseUrl: string; token?: string; encryptionSecret?: string };
+    setCredentials: (cred: {
+      baseUrl: string;
+      token?: string;
+      encryptionSecret?: string;
+    }) => void;
   }
 
   export namespace Activity {
@@ -99,9 +103,11 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   const [credentials, setCredentials] = useState<{
     baseUrl: string;
     token?: string;
+    encryptionSecret?: string;
   }>({
     baseUrl: "http://localhost:9181",
     token: undefined,
+    encryptionSecret: undefined,
   });
 
   const clientGetter = useRef<(endpoint: string) => QuirrelClient<any>>();
@@ -271,6 +277,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
           route,
           config: {
             applicationBaseUrl,
+            encryptionSecret: credentials.encryptionSecret,
             quirrelBaseUrl: baseUrl,
             token,
           },

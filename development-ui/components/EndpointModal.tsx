@@ -30,6 +30,9 @@ export function EndpointModal() {
 
   const [endpoint, setEndpoint] = useState(credentials.baseUrl ?? "");
   const [token, setToken] = useState(credentials.token ?? "");
+  const [encryptionSecret, setEncryptionSecret] = useState(
+    credentials.encryptionSecret ?? ""
+  );
 
   return (
     <>
@@ -157,6 +160,13 @@ export function EndpointModal() {
                   onChange={(evt) => setToken(evt.target.value)}
                   className="border-gray-300 placeholder-gray-500 appearance-none relative block w-full px-3 py-2 border text-gray-900 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
                 />
+
+                <input
+                  placeholder="Encryption Secret"
+                  value={encryptionSecret}
+                  onChange={(evt) => setEncryptionSecret(evt.target.value)}
+                  className="border-gray-300 placeholder-gray-500 appearance-none relative block w-full px-3 py-2 border text-gray-900 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
+                />
               </div>
             </div>
           </div>
@@ -171,6 +181,9 @@ export function EndpointModal() {
                 setCredentials({
                   baseUrl: endpoint,
                   token,
+                  encryptionSecret: !!encryptionSecret
+                    ? encryptionSecret
+                    : undefined,
                 });
                 setShowModal(false);
               }}
