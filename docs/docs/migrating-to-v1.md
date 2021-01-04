@@ -14,7 +14,7 @@ What's new?
   - [Vercel Serverless Functions](/api/vercel)
 - [ui.quirrel.dev](https://ui.quirrel.dev) can be used for monitoring production
 
-The full release notes can be found [here](https://quirrel.dev/TODO:fillout).
+The full release notes can be found [here](https://github.com/quirrel-dev/quirrel/releases/tag/v1.0.0).
 
 To enable the new client libraries, there are two breaking changes:
 
