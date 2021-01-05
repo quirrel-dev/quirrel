@@ -11,6 +11,8 @@ import { BaseLayout } from "../layouts/BaseLayout";
 import { QuirrelClient, Job } from "quirrel/client";
 import _ from "lodash";
 
+let alreadyAlerted = false;
+
 type JobDTO = Omit<Job<any>, "invoke" | "delete" | "runAt"> & {
   runAt: string;
 };
@@ -280,6 +282,16 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
             encryptionSecret: credentials.encryptionSecret,
             quirrelBaseUrl: baseUrl,
             token,
+          },
+          catchDecryptionErrors(error) {
+            if (alreadyAlerted) {
+              return;
+            }
+
+            alreadyAlerted = true;
+            window.alert(
+              "One of your jobs can't be decrypted in the browser, since it's been encrypted with an old version of Quirrel. No worries though - this doesn't affect your application at all, since that uses Node's Crypto."
+            );
           },
         });
       };
