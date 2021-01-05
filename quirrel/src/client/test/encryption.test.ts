@@ -58,3 +58,29 @@ test("encryption", async () => {
   server.teardown();
   endpoint.close();
 });
+
+test("catchDecryptionErrors", async () => {
+  const decryptionErrors: Error[] = [];
+  const quirrel = new QuirrelClient({
+    async handler() {},
+    route: "/",
+    config: {
+      applicationBaseUrl: "hello",
+      quirrelBaseUrl: "lelel",
+      encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
+    },
+    catchDecryptionErrors(error) {
+      decryptionErrors.push(error);
+    },
+  });
+
+  const result = await (quirrel as any).decryptAndDecodeBody(
+    "This is non-decryptable"
+  );
+  expect(result).toEqual("This is non-decryptable");
+
+  expect(decryptionErrors.length).toBe(1);
+  expect(decryptionErrors[0].message).toBe(
+    "Cannot read property 'length' of undefined"
+  );
+});
