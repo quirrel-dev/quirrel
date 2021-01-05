@@ -53,6 +53,7 @@ interface CreateQuirrelClientArgs<T> {
   };
 
   fetch?: typeof fetch;
+  catchDecryptionErrors?: (error: Error) => void;
 }
 
 const vercelMs = z
@@ -197,6 +198,7 @@ export class QuirrelClient<T> {
   private baseUrl;
   private token;
   private fetch;
+  private catchDecryptionErrors;
 
   constructor(args: CreateQuirrelClientArgs<T>) {
     this.handler = args.handler;
@@ -221,7 +223,7 @@ export class QuirrelClient<T> {
       args.config?.encryptionSecret ?? config.getEncryptionSecret(),
       args.config?.oldSecrets ?? config.getOldEncryptionSecrets() ?? undefined
     );
-
+    this.catchDecryptionErrors = args.catchDecryptionErrors;
     this.fetch = args.fetch ?? fetch;
   }
 
@@ -289,7 +291,16 @@ export class QuirrelClient<T> {
 
   private async decryptAndDecodeBody(body: string): Promise<T> {
     if (this.encryptor) {
-      body = await this.encryptor.decrypt(body);
+      if (this.catchDecryptionErrors) {
+        try {
+          body = await this.encryptor.decrypt(body);
+        } catch (error) {
+          this.catchDecryptionErrors(error);
+          return body as any;
+        }
+      } else {
+        body = await this.encryptor.decrypt(body);
+      }
     }
 
     return JSON.parse(body);
