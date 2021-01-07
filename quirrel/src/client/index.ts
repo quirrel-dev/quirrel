@@ -7,6 +7,7 @@ import { verify } from "secure-webhooks";
 import ms from "ms";
 import fetch from "cross-fetch";
 import type { IncomingHttpHeaders } from "http";
+import pack from "../../package.json";
 
 export { Job };
 
@@ -193,7 +194,7 @@ export class QuirrelClient<T> {
   private route;
   private defaultJobOptions;
   private encryptor;
-  private authHeaders;
+  private defaultHeaders: Record<string, string>;
   private quirrelBaseUrl;
   private baseUrl;
   private token;
@@ -205,7 +206,10 @@ export class QuirrelClient<T> {
     this.defaultJobOptions = args.defaultJobOptions;
 
     const token = args.config?.token ?? config.getQuirrelToken();
-    this.authHeaders = getAuthHeaders(token);
+    this.defaultHeaders = {
+      ...getAuthHeaders(token),
+      "X-QuirrelClient-Version": pack.version,
+    };
 
     const quirrelBaseUrl =
       args.config?.quirrelBaseUrl ?? config.getQuirrelBaseUrl();
@@ -232,7 +236,7 @@ export class QuirrelClient<T> {
       credentials: "omit",
       ...init,
       headers: {
-        ...this.authHeaders,
+        ...this.defaultHeaders,
         ...init?.headers,
       },
     });
@@ -270,7 +274,7 @@ export class QuirrelClient<T> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...this.authHeaders,
+        ...this.defaultHeaders,
       },
       credentials: "omit",
       body: JSON.stringify({
@@ -329,7 +333,7 @@ export class QuirrelClient<T> {
 
     while (cursor !== null) {
       const res = await this.fetch(this.baseUrl + "?cursor=" + cursor, {
-        headers: this.authHeaders,
+        headers: this.defaultHeaders,
       });
 
       const json = await res.json();
@@ -351,7 +355,7 @@ export class QuirrelClient<T> {
    */
   async getById(id: string): Promise<Job<T> | null> {
     const res = await this.fetch(this.baseUrl + "/" + id, {
-      headers: this.authHeaders,
+      headers: this.defaultHeaders,
     });
 
     if (res.status === 404) {
@@ -372,7 +376,7 @@ export class QuirrelClient<T> {
   async invoke(id: string): Promise<boolean> {
     const res = await this.fetch(this.baseUrl + "/" + id, {
       method: "POST",
-      headers: this.authHeaders,
+      headers: this.defaultHeaders,
     });
 
     if (res.status === 404) {
@@ -393,7 +397,7 @@ export class QuirrelClient<T> {
   async delete(id: string): Promise<boolean> {
     const res = await this.fetch(this.baseUrl + "/" + id, {
       method: "DELETE",
-      headers: this.authHeaders,
+      headers: this.defaultHeaders,
     });
 
     if (res.status === 404) {
