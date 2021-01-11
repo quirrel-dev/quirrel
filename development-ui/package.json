@@ -9,13 +9,15 @@
     "@tailwindui/react": "^0.1.1",
     "autoprefixer": "^10.1.0",
     "clsx": "^1.1.1",
+    "immer": "^8.0.0",
     "lodash": "^4.17.20",
     "next": "^10.0.3",
     "postcss": "^8.2.1",
     "quirrel": "^1.0.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "tailwindcss": "^2.0.2"
+    "tailwindcss": "^2.0.2",
+    "xstate": "^4.15.4"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.165",

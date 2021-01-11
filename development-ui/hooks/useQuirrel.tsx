@@ -10,6 +10,7 @@ import React, {
 import { BaseLayout } from "../layouts/BaseLayout";
 import { QuirrelClient, Job } from "quirrel/client";
 import _ from "lodash";
+import { produce } from "immer";
 
 let alreadyAlerted = false;
 
@@ -98,6 +99,123 @@ const QuirrelCtx = React.createContext<Quirrel.ContextValue>(mockCtxValue);
 
 export function useQuirrel() {
   return useContext(QuirrelCtx);
+}
+
+function useImmer<T>(
+  defaultValue: T
+): [value: T, setState: (recipe: (old: T) => void) => void] {
+  const [value, setState] = useState(defaultValue);
+  const setStateWithImmer = useCallback(
+    (recipe: (v: T) => void): void => {
+      setState((prevState) => produce(prevState, recipe));
+    },
+    [setState]
+  );
+
+  return [value, setStateWithImmer];
+}
+
+function useJobsReducer() {
+  const [state, setState] = useImmer<
+    Pick<Quirrel.ContextValue, "activity" | "pending" | "completed">
+  >({
+    activity: [],
+    completed: [],
+    pending: [],
+  });
+
+  const dump = useCallback(
+    (jobs: JobDTO[]) =>
+      setState((state) => {
+        state.pending.push(
+          ...jobs.map((j) => ({
+            ...j,
+            started: false,
+          }))
+        );
+      }),
+    [setState]
+  );
+
+  const onActivity = useCallback(
+    (action: Quirrel.Activity) =>
+      setState((state) => {
+        state.activity.push(action);
+
+        function findBy({ endpoint, id }: { endpoint: string; id: string }) {
+          return (job: Quirrel.JobDescriptor) =>
+            job.id === id && job.endpoint === endpoint;
+        }
+
+        function findJobIndex(arg: { endpoint: string; id: string }) {
+          return state.pending.findIndex(findBy(arg));
+        }
+
+        function findJob(arg: { endpoint: string; id: string }) {
+          return state.pending[findJobIndex(arg)];
+        }
+
+        switch (action.type) {
+          case "started": {
+            const job = findJob(action.payload);
+            job.started = true;
+            break;
+          }
+
+          case "scheduled": {
+            state.pending.push({
+              ...action.payload,
+              started: false,
+            });
+            break;
+          }
+
+          case "invoked": {
+            const job = findJob(action.payload);
+            job.runAt = new Date(action.date).toISOString();
+            break;
+          }
+
+          case "deleted": {
+            const jobIndex = findJobIndex(action.payload);
+            state.pending.splice(jobIndex, 1);
+            break;
+          }
+
+          case "rescheduled": {
+            const rescheduledJobIndex = state.completed.findIndex(
+              findBy(action.payload)
+            );
+
+            const rescheduledJob = state.completed[rescheduledJobIndex];
+            state.completed.splice(rescheduledJobIndex, 1);
+
+            rescheduledJob.runAt = action.payload.runAt;
+            state.pending.push(rescheduledJob);
+            break;
+          }
+
+          case "completed": {
+            const completedJobIndex = findJobIndex(action.payload);
+            const completedJob = state.pending[completedJobIndex];
+
+            state.completed.push(completedJob);
+            state.pending.splice(completedJobIndex, 1);
+
+            break;
+          }
+        }
+      }),
+    [setState]
+  );
+
+  return [
+    state,
+    {
+      dump,
+      onActivity,
+    },
+  ];
 }
 
 export function QuirrelProvider(props: PropsWithChildren<{}>) {
