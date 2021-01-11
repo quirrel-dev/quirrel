@@ -384,7 +384,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
     connect({
       baseUrl: "http://localhost:9181",
     });
-  });
+  }, []);
 
   return (
     <QuirrelCtx.Provider
