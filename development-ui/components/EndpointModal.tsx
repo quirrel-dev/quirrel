@@ -40,7 +40,9 @@ export function EndpointModal() {
         onClick={() => setShowModal(true)}
         className="text-gray-600 hover:text-gray-700"
       >
-        {formatBaseUrl(endpoint)}
+        {connectedTo?.baseUrl
+          ? formatBaseUrl(connectedTo?.baseUrl)
+          : "Connecting ..."}
 
         <svg
           xmlns="http://www.w3.org/2000/svg"
