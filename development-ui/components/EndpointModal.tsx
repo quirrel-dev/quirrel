@@ -26,12 +26,12 @@ function formatBaseUrl(url: string) {
 export function EndpointModal() {
   const [showModal, setShowModal] = useState(false);
 
-  const { credentials, setCredentials } = useQuirrel();
+  const { connectedTo, connectTo } = useQuirrel();
 
-  const [endpoint, setEndpoint] = useState(credentials.baseUrl ?? "");
-  const [token, setToken] = useState(credentials.token ?? "");
+  const [endpoint, setEndpoint] = useState(connectedTo?.baseUrl ?? "");
+  const [token, setToken] = useState(connectedTo?.token ?? "");
   const [encryptionSecret, setEncryptionSecret] = useState(
-    credentials.encryptionSecret ?? ""
+    connectedTo?.encryptionSecret ?? ""
   );
 
   return (
@@ -40,7 +40,7 @@ export function EndpointModal() {
         onClick={() => setShowModal(true)}
         className="text-gray-600 hover:text-gray-700"
       >
-        {formatBaseUrl(credentials.baseUrl)}
+        {formatBaseUrl(endpoint)}
 
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -177,8 +177,8 @@ export function EndpointModal() {
               type="button"
               disabled={!isUrl(endpoint)}
               className="inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-orange-500 text-base disabled:opacity-50 leading-6 font-medium text-white shadow-sm hover:bg-orange-400 focus:outline-none focus:border-red-700 focus:shadow-outline-red transition ease-in-out duration-150 sm:text-sm sm:leading-5"
-              onClick={async () => {
-                setCredentials({
+              onClick={() => {
+                connectTo({
                   baseUrl: endpoint,
                   token,
                   encryptionSecret: !!encryptionSecret

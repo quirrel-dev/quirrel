@@ -18,7 +18,7 @@ export default function Cron() {
           },
           {
             title: "Schedule",
-            render: (job) => job.repeat?.cron,
+            render: (job) => job.repeat?.cron ?? "",
           },
           {
             title: "ID",

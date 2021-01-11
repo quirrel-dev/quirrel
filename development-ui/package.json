@@ -16,8 +16,7 @@
     "quirrel": "^1.0.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "tailwindcss": "^2.0.2",
-    "xstate": "^4.15.4"
+    "tailwindcss": "^2.0.2"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.165",
