@@ -13,7 +13,7 @@ interface TableProps<T> {
 export function Table<T>(props: TableProps<T>) {
   const { items, columns, endOfRow, extractKey } = props;
   return (
-    <div className="flex flex-col">
+    <div data-test-class="table" className="flex flex-col">
       <div className="-my-2 overflow-x-auto lg:-mx-8">
         <div className="py-2 align-middle inline-block min-w-full md:px-4">
           <div className="shadow overflow-hidden border-b border-gray-200 md:rounded-lg">
@@ -46,7 +46,10 @@ export function Table<T>(props: TableProps<T>) {
                       }
 
                       return (
-                        <td key={col.title} className="px-6 py-4 whitespace-no-wrap">
+                        <td
+                          key={col.title}
+                          className="px-6 py-4 whitespace-no-wrap"
+                        >
                           {child}
                         </td>
                       );
