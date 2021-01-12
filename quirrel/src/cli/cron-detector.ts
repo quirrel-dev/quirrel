@@ -124,8 +124,12 @@ export class CronDetector {
     return async (filePath: string) => {
       const previousJob = this.pathToCronJob[filePath];
 
-      if (fileChangeType === "deleted" && previousJob) {
-        return await this.onJobRemoved(previousJob, filePath);
+      if (fileChangeType === "deleted") {
+        if (previousJob) {
+          await this.onJobRemoved(previousJob, filePath);
+        }
+        
+        return;
       }
 
       const contents = await fs.readFile(filePath, "utf-8");
