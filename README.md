@@ -25,11 +25,9 @@ Quirrel values ...
 - ... free software (it's MIT licensed!)
 - ... easy setup (through [hosted offering](https://quirrel.dev) and easy on-prem)
 
-This repository contains the Quirrel backend, the base Quirrel base Client and the development UI.
-
 ## Getting Started
 
-If you want to learn about Quirrel, do [the tutorial](https://dev.to/quirrel/building-a-water-drinking-reminder-with-next-js-and-quirrel-1ckj)!
+If you want to learn about Quirrel, ceck out [the tutorial](https://dev.to/quirrel/building-a-water-drinking-reminder-with-next-js-and-quirrel-1ckj)!
 
 
 If you want to integrate Quirrel into an existing application, check out the [Getting Started Guide](https://docs.quirrel.dev).

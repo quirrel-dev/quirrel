@@ -1,6 +1,8 @@
 import { createServer, QuirrelServerConfig } from "./scheduler";
 import { getLogger, LoggerType } from "./shared/logger";
 import { createWorker, QuirrelWorkerConfig } from "./worker";
+import pack from "../../package.json";
+import { Telemetrist } from "./shared/telemetrist";
 
 export type QuirrelConfig = Omit<QuirrelServerConfig, "logger"> &
   Omit<QuirrelWorkerConfig, "enableUsageMetering" | "logger"> & {
@@ -16,6 +18,12 @@ export async function runQuirrel(config: QuirrelConfig) {
     enableUsageMetering: !!config.passphrases?.length,
     logger,
   });
+
+  if (!config.disableTelemetry) {
+    new Telemetrist(config.runningInDocker ?? false).record(
+      `/version/${pack.version}`
+    );
+  }
 
   return {
     server,
