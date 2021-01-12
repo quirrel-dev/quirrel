@@ -10,6 +10,7 @@ import { BaseLayout } from "../layouts/BaseLayout";
 import { QuirrelClient, Job } from "quirrel/client";
 import _ from "lodash";
 import { produce } from "immer";
+import delay from "delay";
 
 let alreadyAlerted = false;
 
@@ -93,7 +94,6 @@ const mockCtxValue: Quirrel.ContextValue = {
   invoke: async () => {},
   delete: async () => {},
   connectTo: () => {},
-  connectedTo: { baseUrl: "http://localhost:9181" },
 };
 
 const QuirrelCtx = React.createContext<Quirrel.ContextValue>(mockCtxValue);
@@ -223,12 +223,10 @@ function useQuirrelClient() {
     setInstanceDetails,
   ] = useState<QuirrelInstanceDetails>();
   const clientGetter = useRef<(endpoint: string) => QuirrelClient<unknown>>();
-  const isConnected = !!clientGetter.current;
+  const [isConnected, setIsConnected] = useState(false);
 
   const useInstance = useCallback(
     (instanceDetails: QuirrelInstanceDetails) => {
-      setInstanceDetails(instanceDetails);
-
       let { baseUrl, token } = instanceDetails;
       if (!(baseUrl.startsWith("https://") || baseUrl.startsWith("http://"))) {
         baseUrl = "https://" + baseUrl;
@@ -266,16 +264,25 @@ function useQuirrelClient() {
       }
 
       clientGetter.current = getClient;
+      setInstanceDetails(instanceDetails);
+      setIsConnected(true);
+
       return getClient;
     },
-    [setInstanceDetails, clientGetter]
+    [setInstanceDetails, clientGetter, setIsConnected]
   );
+
+  const connectionWasAborted = useCallback(() => {
+    setIsConnected(false);
+    clientGetter.current = undefined;
+  }, [setIsConnected, clientGetter]);
 
   return {
     isConnected,
     instanceDetails,
     useInstance,
     getFor: clientGetter.current,
+    connectionWasAborted,
   };
 }
 
@@ -356,6 +363,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
       socket.onclose = (ev) => {
         console.log(`Socket to ${baseUrl} was closed.`);
+        quirrelClient.connectionWasAborted();
       };
 
       socket.onmessage = (evt) => {
@@ -363,7 +371,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         onActivity({ type: data[0], payload: data[1], date: Date.now() });
       };
     },
-    [dump, connectedSocket]
+    [dump, connectedSocket, quirrelClient.connectionWasAborted]
   );
 
   const connect = useCallback(
@@ -381,10 +389,18 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   );
 
   useEffect(() => {
-    connect({
-      baseUrl: "http://localhost:9181",
-    });
-  }, []);
+    if (quirrelClient.isConnected) {
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      connect({
+        baseUrl: "http://localhost:9181",
+      });
+    }, 500);
+
+    return () => clearInterval(intervalId);
+  }, [quirrelClient.isConnected]);
 
   return (
     <QuirrelCtx.Provider
@@ -421,7 +437,9 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            <p id="attaching-to-quirrel" className="inline text-black">Attaching to Quirrel ...</p>
+            <p id="attaching-to-quirrel" className="inline text-black">
+              Attaching to Quirrel ...
+            </p>
           </span>
         </BaseLayout>
       )}
