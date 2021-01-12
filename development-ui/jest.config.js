@@ -1,7 +1,7 @@
 module.exports = {
-  preset: 'jest-playwright-preset',
+  preset: "jest-playwright-preset",
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    "^.+\\.ts$": "ts-jest",
   },
   testEnvironmentOptions: {
     "jest-playwright": {
@@ -11,7 +11,7 @@ module.exports = {
 
   globals: {
     "ts-jest": {
-      tsconfig: "tsconfig.test.json"
-    }
-  }
+      tsconfig: "tsconfig.test.json",
+    },
+  },
 };
