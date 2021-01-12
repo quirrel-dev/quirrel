@@ -48,7 +48,19 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         base-path: quirrel
         path-to-lcov: quirrel/coverage/lcov.info
-  
+
+  dev-ui-test:
+    name: Development UI Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: development-ui
+    steps:
+    - uses: actions/checkout@v2
+    - run: npm ci
+    - run: npm run build
+    - run: npm test
+
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
     runs-on: ubuntu-latest
