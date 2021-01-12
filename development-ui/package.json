@@ -2,8 +2,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:coverage": "NODE_ENV=test next build",
     "start": "next start",
-    "test": "jest"
+    "test": "jest",
+    "test:ci": "npm run build:coverage && start-server-and-test start http://localhost:3000 test && npx nyc report --reporter=lcov"
   },
   "dependencies": {
     "@feedback-fish/react": "^1.1.0",
@@ -27,11 +29,14 @@
     "@types/lodash": "^4.14.165",
     "@types/node": "^14.11.2",
     "@types/react": "^16.9.49",
+    "babel-plugin-istanbul": "^6.0.0",
     "chai": "^4.2.0",
     "ioredis-mock": "^5.2.0",
     "jest": "^26.6.3",
     "jest-playwright-preset": "^1.4.4",
+    "nyc": "^15.1.0",
     "playwright": "^1.7.1",
+    "start-server-and-test": "^1.11.7",
     "ts-jest": "^26.4.4",
     "typescript": "^4.0.3"
   }
