@@ -20,7 +20,7 @@ It supports delayed jobs, fanout jobs, recurring jobs and CRON jobs.
 
 Quirrel values ...
 
-- ... great DX (through [tailormade client libraries](https://github.com/quirrel-dev/quirrel-next) & the [development UI](https://docs.quirrel.dev/development-ui))
+- ... great DX (through [tailormade client libraries](https://docs.quirrel.dev/api/queue) & the [development UI](https://docs.quirrel.dev/development-ui))
 - ... privacy (through end-to-end encryption)
 - ... free software (it's MIT licensed!)
 - ... easy setup (through [hosted offering](https://quirrel.dev) and easy on-prem)
