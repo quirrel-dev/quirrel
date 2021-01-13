@@ -25,7 +25,7 @@ export async function expectTableCellToEqual(
   ).to.equal(value);
 }
 
-export  async function expectTableToBeEmpty(_page = page) {
+export async function expectTableToBeEmpty(_page = page) {
   const table = await _page.$(`tbody`);
   expect(await table?.innerHTML()).to.equal("");
 }
@@ -35,6 +35,8 @@ it("allows invoking jobs", async () => {
   cleanup.push(quirrel.cleanup);
 
   await page.goto("http://localhost:3000/pending");
+
+  await delay(500);
 
   await expectTableToBeEmpty(page);
 
