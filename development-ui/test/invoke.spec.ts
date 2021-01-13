@@ -12,7 +12,7 @@ afterEach(async () => {
   await Promise.all(cleanup.map((clean) => clean()));
 });
 
-async function expectTableCellToEqual(
+export async function expectTableCellToEqual(
   row: number,
   column: number,
   value: string,
@@ -25,7 +25,7 @@ async function expectTableCellToEqual(
   ).to.equal(value);
 }
 
-async function expectTableToBeEmpty(_page = page) {
+export  async function expectTableToBeEmpty(_page = page) {
   const table = await _page.$(`tbody`);
   expect(await table?.innerHTML()).to.equal("");
 }
@@ -48,7 +48,7 @@ it.jestPlaywrightDebug("allows invoking jobs", async ({ page }) => {
   await expectTableCellToEqual(2, 2, "2", page);
   await expectTableCellToEqual(3, 2, "3", page);
 
-  await page.click(`//tr[1]/td[4]/span/button`);
+  await page.click(`//tr[1]/td[4]/span/button[1]`);
 
   await delay(100);
 
