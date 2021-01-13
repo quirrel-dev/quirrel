@@ -30,7 +30,7 @@ export  async function expectTableToBeEmpty(_page = page) {
   expect(await table?.innerHTML()).to.equal("");
 }
 
-it.jestPlaywrightDebug("allows invoking jobs", async ({ page }) => {
+it("allows invoking jobs", async () => {
   const quirrel = await runQuirrel();
   cleanup.push(quirrel.cleanup);
 
