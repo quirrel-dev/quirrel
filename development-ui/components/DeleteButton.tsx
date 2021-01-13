@@ -1,20 +1,16 @@
-import { useState } from "react";
+import { useLoading } from "../hooks/useLoading";
 
 interface DeleteButtonProps {
   delete(): Promise<void>;
 }
 
 export function DeleteButton(props: DeleteButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, withLoading] = useLoading();
 
   return (
     <button
       className="text-gray-500 hover:text-red-500 w-6"
-      onClick={async () => {
-        setIsLoading(true);
-        await props.delete();
-        setIsLoading(false);
-      }}
+      onClick={() => withLoading(props.delete)}
     >
       {isLoading ? (
         "..."

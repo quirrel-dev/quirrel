@@ -45,10 +45,44 @@ jobs:
       uses: coverallsapp/github-action@master
       if: ${{ matrix.node-version == 14 }}
       with:
+        flag-name: quirrel
         github-token: ${{ secrets.GITHUB_TOKEN }}
         base-path: quirrel
         path-to-lcov: quirrel/coverage/lcov.info
-  
+        parallel: true
+
+  dev-ui-test:
+    name: Development UI Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: development-ui
+    steps:
+    - uses: actions/checkout@v2
+    - uses: microsoft/playwright-github-action@v1
+    - run: npm ci
+    - run: npm run test:ci
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        flag-name: development-ui
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        base-path: development-ui
+        path-to-lcov: development-ui/coverage/lcov.info
+        parallel: true
+
+  finish-coveralls:
+    needs:
+      - build
+      - dev-ui-test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        parallel-finished: true
+
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
     runs-on: ubuntu-latest

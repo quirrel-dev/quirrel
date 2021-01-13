@@ -1,8 +1,9 @@
 import { QuirrelProvider } from "../hooks/useQuirrel";
 import "../styles/tailwind.css";
 import Head from "next/head";
+import { AppProps } from "next/app";
 
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>

@@ -3,19 +3,26 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useReducer,
   useRef,
   useState,
 } from "react";
 import { BaseLayout } from "../layouts/BaseLayout";
 import { QuirrelClient, Job } from "quirrel/client";
 import _ from "lodash";
+import { produce } from "immer";
+import delay from "delay";
 
 let alreadyAlerted = false;
 
 type JobDTO = Omit<Job<any>, "invoke" | "delete" | "runAt"> & {
   runAt: string;
 };
+
+interface QuirrelInstanceDetails {
+  baseUrl: string;
+  token?: string;
+  encryptionSecret?: string;
+}
 
 namespace Quirrel {
   export interface ContextValue {
@@ -24,12 +31,8 @@ namespace Quirrel {
     completed: Quirrel.JobDescriptor[];
     invoke(job: Quirrel.JobDescriptor): Promise<void>;
     delete(job: Quirrel.JobDescriptor): Promise<void>;
-    credentials: { baseUrl: string; token?: string; encryptionSecret?: string };
-    setCredentials: (cred: {
-      baseUrl: string;
-      token?: string;
-      encryptionSecret?: string;
-    }) => void;
+    connectedTo?: QuirrelInstanceDetails;
+    connectTo: (instance: QuirrelInstanceDetails) => void;
   }
 
   export namespace Activity {
@@ -90,8 +93,7 @@ const mockCtxValue: Quirrel.ContextValue = {
   completed: [],
   invoke: async () => {},
   delete: async () => {},
-  setCredentials: () => {},
-  credentials: { baseUrl: "http://localhost:9181" },
+  connectTo: () => {},
 };
 
 const QuirrelCtx = React.createContext<Quirrel.ContextValue>(mockCtxValue);
@@ -100,178 +102,143 @@ export function useQuirrel() {
   return useContext(QuirrelCtx);
 }
 
-export function QuirrelProvider(props: PropsWithChildren<{}>) {
-  const [isConnected, setIsConnected] = useState(false);
-  const [credentials, setCredentials] = useState<{
-    baseUrl: string;
-    token?: string;
-    encryptionSecret?: string;
-  }>({
-    baseUrl: "http://localhost:9181",
-    token: undefined,
-    encryptionSecret: undefined,
+function useImmer<T>(defaultValue: T) {
+  const [value, setState] = useState(defaultValue);
+  const setStateWithImmer = useCallback(
+    (recipe: (v: T) => void): void => {
+      setState((prevState) => produce(prevState, recipe));
+    },
+    [setState]
+  );
+
+  return [value, setStateWithImmer] as const;
+}
+
+function useJobsReducer() {
+  const [state, setState] = useImmer<
+    Pick<Quirrel.ContextValue, "activity" | "pending" | "completed">
+  >({
+    activity: [],
+    completed: [],
+    pending: [],
   });
 
-  const clientGetter = useRef<(endpoint: string) => QuirrelClient<any>>();
+  const dump = useCallback(
+    (jobs: JobDTO[]) =>
+      setState((state) => {
+        state.pending.push(
+          ...jobs.map((j) => ({
+            ...j,
+            started: false,
+          }))
+        );
+      }),
+    [setState]
+  );
 
-  const [{ activity, pending, completed }, dispatchActivity] = useReducer(
-    (
-      prevState: Pick<
-        Quirrel.ContextValue,
-        "activity" | "pending" | "completed"
-      >,
-      action:
-        | Quirrel.Activity
-        | { type: "dump"; payload: JobDTO[]; date: number }
-    ): Pick<Quirrel.ContextValue, "activity" | "pending" | "completed"> => {
-      switch (action.type) {
-        case "dump": {
-          return {
-            ...prevState,
-            pending: [
-              ...action.payload.map((job) => ({
-                ...job,
-                started: false,
-              })),
-              ...prevState.pending,
-            ],
-          };
-        }
-        case "started": {
-          return {
-            ...prevState,
-            activity: [action, ...prevState.activity],
-            pending: prevState.pending.map((pendingJob) => {
-              if (
-                pendingJob.id === action.payload.id &&
-                pendingJob.endpoint === action.payload.endpoint
-              ) {
-                return {
-                  ...pendingJob,
-                  started: true,
-                };
-              }
+  const onActivity = useCallback(
+    (action: Quirrel.Activity) =>
+      setState((state) => {
+        state.activity.push(action);
 
-              return pendingJob;
-            }),
-          };
+        function findBy({ endpoint, id }: { endpoint: string; id: string }) {
+          return (job: Quirrel.JobDescriptor) =>
+            job.id === id && job.endpoint === endpoint;
         }
-        case "scheduled": {
-          return {
-            ...prevState,
-            activity: [action, ...prevState.activity],
-            pending: [
-              {
-                ...action.payload,
-                started: false,
-              },
-              ...prevState.pending,
-            ],
-          };
-        }
-        case "invoked": {
-          return {
-            ...prevState,
-            activity: [action, ...prevState.activity],
-            pending: prevState.pending.map((pendingJob) => {
-              if (
-                pendingJob.id === action.payload.id &&
-                pendingJob.endpoint === action.payload.endpoint
-              ) {
-                return {
-                  ...pendingJob,
-                  runAt: new Date().toISOString(),
-                };
-              }
 
-              return pendingJob;
-            }),
-          };
+        function findJobIndex(arg: { endpoint: string; id: string }) {
+          return state.pending.findIndex(findBy(arg));
         }
-        case "deleted": {
-          return {
-            ...prevState,
-            activity: [action, ...prevState.activity],
-            pending: prevState.pending.filter((pendingJob) => {
-              if (
-                pendingJob.id === action.payload.id &&
-                pendingJob.endpoint === action.payload.endpoint
-              ) {
-                return false;
-              }
-              return true;
-            }),
-          };
-        }
-        case "rescheduled": {
-          const rescheduledJob = prevState.completed.find(
-            (job) =>
-              job.id === action.payload.id &&
-              job.endpoint === action.payload.endpoint
-          );
 
-          rescheduledJob.runAt = action.payload.runAt;
-          return {
-            completed: _.without(prevState.completed, rescheduledJob),
-            activity: [action, ...prevState.activity],
-            pending: [rescheduledJob, ...prevState.pending],
-          };
+        function findJob(arg: { endpoint: string; id: string }) {
+          return state.pending[findJobIndex(arg)];
         }
-        case "completed": {
-          const completedJob = prevState.pending.find(
-            (job) =>
-              job.id === action.payload.id &&
-              job.endpoint === action.payload.endpoint
-          );
-          return {
-            ...prevState,
-            completed: [completedJob, ...prevState.completed],
-            activity: [action, ...prevState.activity],
-            pending: _.without(prevState.pending, completedJob),
-          };
+
+        switch (action.type) {
+          case "started": {
+            const job = findJob(action.payload);
+            job.started = true;
+            break;
+          }
+
+          case "scheduled": {
+            state.pending.push({
+              ...action.payload,
+              started: false,
+            });
+            break;
+          }
+
+          case "invoked": {
+            const job = findJob(action.payload);
+            job.runAt = new Date(action.date).toISOString();
+            break;
+          }
+
+          case "deleted": {
+            const jobIndex = findJobIndex(action.payload);
+            state.pending.splice(jobIndex, 1);
+            break;
+          }
+
+          case "rescheduled": {
+            const rescheduledJobIndex = state.completed.findIndex(
+              findBy(action.payload)
+            );
+
+            const rescheduledJob = state.completed[rescheduledJobIndex];
+            state.completed.splice(rescheduledJobIndex, 1);
+
+            rescheduledJob.runAt = action.payload.runAt;
+            state.pending.push(rescheduledJob);
+            break;
+          }
+
+          case "completed": {
+            const completedJobIndex = findJobIndex(action.payload);
+            const completedJob = state.pending[completedJobIndex];
+
+            state.completed.push(completedJob);
+            state.pending.splice(completedJobIndex, 1);
+
+            break;
+          }
         }
-        default:
-          return prevState;
-      }
-    },
+      }),
+    [setState]
+  );
+
+  return [
+    state,
     {
-      activity: [],
-      pending: [],
-      completed: [],
-    }
-  );
-
-  const invoke = useCallback(
-    async (job: Quirrel.JobDescriptor) => {
-      const client = clientGetter.current?.(job.endpoint);
-      await client.invoke(job.id);
+      dump,
+      onActivity,
     },
-    [clientGetter]
-  );
+  ] as const;
+}
 
-  const deleteCallback = useCallback(
-    async (job: Quirrel.JobDescriptor) => {
-      const client = clientGetter.current?.(job.endpoint);
-      await client.delete(job.id);
-    },
-    [clientGetter]
-  );
+function useQuirrelClient() {
+  const [
+    instanceDetails,
+    setInstanceDetails,
+  ] = useState<QuirrelInstanceDetails>();
+  const clientGetter = useRef<(endpoint: string) => QuirrelClient<unknown>>();
+  const [isConnected, setIsConnected] = useState(false);
 
-  useEffect(() => {
-    let cleanup: (() => void) | undefined;
-
-    async function doIt() {
-      let { baseUrl, token } = credentials;
+  const useInstance = useCallback(
+    (instanceDetails: QuirrelInstanceDetails) => {
+      let { baseUrl, token } = instanceDetails;
       if (!(baseUrl.startsWith("https://") || baseUrl.startsWith("http://"))) {
         baseUrl = "https://" + baseUrl;
       }
 
-      const getClient = (endpoint: string) => {
+      function getClient(endpoint: string) {
         const result = /((?:https?:\/\/)?.*?(?::\d+)?)\/(.*)/.exec(endpoint);
         if (!result) {
           alert("Not a valid endpoint: " + endpoint);
-          return;
+          throw new Error("Not a valid endpoint: " + endpoint);
         }
+
         const [, applicationBaseUrl, route] = result;
 
         return new QuirrelClient({
@@ -279,7 +246,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
           route,
           config: {
             applicationBaseUrl,
-            encryptionSecret: credentials.encryptionSecret,
+            encryptionSecret: instanceDetails.encryptionSecret,
             quirrelBaseUrl: baseUrl,
             token,
           },
@@ -294,84 +261,158 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
             );
           },
         });
-      };
-
-      await new Promise<void>((resolve) => {
-        const intervalId = setInterval(async () => {
-          try {
-            await fetch(baseUrl + "/health");
-            clearInterval(intervalId);
-            resolve();
-          } catch {}
-        }, 1000);
-
-        cleanup = () => clearInterval(intervalId);
-      });
-
-      clientGetter.current = getClient;
-
-      const endpointsRes = await fetch(baseUrl + "/queues/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const endpoints: string[] = await endpointsRes.json();
-
-      for (const endpoint of endpoints) {
-        const client = getClient(endpoint);
-        for await (const jobs of client.get()) {
-          dispatchActivity({
-            type: "dump",
-            payload: jobs.map((j) => ({
-              ...j,
-              runAt: j.runAt.toISOString(),
-            })),
-            date: Date.now(),
-          });
-        }
       }
 
+      clientGetter.current = getClient;
+      setInstanceDetails(instanceDetails);
+      setIsConnected(true);
+
+      return getClient;
+    },
+    [setInstanceDetails, clientGetter, setIsConnected]
+  );
+
+  const connectionWasAborted = useCallback(() => {
+    setIsConnected(false);
+    clientGetter.current = undefined;
+  }, [setIsConnected, clientGetter]);
+
+  return {
+    isConnected,
+    instanceDetails,
+    useInstance,
+    getFor: clientGetter.current,
+    connectionWasAborted,
+  };
+}
+
+async function isHealthy(baseUrl: string) {
+  try {
+    const res = await fetch(baseUrl + "/health");
+    return res.status === 200;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function getAllEndpoints(client: QuirrelClient<any>) {
+  const endpointsRes = await client.makeRequest("/queues");
+
+  return (await endpointsRes.json()) as string[];
+}
+
+export function QuirrelProvider(props: PropsWithChildren<{}>) {
+  const [jobsState, { dump, onActivity }] = useJobsReducer();
+  const quirrelClient = useQuirrelClient();
+  const connectedSocket = useRef<WebSocket>();
+
+  const invoke = useCallback(
+    async (job: Quirrel.JobDescriptor) => {
+      const client = quirrelClient.getFor!(job.endpoint);
+      await client.invoke(job.id);
+    },
+    [quirrelClient.getFor]
+  );
+
+  const deleteCallback = useCallback(
+    async (job: Quirrel.JobDescriptor) => {
+      const client = quirrelClient.getFor!(job.endpoint);
+      await client.delete(job.id);
+    },
+    [quirrelClient.getFor]
+  );
+
+  const loadInitialJobs = useCallback(
+    async (getClient: ReturnType<typeof quirrelClient.useInstance>) => {
+      for (const endpoint of await getAllEndpoints(
+        getClient("https://this.is.not.read/")
+      )) {
+        const client = getClient(endpoint);
+
+        for await (const jobs of client.get()) {
+          dump(
+            jobs.map((j) => ({
+              ...j,
+              runAt: j.runAt.toISOString(),
+            }))
+          );
+        }
+      }
+    },
+    [dump]
+  );
+
+  const connectActivityStream = useCallback(
+    (instanceDetails: QuirrelInstanceDetails) => {
+      const { baseUrl, token } = instanceDetails;
       const isSecure = baseUrl.startsWith("https://");
-      const baseUrlWithoutProtocol = baseUrl.slice(isSecure ? 8 : 7);
+      const baseUrlWithoutProtocol = baseUrl.slice(
+        isSecure ? "https://".length : "http://".length
+      );
       const socket = new WebSocket(
         `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`,
         token || "ignored"
       );
+
       socket.onopen = () => {
+        connectedSocket.current?.close();
+        connectedSocket.current = socket;
+
         console.log("Connected successfully.");
-        setIsConnected(true);
       };
+
       socket.onclose = (ev) => {
-        setIsConnected(false);
+        console.log(`Socket to ${baseUrl} was closed.`);
+        quirrelClient.connectionWasAborted();
       };
 
       socket.onmessage = (evt) => {
         const data = JSON.parse(evt.data);
-        dispatchActivity({ type: data[0], payload: data[1], date: Date.now() });
+        onActivity({ type: data[0], payload: data[1], date: Date.now() });
       };
+    },
+    [dump, connectedSocket, quirrelClient.connectionWasAborted]
+  );
 
-      cleanup = () => socket.close();
+  const connect = useCallback(
+    async (instanceDetails: QuirrelInstanceDetails) => {
+      if (!(await isHealthy(instanceDetails.baseUrl))) {
+        return;
+      }
+
+      const getClient = quirrelClient.useInstance(instanceDetails);
+
+      await loadInitialJobs(getClient);
+      connectActivityStream(instanceDetails);
+    },
+    [quirrelClient.useInstance, loadInitialJobs, connectActivityStream]
+  );
+
+  useEffect(() => {
+    if (quirrelClient.isConnected) {
+      return;
     }
 
-    doIt();
+    const intervalId = setInterval(() => {
+      connect({
+        baseUrl: "http://localhost:9181",
+      });
+    }, 500);
 
-    return () => cleanup?.();
-  }, [credentials, setIsConnected, dispatchActivity]);
+    return () => clearInterval(intervalId);
+  }, [quirrelClient.isConnected]);
 
   return (
     <QuirrelCtx.Provider
       value={{
-        activity,
-        pending,
-        completed,
+        ...jobsState,
+        connectTo: connect,
+        connectedTo: quirrelClient.instanceDetails,
         invoke,
-        setCredentials,
-        credentials,
         delete: deleteCallback,
       }}
     >
-      {isConnected ? (
+      {quirrelClient.isConnected ? (
         props.children
       ) : (
         <BaseLayout>
@@ -396,7 +437,9 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            <p className="inline text-black">Attaching to Quirrel ...</p>
+            <p id="attaching-to-quirrel" className="inline text-black">
+              Attaching to Quirrel ...
+            </p>
           </span>
         </BaseLayout>
       )}
