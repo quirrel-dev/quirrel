@@ -13,7 +13,6 @@ The Task Queueing Solution for Serverless.
 
 - [Landing Page](https://quirrel.dev)
 - [Documentation](https://docs.quirrel.dev)
-- [Next.js Client](https://github.com/quirrel-dev/quirrel-next)
 
 Quirrel makes job queueing simple as cake.
 It supports delayed jobs, fanout jobs, recurring jobs and CRON jobs.
