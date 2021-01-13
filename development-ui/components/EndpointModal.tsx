@@ -39,6 +39,7 @@ export function EndpointModal() {
       <button
         onClick={() => setShowModal(true)}
         className="text-gray-600 hover:text-gray-700"
+        data-test-id="open-connection-modal"
       >
         {connectedTo?.baseUrl
           ? formatBaseUrl(connectedTo?.baseUrl)
@@ -151,6 +152,7 @@ export function EndpointModal() {
 
                 <input
                   placeholder="Endpoint"
+                  name="endpoint"
                   value={endpoint}
                   onChange={(evt) => setEndpoint(evt.target.value)}
                   className="border-gray-300 placeholder-gray-500 appearance-none relative block w-full px-3 py-2 border text-gray-900 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
@@ -176,10 +178,12 @@ export function EndpointModal() {
         <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
           <span className="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
             <button
-              type="button"
+              type="submit"
               disabled={!isUrl(endpoint)}
               className="inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-orange-500 text-base disabled:opacity-50 leading-6 font-medium text-white shadow-sm hover:bg-orange-400 focus:outline-none focus:border-red-700 focus:shadow-outline-red transition ease-in-out duration-150 sm:text-sm sm:leading-5"
-              onClick={() => {
+              onClick={(evt) => {
+                evt.preventDefault();
+
                 connectTo({
                   baseUrl: endpoint,
                   token,

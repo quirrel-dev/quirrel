@@ -1,7 +1,6 @@
-import { runQuirrel } from "quirrel";
-import IORedis from "ioredis-mock";
 import delay from "delay";
 import { expect } from "chai";
+import { runQuirrel } from "./runQuirrel";
 
 let cleanup: (() => Promise<void>)[] = [];
 
@@ -13,10 +12,18 @@ afterEach(async () => {
   await Promise.all(cleanup.map((clean) => clean()));
 });
 
-async function expectToShowAttachingToQuirrel() {
+export async function expectToShowAttachingToQuirrel() {
   const attachingEl = await page.$("#attaching-to-quirrel");
   expect(attachingEl).to.exist;
   expect(await attachingEl?.innerText()).to.equal("Attaching to Quirrel ...");
+}
+
+export async function expectToShowJobTable() {
+  const tableEl = await page.$("[data-test-class=table]");
+  expect(tableEl).to.exist;
+  expect(await tableEl?.textContent()).to.equal(
+    ["Endpoint", "ID", "Run At"].join("")
+  );
 }
 
 it("automatically connects when Quirrel is started", async () => {
@@ -24,25 +31,15 @@ it("automatically connects when Quirrel is started", async () => {
 
   await expectToShowAttachingToQuirrel();
 
-  const ioredis = new IORedis();
-  const quirrelServer = await runQuirrel({
-    logger: "none",
-    redisFactory: () => {
-      return ioredis.createConnectedClient() as any;
-    },
-  });
+  const quirrelServer = await runQuirrel();
 
-  cleanup.push(quirrelServer.close);
+  cleanup.push(quirrelServer.cleanup);
 
   await delay(550);
 
-  const tableEl = await page.$("[data-test-class=table]");
-  expect(tableEl).to.exist;
-  expect(await tableEl?.textContent()).to.equal(
-    ["Endpoint", "ID", "Run At"].join("")
-  );
+  await expectToShowJobTable();
 
-  await quirrelServer.close();
+  await quirrelServer.cleanup();
 
   await expectToShowAttachingToQuirrel();
 });

@@ -4,7 +4,7 @@
     "build": "next build",
     "build:coverage": "NODE_ENV=test next build",
     "start": "next start",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:ci": "npm run build:coverage && start-server-and-test start http://localhost:3000 test && npx nyc report --reporter=lcov"
   },
   "dependencies": {
