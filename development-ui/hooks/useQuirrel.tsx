@@ -10,7 +10,6 @@ import { BaseLayout } from "../layouts/BaseLayout";
 import { QuirrelClient, Job } from "quirrel/client";
 import _ from "lodash";
 import { produce } from "immer";
-import delay from "delay";
 
 let alreadyAlerted = false;
 
@@ -371,7 +370,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
         onActivity({ type: data[0], payload: data[1], date: Date.now() });
       };
     },
-    [dump, connectedSocket, quirrelClient.connectionWasAborted]
+    [dump, connectedSocket, quirrelClient.connectionWasAborted, onActivity]
   );
 
   const connect = useCallback(
