@@ -62,7 +62,12 @@ todoReminders.enqueue(todo.id, {
 
 Runs three times: At `scheduled_date`, one day later and two days later.
 
-#### CRON Job
+#### CRON Schedule
+
+:::note Cron Jobs
+This example is about *regular* Jobs, executed on a cron schedule.
+If you're looking for Cron Jobs, take a look at the more idiomatic [`CronJob`](./cronjob).
+:::
 
 ```ts
 billingQueue.enqueue(undefined, {
