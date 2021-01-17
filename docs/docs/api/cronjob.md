@@ -30,3 +30,9 @@ To register cron jobs on deployment, run `quirrel ci` [during deployment](/deplo
 :::note
 If you're struggling with cron syntax, check out [crontab guru](https://crontab.guru/).
 :::
+
+:::note
+The `CronJob` call is detected using regular expressions.
+This limits the first two parameters to static strings.
+Using variables won't work.
+:::
