@@ -3,6 +3,7 @@ import { promises as fs } from "fs";
 import type { FastifyInstance } from "fastify";
 import { makeFetchMockConnectedTo } from "./fetch-mock";
 import * as chokidar from "chokidar";
+import { parseChokidarRulesFromGitignore } from "./parse-gitignore";
 
 function requireFrameworkClientForDevelopmentDefaults(framework: string) {
   require(`../${framework}`);
@@ -48,8 +49,10 @@ export class CronDetector {
     private readonly connectedTo?: FastifyInstance,
     private readonly dryRun?: boolean
   ) {
+    const rules = parseChokidarRulesFromGitignore(cwd);
     this.watcher = chokidar.watch(["**/*.[jt]s", "**/*.[jt]sx"], {
-      ignored: ["node_modules"],
+      ignored: rules.ignoredPaths,
+      cwd,
     });
 
     this.watcher.on("add", this.on("added"));
@@ -128,7 +131,7 @@ export class CronDetector {
         if (previousJob) {
           await this.onJobRemoved(previousJob, filePath);
         }
-        
+
         return;
       }
 
