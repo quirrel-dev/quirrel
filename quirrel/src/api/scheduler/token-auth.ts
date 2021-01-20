@@ -1,6 +1,6 @@
 import { FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
-import { IncomingMessage } from "http";
+import { IncomingMessage, IncomingHttpHeaders } from "http";
 import { UsageMeter } from "../shared/usage-meter";
 import basicAuth from "basic-auth";
 
@@ -33,17 +33,21 @@ const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
 ) => {
   const usageMeter = new UsageMeter(fastify.redis);
 
-  async function getTokenID(authorizationHeader?: string) {
-    if (!authorizationHeader) {
+  async function getTokenID(headers: IncomingHttpHeaders) {
+    const { authorization } = headers;
+    if (!authorization) {
       return null;
     }
 
-    if (authorizationHeader.startsWith("Bearer ")) {
-      const [_, token] = authorizationHeader.split("Bearer ");
+    if (authorization.startsWith("Bearer ")) {
+      const [_, token] = authorization.split("Bearer ");
       const tokenId = await fastify.tokens.check(token);
-      return tokenId;
-    } else if (authorizationHeader.startsWith("Basic ")) {
-      const basicCredentials = basicAuth.parse(authorizationHeader);
+      if (!tokenId) {
+        return null;
+      }
+      return { tokenId, countUsage: true };
+    } else if (authorization.startsWith("Basic ")) {
+      const basicCredentials = basicAuth.parse(authorization);
 
       if (!basicCredentials) {
         return null;
@@ -51,7 +55,8 @@ const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
 
       const isRootUser = opts.passphrases.includes(basicCredentials.pass);
       if (isRootUser) {
-        return basicCredentials.name;
+        const countUsage = !!headers["x-quirrel-count-usage"];
+        return { tokenId: basicCredentials.name, countUsage };
       }
     }
 
@@ -62,10 +67,14 @@ const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
     request: FastifyRequest | IncomingMessage
   ): Promise<string | null> {
     if (opts.auth) {
-      const { authorization } = request.headers;
-      const tokenId = await getTokenID(authorization);
+      const result = await getTokenID(request.headers);
+      if (!result) {
+        return null;
+      }
 
-      if (tokenId) {
+      const { tokenId, countUsage } = result;
+
+      if (countUsage) {
         usageMeter.record(tokenId);
       }
 
