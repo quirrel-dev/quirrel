@@ -4,7 +4,7 @@ import delay from "delay";
 import request from "supertest";
 
 function testAgainst(backend: "Redis" | "Mock") {
-  async function setup({ fail }: { fail: boolean }) {
+  async function setup({ fail = false }: { fail?: boolean } = {}) {
     const server = fastify();
     server.post("/", () => {
       throw new Error("Something broke!");
@@ -96,6 +96,40 @@ function testAgainst(backend: "Redis" | "Mock") {
       expect(incidentReceiverAuthorizations).toEqual(["Bearer super-secret"]);
 
       await teardown();
+    });
+
+    describe("on a repeated job", () => {
+      it("ends that repeated job", async () => {
+        const {
+          teardown,
+          quirrel,
+          endpoint,
+          incidentReceiverBodies,
+        } = await setup();
+
+        const runAt = new Date().toISOString();
+
+        await request(quirrel)
+          .post("/queues/" + endpoint)
+          .send({
+            body: JSON.stringify({ foo: "bar" }),
+            id: "a",
+            runAt,
+            repeat: {
+              every: 1 * 1000,
+              times: 3,
+            },
+          })
+          .expect(201);
+
+        await delay(100);
+
+        expect(incidentReceiverBodies).toHaveLength(1);
+
+        await request(quirrel).get(`/queues/${endpoint}/a`).expect(404);
+
+        await teardown();
+      });
     });
 
     describe("when the incident receiver is down", () => {
