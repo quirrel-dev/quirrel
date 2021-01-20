@@ -42,10 +42,8 @@ jobs:
       - run: npm run build
       - run: npm test -- --coverage
       - run: curl -Ls https://coverage.codacy.com/get.sh > codacy.sh && chmod +x codacy.sh
-      - run: ./codacy.sh report --coverage-reports coverage/lcov.info --partial --prefix quirrel
+      - run: ./codacy.sh report --coverage-reports coverage/lcov.info --partial --prefix quirrel --token ${{ secrets.CODACY_PROJECT_TOKEN }}
         if: ${{ matrix.node-version == 14 }}
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
   dev-ui-test:
     name: Development UI Tests
@@ -59,9 +57,7 @@ jobs:
       - run: npm ci
       - run: npm run test:ci
       - run: curl -Ls https://coverage.codacy.com/get.sh > codacy.sh && chmod +x codacy.sh
-      - run: ./codacy.sh report --coverage-reports coverage/lcov.info --partial --prefix development-ui
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+      - run: ./codacy.sh report --coverage-reports coverage/lcov.info --partial --prefix development-ui --token ${{ secrets.CODACY_PROJECT_TOKEN }}
 
   finish-coverage:
     needs:
@@ -70,9 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: curl -Ls https://coverage.codacy.com/get.sh > codacy.sh && chmod +x codacy.sh
-      - run: ./codacy.sh final
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+      - run: ./codacy.sh final --token ${{ secrets.CODACY_PROJECT_TOKEN }}
 
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
