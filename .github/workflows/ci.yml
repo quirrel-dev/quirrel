@@ -68,9 +68,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v2
-          with:
-            name: quirrel-coverage
-            path: quirrel-coverage/lcov.info
+        with:
+          name: quirrel-coverage
+          path: quirrel-coverage/lcov.info
       - uses: actions/download-artifact@v2
         with:
           name: development-ui-coverage
