@@ -41,6 +41,7 @@ jobs:
       - run: npm test -- --coverage
         working-directory: quirrel
       - uses: actions/upload-artifact@v2
+        if: ${{ matrix.node-version == 14 }}
         with:
           name: quirrel-coverage
           path: quirrel/coverage/lcov.info
