@@ -50,3 +50,9 @@ Quirrel uses its own, tailor-made job scheduling library called [Owl](https://gi
 It makes heavy use of Redis' Sorted Sets and Pub/Sub and should scale quite well.
 
 More information on the job scheduler can be found in Owl's [README](https://github.com/quirrel-dev/owl/blob/main/README.md).
+
+## How the development UI works
+
+Upon opening [ui.quirrel.dev](https://ui.quirrel.dev),
+the website tries to connect to your local development instance of Quirrel (default: `localhost:9181`) to get a snapshot of all pending jobs.
+Real-time updates are implemented by subscribing to an activity log that's published via websockets.
