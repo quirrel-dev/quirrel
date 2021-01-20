@@ -11,7 +11,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     container: node:${{ matrix.node-version }}
 
@@ -28,28 +27,23 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    
+
     env:
       REDIS_URL: redis://redis:6379
       DISABLE_TELEMETRY: true
 
     steps:
-    - uses: actions/checkout@v2
-    - run: npm ci
-      working-directory: quirrel
-    - run: npm run build
-      working-directory: quirrel
-    - run: npm test -- --coverage
-      working-directory: quirrel
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
-      if: ${{ matrix.node-version == 14 }}
-      with:
-        flag-name: quirrel
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        base-path: quirrel
-        path-to-lcov: quirrel/coverage/lcov.info
-        parallel: true
+      - uses: actions/checkout@v2
+      - run: npm ci
+        working-directory: quirrel
+      - run: npm run build
+        working-directory: quirrel
+      - run: npm test -- --coverage
+        working-directory: quirrel
+      - uses: actions/upload-artifact@v2
+        with:
+          name: quirrel-coverage
+          path: quirrel/coverage/lcov.info
 
   dev-ui-test:
     name: Development UI Tests
@@ -58,30 +52,34 @@ jobs:
       run:
         working-directory: development-ui
     steps:
-    - uses: actions/checkout@v2
-    - uses: microsoft/playwright-github-action@v1
-    - run: npm ci
-    - run: npm run test:ci
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
-      with:
-        flag-name: development-ui
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        base-path: development-ui
-        path-to-lcov: development-ui/coverage/lcov.info
-        parallel: true
+      - uses: actions/checkout@v2
+      - uses: microsoft/playwright-github-action@v1
+      - run: npm ci
+      - run: npm run test:ci
+      - uses: actions/upload-artifact@v2
+        with:
+          name: development-ui-coverage
+          path: development-ui/coverage/lcov.info
 
-  finish-coveralls:
+  upload-coverage:
     needs:
       - build
       - dev-ui-test
     runs-on: ubuntu-latest
     steps:
-    - name: Coveralls Finished
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        parallel-finished: true
+      - uses: actions/download-artifact@v2
+          with:
+            name: quirrel-coverage
+            path: quirrel-coverage/lcov.info
+      - uses: actions/download-artifact@v2
+        with:
+          name: development-ui-coverage
+          path: development-ui-coverage/lcov.info
+      - name: Run codacy-coverage-reporter
+        uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: quirrel-coverage/lcov.info,development-ui-coverage/lcov.info
 
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
