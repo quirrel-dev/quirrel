@@ -5,7 +5,7 @@
     "build:coverage": "NODE_ENV=test next build",
     "start": "next start",
     "test": "jest --runInBand --forceExit",
-    "test:ci": "npm run build:coverage && start-server-and-test start http://localhost:3000 test && npx nyc report --reporter=lcov"
+    "test:ci": "npm run build:coverage && start-server-and-test start http://localhost:3000 test && npx nyc report --reporter=lcov --cwd $(pwd)/.. -t development-ui/.nyc_output --report-dir development-ui/coverage"
   },
   "dependencies": {
     "@feedback-fish/react": "^1.1.0",

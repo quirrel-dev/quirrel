@@ -1,8 +1,7 @@
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
-  testPathIgnorePatterns: [
-    "/dist"
-  ],
-  modulePathIgnorePatterns: ['<rootDir>/dist']
+  testPathIgnorePatterns: ["/dist"],
+  modulePathIgnorePatterns: ["<rootDir>/dist"],
+  coverageReporters: ["text", ["lcov", { projectRoot: "../" }]],
 };
