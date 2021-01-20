@@ -61,7 +61,7 @@ export async function createWorker({
 
   const owl = createOwl(redisFactory);
 
-  const worker = owl.createWorker(async (job) => {
+  const worker = owl.createWorker(async (job, jobMeta) => {
     let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
     const body = job.payload;
 
@@ -121,6 +121,10 @@ export async function createWorker({
       );
 
       telemetrist?.dispatch("execution_errored");
+
+      if (response.status === 404) {
+        jobMeta.dontReschedule();
+      }
     }
 
     await usageMeter?.record(tokenId);

@@ -6,7 +6,13 @@ import request from "supertest";
 function testAgainst(backend: "Redis" | "Mock") {
   async function setup({ fail = false }: { fail?: boolean } = {}) {
     const server = fastify();
-    server.post("/", () => {
+    server.post("/", (request, reply) => {
+      const { status } = JSON.parse(request.body as string);
+      if (status) {
+        reply.status(status).send();
+        return;
+      }
+
       throw new Error("Something broke!");
     });
 
@@ -112,7 +118,7 @@ function testAgainst(backend: "Redis" | "Mock") {
         await request(quirrel)
           .post("/queues/" + endpoint)
           .send({
-            body: JSON.stringify({ foo: "bar" }),
+            body: JSON.stringify({ status: 404 }),
             id: "a",
             runAt,
             repeat: {
