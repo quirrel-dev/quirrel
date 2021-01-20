@@ -4,7 +4,6 @@
 
 ![CI](https://github.com/quirrel-dev/quirrel/workflows/CI/badge.svg)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/78723a5f4f964000995f1776b1d51561)](https://app.codacy.com/gh/quirrel-dev/quirrel?utm_source=github.com&utm_medium=referral&utm_content=quirrel-dev/quirrel&utm_campaign=Badge_Grade)
-[![Coverage Status](https://coveralls.io/repos/github/quirrel-dev/quirrel/badge.svg?branch=main)](https://coveralls.io/github/quirrel-dev/quirrel?branch=main)
 [![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/4u38.svg)](https://status.quirrel.dev)
 [![Twitter Follow](https://img.shields.io/twitter/follow/skn0tt?label=Stay%20updated&style=social)](https://twitter.com/skn0tt)
 
