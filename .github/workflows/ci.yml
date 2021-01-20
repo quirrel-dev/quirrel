@@ -40,7 +40,8 @@ jobs:
         working-directory: quirrel
       - run: npm test -- --coverage
         working-directory: quirrel
-      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --coverage-reports coverage/lcov.info --partial --prefix quirrel
+      - run: curl -Ls https://coverage.codacy.com/get.sh > codacy.sh && chmod +x codacy.sh
+      - run: ./codacy.sh report --coverage-reports coverage/lcov.info --partial --prefix quirrel
         if: ${{ matrix.node-version == 14 }}
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
@@ -56,7 +57,8 @@ jobs:
       - uses: microsoft/playwright-github-action@v1
       - run: npm ci
       - run: npm run test:ci
-      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --coverage-reports coverage/lcov.info --partial --prefix development-ui
+      - run: curl -Ls https://coverage.codacy.com/get.sh > codacy.sh && chmod +x codacy.sh
+      - run: ./codacy.sh report --coverage-reports coverage/lcov.info --partial --prefix development-ui
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
@@ -66,7 +68,8 @@ jobs:
       - dev-ui-test
     runs-on: ubuntu-latest
     steps:
-      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+      - run: curl -Ls https://coverage.codacy.com/get.sh > codacy.sh && chmod +x codacy.sh
+      - run: ./codacy.sh final
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
