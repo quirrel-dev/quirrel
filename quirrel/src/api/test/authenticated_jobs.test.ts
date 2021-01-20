@@ -93,8 +93,12 @@ function testAgainst(backend: "Redis" | "Mock") {
         .auth("ignored", passphrase)
         .expect(200, {});
     });
-
     test("admin impersonation", async () => {
+      await request(quirrel)
+        .delete("/usage")
+        .auth("ignored", passphrase)
+        .expect(200);
+
       const { text: token } = await request(quirrel)
         .put("/tokens/this.is.a.project")
         .auth("ignored", passphrase)
@@ -113,6 +117,33 @@ function testAgainst(backend: "Redis" | "Mock") {
       expect(lastBody).toEqual('{"foo":"bar"}');
       expect(lastSignature).toMatch(/v=(\d+),d=([\da-f]+)/);
       expect(verify(lastBody, token, lastSignature)).toBe(true);
+
+      await request(quirrel)
+        .delete("/usage")
+        .auth("ignored", passphrase)
+        .expect(200, {
+          // only one for execution
+          "this.is.a.project": 1,
+        });
+
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .set("x-quirrel-count-usage", "true")
+        .auth("this.is.a.project", passphrase)
+        .send({
+          body: JSON.stringify({ foo: "bar" }),
+        })
+        .expect(201);
+
+      await delay(300);
+
+      await request(quirrel)
+        .delete("/usage")
+        .auth("ignored", passphrase)
+        .expect(200, {
+          // one for enqueueing, one for execution
+          "this.is.a.project": 2,
+        });
     });
   });
 }
