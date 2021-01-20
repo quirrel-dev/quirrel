@@ -32,14 +32,15 @@ jobs:
       REDIS_URL: redis://redis:6379
       DISABLE_TELEMETRY: true
 
+    defaults:
+      run:
+        working-directory: quirrel
+
     steps:
       - uses: actions/checkout@v2
       - run: npm ci
-        working-directory: quirrel
       - run: npm run build
-        working-directory: quirrel
       - run: npm test -- --coverage
-        working-directory: quirrel
       - run: curl -Ls https://coverage.codacy.com/get.sh > codacy.sh && chmod +x codacy.sh
       - run: ./codacy.sh report --coverage-reports coverage/lcov.info --partial --prefix quirrel
         if: ${{ matrix.node-version == 14 }}
