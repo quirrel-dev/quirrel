@@ -40,11 +40,10 @@ jobs:
         working-directory: quirrel
       - run: npm test -- --coverage
         working-directory: quirrel
-      - uses: actions/upload-artifact@v2
+      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --coverage-reports coverage/lcov.info --partial --prefix quirrel
         if: ${{ matrix.node-version == 14 }}
-        with:
-          name: quirrel-coverage
-          path: quirrel/coverage/lcov.info
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
   dev-ui-test:
     name: Development UI Tests
@@ -57,30 +56,19 @@ jobs:
       - uses: microsoft/playwright-github-action@v1
       - run: npm ci
       - run: npm run test:ci
-      - uses: actions/upload-artifact@v2
-        with:
-          name: development-ui-coverage
-          path: development-ui/coverage/lcov.info
+      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --coverage-reports coverage/lcov.info --partial --prefix development-ui
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
-  upload-coverage:
+  finish-coverage:
     needs:
       - build
       - dev-ui-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: quirrel-coverage
-          path: quirrel-coverage/lcov.info
-      - uses: actions/download-artifact@v2
-        with:
-          name: development-ui-coverage
-          path: development-ui-coverage/lcov.info
-      - name: Run codacy-coverage-reporter
-        uses: codacy/codacy-coverage-reporter-action@master
-        with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: quirrel-coverage/lcov.info,development-ui-coverage/lcov.info
+      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
