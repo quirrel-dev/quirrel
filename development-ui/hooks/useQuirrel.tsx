@@ -290,7 +290,12 @@ async function isHealthy(baseUrl: string) {
     const res = await fetch(baseUrl + "/health");
     return res.status === 200;
   } catch (error) {
-    console.log({ error })
+    if (error.message === "Not allowed to request resource") {
+      window.alert(
+        "This browser does not support connecting to your local Quirrel instance. Please use a different browser."
+      );
+    }
+
     return false;
   }
 }
