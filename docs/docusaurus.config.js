@@ -1,6 +1,6 @@
 module.exports = {
   title: "Quirrel",
-  tagline: "The Task Queueing Solution for Next.js x Vercel.",
+  tagline: "The Task Queueing Solution for Serverless.",
   url: "https://docs.quirrel.dev",
   baseUrl: "/",
   onBrokenLinks: "throw",
