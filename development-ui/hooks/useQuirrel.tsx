@@ -10,6 +10,7 @@ import { BaseLayout } from "../layouts/BaseLayout";
 import { QuirrelClient, Job } from "quirrel/client";
 import _ from "lodash";
 import { produce } from "immer";
+import { getConnectionDetailsFromHash } from "../lib/encrypted-connection-details";
 
 let alreadyAlerted = false;
 
@@ -17,7 +18,7 @@ type JobDTO = Omit<Job<any>, "invoke" | "delete" | "runAt"> & {
   runAt: string;
 };
 
-interface QuirrelInstanceDetails {
+export interface QuirrelInstanceDetails {
   baseUrl: string;
   token?: string;
   encryptionSecret?: string;
@@ -408,15 +409,21 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       return;
     }
 
-    const intervalId = setInterval(async () => {
-      const result = await connect({
-        baseUrl: "http://localhost:9181",
-      });
+    let intervalId: NodeJS.Timeout;
 
-      if (result === "stopPolling" || result === "success") {
-        clearInterval(intervalId);
-      }
-    }, 500);
+    getConnectionDetailsFromHash().then((connDetails) => {
+      intervalId = setInterval(async () => {
+        const result = await connect(
+          connDetails ?? {
+            baseUrl: "http://localhost:9181",
+          }
+        );
+
+        if (result === "stopPolling" || result === "success") {
+          clearInterval(intervalId);
+        }
+      }, 500);
+    });
 
     return () => clearInterval(intervalId);
   }, [quirrelClient.isConnected]);
