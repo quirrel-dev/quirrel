@@ -2,6 +2,9 @@
 title: Blitz.js
 ---
 
+> Install Quirrel using the official Blitz Recipe:
+`blitz install quirrel`
+
 ```ts title="app/api/someQueue.ts"
 import { Queue } from "quirrel/blitz";
 
