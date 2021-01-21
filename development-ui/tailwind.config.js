@@ -125,6 +125,7 @@ module.exports = {
   variants: {
     extend: {
       opacity: ["disabled"],
+      textColor: ["disabled"],
     },
   },
   plugins: [],

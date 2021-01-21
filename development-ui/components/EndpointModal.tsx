@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuirrel } from "../hooks/useQuirrel";
+import { connectionDetailsToHash } from "../lib/encrypted-connection-details";
 import { Modal } from "./Modal";
 
 const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
@@ -172,10 +173,45 @@ export function EndpointModal() {
                   className="border-gray-300 placeholder-gray-500 appearance-none relative block w-full px-3 py-2 border text-gray-900 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
                 />
               </div>
+              <button
+                onClick={async () => {
+                  const hash = await connectionDetailsToHash({
+                    baseUrl: endpoint,
+                    encryptionSecret,
+                    token,
+                  });
+
+                  if (!hash) {
+                    return;
+                  }
+
+                  const fullUrl = location.origin + hash;
+
+                  window.alert(`Add this to your bookmarks.\n${fullUrl}`);
+                }}
+                className="text-gray-700 disabled:text-gray-400 transition text-s mt-3 inline-flex items-center"
+                disabled={!endpoint}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  className="h-3 inline m-1"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                  />
+                </svg>
+                Add as Bookmark
+              </button>
             </div>
           </div>
         </div>
-        <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <div className="bg-gray-50 px-4 pt-0 pb-3 sm:px-6 sm:flex sm:flex-row-reverse">
           <span className="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
             <button
               type="submit"
