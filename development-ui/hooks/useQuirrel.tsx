@@ -17,7 +17,7 @@ type JobDTO = Omit<Job<any>, "invoke" | "delete" | "runAt"> & {
   runAt: string;
 };
 
-interface QuirrelInstanceDetails {
+export interface QuirrelInstanceDetails {
   baseUrl: string;
   token?: string;
   encryptionSecret?: string;
