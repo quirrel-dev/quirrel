@@ -451,6 +451,7 @@ export class QuirrelClient<T> {
         body: "OK",
       };
     } catch (error) {
+      console.error(error);
       return {
         status: 500,
         headers: {},
