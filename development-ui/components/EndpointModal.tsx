@@ -185,7 +185,9 @@ export function EndpointModal() {
                     return;
                   }
 
-                  window.alert(hash);
+                  const fullUrl = location.origin + hash;
+
+                  window.alert(`Add this to your bookmarks.\n${fullUrl}`);
                 }}
                 className="text-gray-700 disabled:text-gray-400 transition text-s mt-3 inline-flex items-center"
                 disabled={!endpoint}

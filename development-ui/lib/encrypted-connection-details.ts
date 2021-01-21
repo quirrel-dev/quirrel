@@ -30,7 +30,7 @@ async function decrypt(
 ): Promise<string | null> {
   try {
     const encryptor = getEncryptor(passphrase);
-    return encryptor.decrypt(value);
+    return await encryptor.decrypt(value);
   } catch (error) {
     return null;
   }
@@ -50,7 +50,7 @@ export async function getConnectionDetailsFromHash(): Promise<
   }
 
   do {
-    const passphrase = window.prompt("Passphrase? TODO: nice text");
+    const passphrase = window.prompt("Please enter your passphrase.");
     if (!passphrase) {
       return;
     }
@@ -70,7 +70,10 @@ export async function getConnectionDetailsFromHash(): Promise<
 
 function askForPassphrase() {
   do {
-    const passphrase = window.prompt("To prevent your credentials from being leaked through your browser history, please enter an encryption passphrase:", "min 10 characters");
+    const passphrase = window.prompt(
+      "To prevent your credentials from being leaked to your browser history, please enter an encryption passphrase:",
+      "min 10 characters"
+    );
     if (!passphrase) {
       return;
     }
