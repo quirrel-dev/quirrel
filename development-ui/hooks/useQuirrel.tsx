@@ -286,12 +286,21 @@ function useQuirrelClient() {
   };
 }
 
-async function isHealthy(baseUrl: string) {
+async function isHealthy(
+  baseUrl: string
+): Promise<{ isHealthy: boolean; stopPolling?: boolean }> {
   try {
     const res = await fetch(baseUrl + "/health");
-    return res.status === 200;
+    return { isHealthy: res.status === 200 };
   } catch (error) {
-    return false;
+    if (error.message === "Not allowed to request resource") {
+      window.alert(
+        "This browser does not support connecting to your local Quirrel instance. Please use a different browser."
+      );
+      return { isHealthy: false, stopPolling: true };
+    }
+
+    return { isHealthy: false };
   }
 }
 
@@ -376,14 +385,21 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
   const connect = useCallback(
     async (instanceDetails: QuirrelInstanceDetails) => {
-      if (!(await isHealthy(instanceDetails.baseUrl))) {
-        return;
+      const { isHealthy: _isHealthy, stopPolling } = await isHealthy(
+        instanceDetails.baseUrl
+      );
+      if (stopPolling) {
+        return "stopPolling";
+      }
+      if (!_isHealthy) {
+        return "unhealthy";
       }
 
       const getClient = quirrelClient.useInstance(instanceDetails);
 
       await loadInitialJobs(getClient);
       connectActivityStream(instanceDetails);
+      return "success";
     },
     [quirrelClient.useInstance, loadInitialJobs, connectActivityStream]
   );
@@ -396,12 +412,16 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
     let intervalId: NodeJS.Timeout;
 
     getConnectionDetailsFromHash().then((connDetails) => {
-      intervalId = setInterval(() => {
-        connect(
+      intervalId = setInterval(async () => {
+        const result = await connect(
           connDetails ?? {
             baseUrl: "http://localhost:9181",
           }
         );
+
+        if (result === "stopPolling" || result === "success") {
+          clearInterval(intervalId);
+        }
       }, 500);
     });
 
