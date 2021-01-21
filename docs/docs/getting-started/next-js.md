@@ -23,23 +23,12 @@ You can use [`concurrently`](https://github.com/kimmobrunfeldt/concurrently)
 to have the Quirrel server be started together with Next:
 ```json
 "scripts": {
-  "dev": "concurrently \"next dev\" quirrel"
+  "dev": "concurrently 'next dev' 'quirrel'"
 }
 ```
 :::
 
-:::note
-By default, the server doesn't persist any data.
-If you need your jobs to be persisted *in development*, provide connection details for a Redis instance using the  `--redis` option.
-:::
-
-Now that our Quirrel server is running, let's install the client library:
-
-```bash
-npm install @quirrel/next
-```
-
-This is all we need to create our first Queue!
+This is all we need installed to create our first Queue!
 
 ## Your first Queue
 
