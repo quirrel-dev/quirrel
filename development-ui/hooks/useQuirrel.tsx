@@ -290,6 +290,7 @@ async function isHealthy(baseUrl: string) {
     const res = await fetch(baseUrl + "/health");
     return res.status === 200;
   } catch (error) {
+    console.log({ error })
     return false;
   }
 }
