@@ -70,7 +70,7 @@ export async function getConnectionDetailsFromHash(): Promise<
 
 function askForPassphrase() {
   do {
-    const passphrase = window.prompt("Passphrase? TODO: nice text");
+    const passphrase = window.prompt("To prevent your credentials from being leaked through your browser history, please enter an encryption passphrase:", "min 10 characters");
     if (!passphrase) {
       return;
     }
