@@ -2,7 +2,6 @@ import { useState } from "react";
 import clsx from "clsx";
 import Link from "next/link";
 import React from "react";
-import { FeedbackFish } from "@feedback-fish/react";
 import { EndpointModal } from "./EndpointModal";
 
 const PillButton = React.forwardRef(
@@ -110,12 +109,17 @@ export function Nav(props: NavProps) {
               </div>
             </div>
           </div>
-          <div className="-mr-2 hidden md:flex justify-center" style={{ width: "180px" }}>
-            <FeedbackFish projectId="97b5e3470471e7">
-              <a className="text-center text-gray-600 hover:text-gray-400 px-3 block text-base font-medium cursor-pointer">
-                Feedback
-              </a>
-            </FeedbackFish>
+          <div
+            className="-mr-2 hidden md:flex justify-center"
+            style={{ width: "180px" }}
+          >
+            <a
+              href="https://github.com/quirrel-dev/quirrel/issues/new/choose"
+              target="_blank"
+              className="text-center text-gray-600 hover:text-gray-400 px-3 block text-base font-medium cursor-pointer"
+            >
+              Feedback
+            </a>
           </div>
           <div className="-mr-2 flex md:hidden">
             <button
@@ -170,11 +174,13 @@ export function Nav(props: NavProps) {
             <MenuButton title="Cron" selected={selectedPage === "cron"} />
           </Link>
 
-          <FeedbackFish projectId="97b5e3470471e7">
-            <a className="text-gray-600 hover:text-gray-400 px-3 mt-2 block text-base font-medium cursor-pointer">
-              Feedback
-            </a>
-          </FeedbackFish>
+          <a
+            href="https://github.com/quirrel-dev/quirrel/issues/new/choose"
+            target="_blank"
+            className="text-gray-600 hover:text-gray-400 px-3 mt-2 block text-base font-medium cursor-pointer"
+          >
+            Feedback
+          </a>
         </div>
       </div>
     </nav>

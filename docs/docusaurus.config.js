@@ -14,10 +14,6 @@ module.exports = {
       "data-domain": "docs.quirrel.dev",
       src: "https://plausible.io/js/plausible.js",
     },
-    {
-      defer: true,
-      src: "https://feedback.fish/ff.js?pid=a69c8256a9a967",
-    },
   ],
   themeConfig: {
     announcementBar: {
@@ -56,7 +52,7 @@ module.exports = {
           position: "left",
         },
         {
-          "data-feedback-fish": "",
+          href: "https://github.com/quirrel-dev/quirrel/issues/new/choose",
           label: "Feedback",
           position: "right",
         },
