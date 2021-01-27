@@ -2,6 +2,16 @@ import { Table } from "../components/Table";
 import { useQuirrel } from "../hooks/useQuirrel";
 import { BaseLayout } from "../layouts/BaseLayout";
 
+const intl = new Intl.DateTimeFormat([], {
+  minute: "2-digit",
+  hour: "2-digit",
+  second: "2-digit",
+});
+
+function formatTime(date: Date) {
+  return intl.format(date);
+}
+
 export default function Activity() {
   const { activity } = useQuirrel();
   return (
@@ -10,6 +20,10 @@ export default function Activity() {
         items={activity}
         extractKey={(item) => "" + item.date}
         columns={[
+          {
+            title: "Time",
+            render: (a) => formatTime(new Date(a.date)),
+          },
           {
             title: "Endpoint",
             render: (a) => a.payload.endpoint,
@@ -23,7 +37,7 @@ export default function Activity() {
             render: (a) => a.type,
           },
           {
-            title: "...",
+            title: "",
             render: (a) => {
               switch (a.type) {
                 case "scheduled":
