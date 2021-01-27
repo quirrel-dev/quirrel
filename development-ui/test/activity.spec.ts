@@ -1,6 +1,6 @@
 import delay from "delay";
 import { runQuirrel } from "./runQuirrel";
-import { expect } from "chai";
+import { expectTableCellToEqual, expectTableToBeEmpty } from "./invoke.spec";
 
 let cleanup: (() => Promise<void>)[] = [];
 
@@ -11,24 +11,6 @@ beforeEach(() => {
 afterEach(async () => {
   await Promise.all(cleanup.map((clean) => clean()));
 });
-
-export async function expectTableCellToEqual(
-  row: number,
-  column: number,
-  value: string,
-  _page = page
-) {
-  const rowEl = await _page.$(`//tr[${row}]`);
-  expect(rowEl).to.exist;
-  expect(
-    await (await _page.$(`//tr[${row}]/td[${column}]`))?.innerText()
-  ).to.equal(value);
-}
-
-export async function expectTableToBeEmpty(_page = page) {
-  const table = await _page.$(`tbody`);
-  expect(await table?.innerHTML()).to.equal("");
-}
 
 it("shows activity feed", async () => {
   const quirrel = await runQuirrel();
