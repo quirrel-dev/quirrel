@@ -4,6 +4,7 @@ import * as SearchPredicates from "../lib/search-predicates";
 interface TableRow<T> {
   title: string;
   render: (v: T) => React.ReactChild;
+  renderTooltip?: (v: T) => string;
 }
 
 interface TableProps<T> {
@@ -56,6 +57,7 @@ export function Table<T>(props: TableProps<T>) {
                   <tr key={extractKey(item)}>
                     {columns.map((col) => {
                       let child = col.render(item);
+                      const title = col.renderTooltip?.(item);
 
                       if (typeof child === "string") {
                         child = (
@@ -67,6 +69,7 @@ export function Table<T>(props: TableProps<T>) {
 
                       return (
                         <td
+                          title={title}
                           key={col.title}
                           className="px-6 py-4 whitespace-no-wrap"
                         >

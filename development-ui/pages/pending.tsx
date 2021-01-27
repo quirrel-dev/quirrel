@@ -4,6 +4,7 @@ import { useQuirrel } from "../hooks/useQuirrel";
 import { BaseLayout } from "../layouts/BaseLayout";
 import _ from "lodash";
 import { DeleteButton } from "../components/DeleteButton";
+import { truncateUrl } from "../lib/truncate-url";
 
 export default function Pending() {
   const { pending, invoke, delete: deleteJob } = useQuirrel();
@@ -15,7 +16,8 @@ export default function Pending() {
         columns={[
           {
             title: "Endpoint",
-            render: (job) => job.endpoint,
+            render: (job) => truncateUrl(job.endpoint),
+            renderTooltip: (job) => job.endpoint,
           },
           {
             title: "ID",
