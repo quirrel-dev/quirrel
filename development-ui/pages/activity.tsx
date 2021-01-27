@@ -22,6 +22,19 @@ export default function Activity() {
             title: "Event",
             render: (a) => a.type,
           },
+          {
+            title: "...",
+            render: (a) => {
+              switch (a.type) {
+                case "scheduled":
+                  return a.payload.body;
+                case "rescheduled":
+                  return a.payload.runAt;
+                default:
+                  return null;
+              }
+            },
+          },
         ]}
       />
     </BaseLayout>
