@@ -25,9 +25,13 @@ export default function Pending() {
             title: "Run At",
             render: (job) => job.runAt,
           },
+          {
+            title: "Payload",
+            render: (job) => job.body,
+          },
         ]}
         endOfRow={(job) => (
-          <span className="flex justify-between items-center">
+          <span className="w-32 flex justify-between items-center">
             <InvokeButton invoke={() => invoke(job)} />
 
             <DeleteButton delete={() => deleteJob(job)} />
