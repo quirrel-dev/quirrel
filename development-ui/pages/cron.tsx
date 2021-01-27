@@ -2,6 +2,7 @@ import { InvokeButton } from "../components/InvokeButton";
 import { Table } from "../components/Table";
 import { useQuirrel } from "../hooks/useQuirrel";
 import { BaseLayout } from "../layouts/BaseLayout";
+import { truncateUrl } from "../lib/truncate-url";
 
 export default function Cron() {
   const { pending, invoke } = useQuirrel();
@@ -14,7 +15,8 @@ export default function Cron() {
         columns={[
           {
             title: "Endpoint",
-            render: (job) => job.endpoint,
+            render: (job) => truncateUrl(job.endpoint),
+            renderTooltip: (job) => job.endpoint,
           },
           {
             title: "Schedule",

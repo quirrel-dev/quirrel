@@ -1,6 +1,7 @@
 import { Table } from "../components/Table";
 import { useQuirrel } from "../hooks/useQuirrel";
 import { BaseLayout } from "../layouts/BaseLayout";
+import { truncateUrl } from "../lib/truncate-url";
 
 const intl = new Intl.DateTimeFormat([], {
   minute: "2-digit",
@@ -26,7 +27,8 @@ export default function Activity() {
           },
           {
             title: "Endpoint",
-            render: (a) => a.payload.endpoint,
+            render: (a) => truncateUrl(a.payload.endpoint),
+            renderTooltip: (a) => a.payload.endpoint,
           },
           {
             title: "ID",
