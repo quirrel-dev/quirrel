@@ -66,17 +66,11 @@ namespace Quirrel {
       payload: { id: string; endpoint: string };
       date: number;
     }
-    export interface Requested {
-      type: "requested";
-      payload: { id: string; endpoint: string };
-      date: number;
-    }
   }
 
   export type Activity =
     | Activity.Scheduled
     | Activity.Completed
-    | Activity.Requested
     | Activity.Invoked
     | Activity.Rescheduled
     | Activity.Deleted
