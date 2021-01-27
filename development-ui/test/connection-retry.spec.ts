@@ -22,7 +22,7 @@ export async function expectToShowJobTable() {
   const tableEl = await page.$("[data-test-class=table]");
   expect(tableEl).to.exist;
   expect(await tableEl?.textContent()).to.equal(
-    ["Endpoint", "ID", "Run At"].join("")
+    ["Endpoint", "ID", "Run At", "Payload"].join("")
   );
 }
 
