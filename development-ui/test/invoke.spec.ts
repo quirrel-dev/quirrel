@@ -50,7 +50,7 @@ it("allows invoking jobs", async () => {
   await expectTableCellToEqual(2, 2, "2", page);
   await expectTableCellToEqual(3, 2, "3", page);
 
-  await page.click(`//tr[1]/td[4]/span/button[1]`);
+  await page.click(`//tr[1]/td[5]/span/button[1]`);
 
   await delay(100);
 

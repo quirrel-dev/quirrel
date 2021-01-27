@@ -24,7 +24,7 @@ test("jobs can be deleted", async () => {
 
   await page.goto("http://localhost:3000/pending");
 
-  await page.click(`//tr[1]/td[4]/span/button[2]`);
+  await page.click(`//tr[1]/td[5]/span/button[2]`);
 
   expect(await quirrel.client.getById("to-be-deleted")).to.be.null;
 });
