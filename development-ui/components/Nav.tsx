@@ -3,6 +3,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import React from "react";
 import { EndpointModal } from "./EndpointModal";
+import { SearchBar } from "./SearchBar";
 
 const PillButton = React.forwardRef(
   (
@@ -76,8 +77,8 @@ export function Nav(props: NavProps) {
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div
-            className="flex-shrink-0 flex items-center justify-between"
-            style={{ width: "180px" }}
+            className="flex-shrink-0 flex items-center justify-start space-x-8"
+            style={{ width: "300px" }}
           >
             <img
               className="h-10 w-auto"
@@ -109,10 +110,12 @@ export function Nav(props: NavProps) {
               </div>
             </div>
           </div>
+
           <div
-            className="-mr-2 hidden md:flex justify-center"
-            style={{ width: "180px" }}
+            className="-mr-2 hidden md:flex justify-end space-x-8 items-center"
+            style={{ width: "300px" }}
           >
+            <SearchBar />
             <a
               href="https://github.com/quirrel-dev/quirrel/issues/new/choose"
               target="_blank"

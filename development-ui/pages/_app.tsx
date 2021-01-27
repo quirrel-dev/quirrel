@@ -2,6 +2,7 @@ import { QuirrelProvider } from "../hooks/useQuirrel";
 import "../styles/tailwind.css";
 import Head from "next/head";
 import { AppProps } from "next/app";
+import { GlobalSearchProvider } from "../hooks/useGlobalSearch";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -14,9 +15,11 @@ function MyApp({ Component, pageProps }: AppProps) {
           src="https://plausible.io/js/plausible.js"
         ></script>
       </Head>
-      <QuirrelProvider>
-        <Component {...pageProps} />
-      </QuirrelProvider>
+      <GlobalSearchProvider>
+        <QuirrelProvider>
+          <Component {...pageProps} />
+        </QuirrelProvider>
+      </GlobalSearchProvider>
     </>
   );
 }
