@@ -42,11 +42,11 @@ it("shows activity feed", async () => {
 
   const job = await quirrel.client.enqueue("job", { delay: "1min", id: "job" });
   await delay(50);
-  await expectTableCellToEqual(1, 3, "scheduled", page);
+  await expectTableCellToEqual(1, 4, "scheduled", page);
 
   await job.delete();
   await delay(50);
-  await expectTableCellToEqual(2, 3, "deleted", page);
+  await expectTableCellToEqual(2, 4, "deleted", page);
 
   const job2 = await quirrel.client.enqueue("job-1", {
     delay: "1min",
@@ -57,12 +57,12 @@ it("shows activity feed", async () => {
     },
   });
   await delay(50);
-  await expectTableCellToEqual(3, 3, "scheduled", page);
+  await expectTableCellToEqual(3, 4, "scheduled", page);
 
   await job2.invoke();
   await delay(50);
-  await expectTableCellToEqual(4, 3, "invoked", page);
-  await expectTableCellToEqual(5, 3, "started", page);
-  await expectTableCellToEqual(6, 3, "completed", page);
-  await expectTableCellToEqual(7, 3, "rescheduled", page);
+  await expectTableCellToEqual(4, 4, "invoked", page);
+  await expectTableCellToEqual(5, 4, "started", page);
+  await expectTableCellToEqual(6, 4, "completed", page);
+  await expectTableCellToEqual(7, 4, "rescheduled", page);
 });
