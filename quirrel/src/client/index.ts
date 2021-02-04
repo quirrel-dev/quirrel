@@ -66,7 +66,7 @@ const vercelMs = z
 
 const timeDuration = (fieldName = "duration") =>
   z.union([
-    z.number().positive({ message: `${fieldName} must not be negative.` }),
+    z.number().positive({ message: `${fieldName} must not be negative` }),
     vercelMs,
   ]);
 
@@ -74,7 +74,7 @@ export const cron = z
   .string()
   .regex(
     /(@(yearly|monthly|weekly|daily|hourly))|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,7})/,
-    "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference."
+    "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference"
   );
 
 const EnqueueJobOptsSchema = z.object({
@@ -86,7 +86,7 @@ const EnqueueJobOptsSchema = z.object({
   runAt: z
     .date()
     .refine((date) => Date.now() <= +date, {
-      message: "runAt must not be in the past.",
+      message: "runAt must not be in the past",
     })
     .optional(),
   repeat: z
@@ -265,7 +265,11 @@ export class QuirrelClient<T> {
    */
   async enqueue(payload: T, opts: EnqueueJobOpts = {}): Promise<Job<T>> {
     if (typeof payload === "undefined") {
-      throw new Error("Passing `undefined` as Payload is not allowed.");
+      throw new Error("Passing `undefined` as Payload is not allowed");
+    }
+
+    if (opts.repeat && opts.retry?.length) {
+      throw new Error("retry and repeat cannot be used together");
     }
 
     opts = EnqueueJobOptsSchema.parse(opts);
@@ -442,7 +446,7 @@ export class QuirrelClient<T> {
         return {
           status: 401,
           headers: {},
-          body: "Signature missing.",
+          body: "Signature missing",
         };
       }
 
@@ -451,7 +455,7 @@ export class QuirrelClient<T> {
         return {
           status: 401,
           headers: {},
-          body: "Signature invalid.",
+          body: "Signature invalid",
         };
       }
     }

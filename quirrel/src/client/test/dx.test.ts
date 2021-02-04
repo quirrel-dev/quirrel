@@ -21,11 +21,22 @@ describe("DX", () => {
     it("throws immediately", async () => {
       await expect(() =>
         quirrel.enqueue("", { runAt: new Date(0) })
-      ).rejects.toThrowError("runAt must not be in the past.");
+      ).rejects.toThrowError("runAt must not be in the past");
 
       await expect(() =>
         quirrel.enqueue("", { delay: -1 })
-      ).rejects.toThrowError("delay must not be negative.");
+      ).rejects.toThrowError("delay must not be negative");
+    });
+  });
+
+  describe("when given both retry and repeat", () => {
+    it("throws immediately", async () => {
+      await expect(() =>
+        quirrel.enqueue("", {
+          retry: ["1min"],
+          repeat: { every: "200ms", times: 5 },
+        })
+      ).rejects.toThrowError("retry and repeat cannot be used together");
     });
   });
 });
