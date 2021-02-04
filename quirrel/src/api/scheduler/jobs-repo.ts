@@ -147,6 +147,7 @@ export class JobsRepo {
       repeat,
       override,
       exclusive,
+      retry,
     }: POSTQueuesEndpointBody
   ) {
     if (typeof id === "undefined") {
@@ -196,6 +197,7 @@ export class JobsRepo {
           }
         : undefined,
       override,
+      retry,
     });
 
     return JobsRepo.toJobDTO(createdJob);

@@ -15,6 +15,15 @@
     "id": {
       "type": "string"
     },
+    "retry": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0
+      },
+      "minItems": 1,
+      "maxItems": 10
+    },
     "override": { "type": "boolean" },
     "exclusive": { "type": "boolean" },
     "repeat": {

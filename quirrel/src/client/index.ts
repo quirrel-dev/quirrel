@@ -79,6 +79,7 @@ const EnqueueJobOptsSchema = z.object({
   override: z.boolean().optional(),
   delay: timeDuration.optional(),
   runAt: z.date().optional(),
+  retry: z.array(timeDuration).min(1).max(10).optional(),
   repeat: z
     .object({
       every: timeDuration.optional(),
@@ -108,6 +109,12 @@ export interface EnqueueJobOpts {
    * will be executed at the same time.
    */
   exclusive?: boolean;
+
+  /**
+   * If a job fails, retry it at along the specified intervals.
+   * @example ["5min", "1h", "1d"] // retries it after 5 minutes, 1:05 hours, and 1 day 1:05 hours
+   */
+  retry?: (number | string)[];
 
   /**
    * Determines what to do when a job
@@ -283,6 +290,7 @@ export class QuirrelClient<T> {
         delay,
         id: opts.id,
         repeat: opts.repeat,
+        retry: opts.retry?.map(parseDuration),
       }),
     });
 
