@@ -55,6 +55,29 @@ function testAgainst(backend: "Redis" | "Mock") {
       expect(lastBody).toEqual('{"foo":"bar"}');
     });
 
+    describe("enqueueing a job in the past", () => {
+      it("should execute immediately", async () => {
+        await request(quirrel)
+          .post("/queues/" + endpoint)
+          .send({ body: JSON.stringify({ inThe: "past" }), runAt: new Date(0) })
+          .expect(201);
+
+        await delay(300);
+
+        expect(lastBody).toEqual('{"inThe":"past"}');
+      });
+    });
+
+    test("enqueueing a job with delay < 0", async () => {
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({ body: JSON.stringify({ foo: "bar" }), delay: -1 })
+        .expect(
+          400,
+          '{"statusCode":400,"error":"Bad Request","message":"body.delay should be >= 0"}'
+        );
+    });
+
     test("queue list", async () => {
       async function sendTo(endpoint: string) {
         await request(quirrel)
