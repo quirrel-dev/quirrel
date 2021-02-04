@@ -9,6 +9,14 @@ import { createOwl } from "../shared/owl";
 import type { Logger } from "../shared/logger";
 import { IncidentForwarder } from "../shared/incident-forwarder";
 
+interface ExecutionError {
+  toString(): string;
+  endpoint: string;
+  tokenId: string;
+  responseBody: string;
+  responseStatus: number;
+}
+
 export function replaceLocalhostWithDockerHost(url: string): string {
   if (url.startsWith("http://localhost")) {
     return url.replace("http://localhost", "http://host.docker.internal");
@@ -61,45 +69,79 @@ export async function createWorker({
 
   const owl = createOwl(redisFactory);
 
-  const worker = owl.createWorker(async (job, jobMeta) => {
-    let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
-    const body = job.payload;
+  const worker = owl.createWorker(
+    async (job, jobMeta) => {
+      let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
+      const body = job.payload;
 
-    const executionDone = logger?.startingExecution({
-      tokenId,
-      endpoint,
-      body,
-      id: job.id,
-    });
+      const executionDone = logger?.startingExecution({
+        tokenId,
+        endpoint,
+        body,
+        id: job.id,
+      });
 
-    const headers: Record<string, string> = {
-      "Content-Type": "text/plain",
-    };
+      const headers: Record<string, string> = {
+        "Content-Type": "text/plain",
+      };
 
-    if (tokenId) {
-      const token = await tokenRepo.getById(tokenId);
-      if (token) {
-        const signature = sign(body ?? "", token);
-        headers["x-quirrel-signature"] = signature;
+      if (tokenId) {
+        const token = await tokenRepo.getById(tokenId);
+        if (token) {
+          const signature = sign(body ?? "", token);
+          headers["x-quirrel-signature"] = signature;
+        }
       }
-    }
 
-    if (runningInDocker) {
-      endpoint = replaceLocalhostWithDockerHost(endpoint);
-    }
+      if (runningInDocker) {
+        endpoint = replaceLocalhostWithDockerHost(endpoint);
+      }
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      body,
-      headers,
-    });
+      const [response] = await Promise.all([
+        fetch(endpoint, {
+          method: "POST",
+          body,
+          headers,
+        }),
+        usageMeter?.record(tokenId),
+      ]);
 
-    if (response.status >= 200 && response.status < 300) {
-      executionDone?.();
+      if (response.status >= 200 && response.status < 300) {
+        executionDone?.();
 
-      telemetrist?.dispatch("dispatch_job");
-    } else {
-      const responseBody = await response.text();
+        telemetrist?.dispatch("dispatch_job");
+      } else {
+        const responseBody = await response.text();
+
+        logger?.executionErrored(
+          { endpoint, tokenId, body: job.payload, id: job.id },
+          responseBody
+        );
+
+        if (response.status === 404) {
+          jobMeta.dontReschedule();
+        }
+
+        const error: ExecutionError = {
+          tokenId,
+          endpoint,
+          responseBody,
+          responseStatus: response.status,
+          toString() {
+            return responseBody;
+          },
+        };
+
+        throw error;
+      }
+    },
+    async (job, _error) => {
+      const {
+        tokenId,
+        endpoint,
+        responseBody,
+        responseStatus,
+      } = (_error as any) as ExecutionError;
 
       await incidentForwarder?.dispatch(
         {
@@ -111,24 +153,13 @@ export async function createWorker({
         },
         {
           body: responseBody,
-          status: response.status,
+          status: responseStatus,
         }
       );
 
-      logger?.executionErrored(
-        { endpoint, tokenId, body: job.payload, id: job.id },
-        responseBody
-      );
-
-      telemetrist?.dispatch("execution_errored");
-
-      if (response.status === 404) {
-        jobMeta.dontReschedule();
-      }
+      await telemetrist?.dispatch("execution_errored");
     }
-
-    await usageMeter?.record(tokenId);
-  });
+  );
 
   async function close() {
     await worker.close();
