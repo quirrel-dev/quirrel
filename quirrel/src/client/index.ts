@@ -64,7 +64,11 @@ const vercelMs = z
     "Please provide a valid time span, according to https://github.com/vercel/ms"
   );
 
-const timeDuration = z.union([z.number().positive(), vercelMs]);
+const timeDuration = (fieldName = "duration") =>
+  z.union([
+    z.number().positive({ message: `${fieldName} must not be negative.` }),
+    vercelMs,
+  ]);
 
 export const cron = z
   .string()
@@ -77,11 +81,16 @@ const EnqueueJobOptsSchema = z.object({
   id: z.string().optional(),
   exclusive: z.boolean().optional(),
   override: z.boolean().optional(),
-  delay: timeDuration.optional(),
-  runAt: z.date().optional(),
+  delay: timeDuration("delay").optional(),
+  runAt: z
+    .date()
+    .refine((date) => Date.now() <= +date, {
+      message: "runAt must not be in the past.",
+    })
+    .optional(),
   repeat: z
     .object({
-      every: timeDuration.optional(),
+      every: timeDuration("every").optional(),
       times: z.number().nonnegative().optional(),
       cron: cron.optional(),
     })
