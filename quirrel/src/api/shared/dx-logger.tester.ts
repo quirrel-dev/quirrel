@@ -13,6 +13,8 @@ dxLogger.jobCreated({
   tokenId: "anonymous",
   exclusive: false,
   runAt: new Date().toISOString(),
+  count: 0,
+  retry: [],
 });
 
 const done = dxLogger.startingExecution({
