@@ -175,6 +175,16 @@ runAt: Date;
 
 The date the job is scheduled for.
 
+### `count`
+
+```ts
+count: number;
+```
+
+The repetition of this execution.
+Starts at 1, increments with each repetition / retry.
+
+
 ### `repeat`
 
 ```ts
