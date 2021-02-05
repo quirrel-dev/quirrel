@@ -12,7 +12,7 @@ import pack from "../../package.json";
 export { Job };
 
 export type QuirrelJobHandler<T> = (job: T) => Promise<void>;
-export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">;
+export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive" | "retry">;
 
 interface CreateQuirrelClientArgs<T> {
   route: string;
