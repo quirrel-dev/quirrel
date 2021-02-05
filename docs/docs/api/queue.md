@@ -24,6 +24,7 @@ async enqueue(
       times?: number;
       cron?: string;
     }
+    retry?: (number | string)[];
 
     exclusive?: boolean;
   }
@@ -95,6 +96,21 @@ orderQueue.enqueue(
 ```
 
 You can also specify `{ exclusive: true }` as the third argument to the `Queue` constructor.
+
+#### Retryable
+
+```ts
+apiIntegrationQueue.enqueue(
+  { ... },
+  {
+    retry: ["10sec", "5min", "1h"]
+  }
+);
+```
+
+Retries a jobs three times, until it successd: After 10 seconds, 5 minutes and 1 hour.
+
+You can also specify `{ retry: [ ... ] }` as the third argument to the `Queue` constructor.
 
 ### `.get`
 
