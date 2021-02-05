@@ -2,6 +2,7 @@
 title: Queue
 hide_title: true
 ---
+
 ## `Queue`
 
 Depending on the framework, creating a queue works a bit different.
@@ -11,21 +12,21 @@ Take a look at the sidebar to find a guide for your framework.
 
 ```ts
 async enqueue(
-    payload: T,
-    options: {
-        id?: string;
-        override?: boolean;
+  payload: T,
+  options: {
+    id?: string;
+    override?: boolean;
 
-        runAt?: Date;
-        delay?: number | string;
-        repeat?: {
-            every?: number | string;
-            times?: number;
-            cron?: string;
-        }
-
-        exclusive?: boolean;
+    runAt?: Date;
+    delay?: number | string;
+    repeat?: {
+      every?: number | string;
+      times?: number;
+      cron?: string;
     }
+
+    exclusive?: boolean;
+  }
 ): Promise<Job<T>>
 ```
 
@@ -65,7 +66,7 @@ Runs three times: At `scheduled_date`, one day later and two days later.
 #### CRON Schedule
 
 :::note Cron Jobs
-This example is about *regular* Jobs, executed on a cron schedule.
+This example is about _regular_ Jobs, executed on a cron schedule.
 If you're looking for Cron Jobs, take a look at the more idiomatic [`CronJob`](./cronjob).
 :::
 
@@ -85,11 +86,11 @@ CRON jobs are scheduled based on UTC.
 
 ```ts
 orderQueue.enqueue(
-    { ... },
-    {
-        id: "1234", // if two jobs share the same `runAt`, they're ordered by ID.
-        exclusive: true, // make sure only one job is executed at once
-    }
+  { ... },
+  {
+    id: "1234", // if two jobs share the same `runAt`, they're ordered by ID.
+    exclusive: true, // make sure only one job is executed at once
+  }
 );
 ```
 
@@ -178,10 +179,10 @@ The date the job is scheduled for.
 
 ```ts
 {
-    cron?: string;
-    times?: number;
-    every?: number;
-    count: number;
+  cron?: string;
+  times?: number;
+  every?: number;
+  count: number;
 }
 ```
 
