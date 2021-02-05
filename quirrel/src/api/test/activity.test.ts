@@ -103,6 +103,8 @@ function testAgainst(backend: "Redis" | "Mock") {
         body: JSON.stringify({ qux: "baz" }),
         endpoint: decodeURIComponent(endpoint),
         id: job2id,
+        retry: [],
+        count: 1,
         runAt: new Date(now + 300).toISOString(),
         exclusive: false,
       },

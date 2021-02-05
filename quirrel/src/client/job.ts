@@ -28,6 +28,20 @@ export interface JobDTO {
   readonly exclusive: boolean;
 
   /**
+   * If a job fails, retry it at along the specified intervals.
+   * @example [10, 20, 30] // retries it after 10ms, 20ms and 30ms.
+   * @example [] // doesn't retry.
+   */
+  readonly retry: number[];
+
+  /**
+   * What repetition the next execution will be.
+   * Starts at 1, increments with every execution.
+   * Used for repeat and retry.
+   */
+  readonly count: number;
+
+  /**
    * Present if the job has been scheduled to repeat.
    */
   readonly repeat?: {
@@ -50,6 +64,7 @@ export interface JobDTO {
     /**
      * What repetition the next execution will be.
      * Starts at 1, increments with every execution.
+     * @deprecated use top-level count instead.
      */
     readonly count: number;
   };
