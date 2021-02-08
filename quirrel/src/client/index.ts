@@ -12,7 +12,7 @@ import pack from "../../package.json";
 export { Job };
 
 export type QuirrelJobHandler<T> = (job: T) => Promise<void>;
-export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive">;
+export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive" | "retry">;
 
 interface CreateQuirrelClientArgs<T> {
   route: string;
@@ -66,7 +66,7 @@ const vercelMs = z
 
 const timeDuration = (fieldName = "duration") =>
   z.union([
-    z.number().positive({ message: `${fieldName} must not be negative.` }),
+    z.number().positive({ message: `${fieldName} must not be negative` }),
     vercelMs,
   ]);
 
@@ -74,18 +74,19 @@ export const cron = z
   .string()
   .regex(
     /(@(yearly|monthly|weekly|daily|hourly))|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,7})/,
-    "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference."
+    "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference"
   );
 
 const EnqueueJobOptsSchema = z.object({
   id: z.string().optional(),
   exclusive: z.boolean().optional(),
   override: z.boolean().optional(),
+  retry: z.array(timeDuration("retry")).min(1).max(10).optional(),
   delay: timeDuration("delay").optional(),
   runAt: z
     .date()
     .refine((date) => Date.now() <= +date, {
-      message: "runAt must not be in the past.",
+      message: "runAt must not be in the past",
     })
     .optional(),
   repeat: z
@@ -117,6 +118,12 @@ export interface EnqueueJobOpts {
    * will be executed at the same time.
    */
   exclusive?: boolean;
+
+  /**
+   * If a job fails, retry it at along the specified intervals.
+   * @example ["5min", "1h", "1d"] // retries it after 5 minutes, 1:05 hours, and 1 day 1:05 hours
+   */
+  retry?: (number | string)[];
 
   /**
    * Determines what to do when a job
@@ -258,7 +265,11 @@ export class QuirrelClient<T> {
    */
   async enqueue(payload: T, opts: EnqueueJobOpts = {}): Promise<Job<T>> {
     if (typeof payload === "undefined") {
-      throw new Error("Passing `undefined` as Payload is not allowed.");
+      throw new Error("Passing `undefined` as Payload is not allowed");
+    }
+
+    if (opts.repeat && opts.retry?.length) {
+      throw new Error("retry and repeat cannot be used together");
     }
 
     opts = EnqueueJobOptsSchema.parse(opts);
@@ -292,6 +303,7 @@ export class QuirrelClient<T> {
         delay,
         id: opts.id,
         repeat: opts.repeat,
+        retry: opts.retry?.map(parseDuration),
       }),
     });
 
@@ -434,7 +446,7 @@ export class QuirrelClient<T> {
         return {
           status: 401,
           headers: {},
-          body: "Signature missing.",
+          body: "Signature missing",
         };
       }
 
@@ -443,7 +455,7 @@ export class QuirrelClient<T> {
         return {
           status: 401,
           headers: {},
-          body: "Signature invalid.",
+          body: "Signature invalid",
         };
       }
     }

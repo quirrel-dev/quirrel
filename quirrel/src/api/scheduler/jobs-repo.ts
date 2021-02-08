@@ -20,6 +20,8 @@ interface JobDTO {
   body: string;
   runAt: string;
   exclusive: boolean;
+  retry: number[];
+  count: number;
   repeat?: {
     every?: number;
     times?: number;
@@ -46,6 +48,8 @@ export class JobsRepo {
       body: job.payload,
       runAt: job.runAt.toISOString(),
       exclusive: job.exclusive,
+      retry: job.retry,
+      count: job.count,
       repeat: job.schedule
         ? {
             count: job.count,
@@ -147,6 +151,7 @@ export class JobsRepo {
       repeat,
       override,
       exclusive,
+      retry,
     }: POSTQueuesEndpointBody
   ) {
     if (typeof id === "undefined") {
@@ -196,6 +201,7 @@ export class JobsRepo {
           }
         : undefined,
       override,
+      retry,
     });
 
     return JobsRepo.toJobDTO(createdJob);

@@ -6,7 +6,9 @@ import request from "supertest";
 function testAgainst(backend: "Redis" | "Mock") {
   async function setup({ fail = false }: { fail?: boolean } = {}) {
     const server = fastify();
+    const executionIds: string[] = [];
     server.post("/", (request, reply) => {
+      executionIds.push(request.id);
       const { status } = JSON.parse(request.body as string);
       if (status) {
         reply.status(status).send();
@@ -49,6 +51,7 @@ function testAgainst(backend: "Redis" | "Mock") {
       endpoint,
       incidentReceiverBodies,
       incidentReceiverAuthorizations,
+      executionIds,
       teardown: () =>
         Promise.all([teardown(), server.close(), incidentReceiver.close()]),
     };
@@ -133,6 +136,37 @@ function testAgainst(backend: "Redis" | "Mock") {
         expect(incidentReceiverBodies).toHaveLength(1);
 
         await request(quirrel).get(`/queues/${endpoint}/a`).expect(404);
+
+        await teardown();
+      });
+    });
+
+    describe("with retry", () => {
+      it("retries", async () => {
+        const {
+          teardown,
+          quirrel,
+          endpoint,
+          incidentReceiverBodies,
+          executionIds,
+        } = await setup();
+
+        const runAt = new Date().toISOString();
+
+        await request(quirrel)
+          .post("/queues/" + endpoint)
+          .send({
+            body: JSON.stringify({ status: 404 }),
+            id: "a",
+            runAt,
+            retry: [100, 200],
+          })
+          .expect(201);
+
+        await delay(500);
+
+        expect(executionIds).toHaveLength(3);
+        expect(incidentReceiverBodies).toHaveLength(1);
 
         await teardown();
       });

@@ -2,6 +2,7 @@
 title: Queue
 hide_title: true
 ---
+
 ## `Queue`
 
 Depending on the framework, creating a queue works a bit different.
@@ -11,21 +12,22 @@ Take a look at the sidebar to find a guide for your framework.
 
 ```ts
 async enqueue(
-    payload: T,
-    options: {
-        id?: string;
-        override?: boolean;
+  payload: T,
+  options: {
+    id?: string;
+    override?: boolean;
 
-        runAt?: Date;
-        delay?: number | string;
-        repeat?: {
-            every?: number | string;
-            times?: number;
-            cron?: string;
-        }
-
-        exclusive?: boolean;
+    runAt?: Date;
+    delay?: number | string;
+    repeat?: {
+      every?: number | string;
+      times?: number;
+      cron?: string;
     }
+    retry?: (number | string)[];
+
+    exclusive?: boolean;
+  }
 ): Promise<Job<T>>
 ```
 
@@ -65,7 +67,7 @@ Runs three times: At `scheduled_date`, one day later and two days later.
 #### CRON Schedule
 
 :::note Cron Jobs
-This example is about *regular* Jobs, executed on a cron schedule.
+This example is about _regular_ Jobs, executed on a cron schedule.
 If you're looking for Cron Jobs, take a look at the more idiomatic [`CronJob`](./cronjob).
 :::
 
@@ -85,15 +87,30 @@ CRON jobs are scheduled based on UTC.
 
 ```ts
 orderQueue.enqueue(
-    { ... },
-    {
-        id: "1234", // if two jobs share the same `runAt`, they're ordered by ID.
-        exclusive: true, // make sure only one job is executed at once
-    }
+  { ... },
+  {
+    id: "1234", // if two jobs share the same `runAt`, they're ordered by ID.
+    exclusive: true, // make sure only one job is executed at once
+  }
 );
 ```
 
 You can also specify `{ exclusive: true }` as the third argument to the `Queue` constructor.
+
+#### Retryable
+
+```ts
+apiIntegrationQueue.enqueue(
+  { ... },
+  {
+    retry: ["10sec", "5min", "1h"]
+  }
+);
+```
+
+Retries a jobs three times, until it successd: After 10 seconds, 5 minutes and 1 hour.
+
+You can also specify `{ retry: [ ... ] }` as the third argument to the `Queue` constructor.
 
 ### `.get`
 
@@ -174,14 +191,24 @@ runAt: Date;
 
 The date the job is scheduled for.
 
+### `count`
+
+```ts
+count: number;
+```
+
+The repetition of this execution.
+Starts at 1, increments with each repetition / retry.
+
+
 ### `repeat`
 
 ```ts
 {
-    cron?: string;
-    times?: number;
-    every?: number;
-    count: number;
+  cron?: string;
+  times?: number;
+  every?: number;
+  count: number;
 }
 ```
 
