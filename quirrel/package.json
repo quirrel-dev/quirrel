@@ -38,7 +38,7 @@
     "@types/easy-table": "^0.0.32",
     "@types/expand-tilde": "^2.0.0",
     "@types/ioredis": "4.17.7",
-    "@types/jest": "^26.0.13",
+    "@types/jest": "^26.0.20",
     "@types/ms": "^0.7.31",
     "@types/parse-gitignore": "^1.0.0",
     "@types/pino": "^6.3.3",
