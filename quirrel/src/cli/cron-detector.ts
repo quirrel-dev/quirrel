@@ -51,7 +51,7 @@ export class CronDetector {
   ) {
     const rules = parseChokidarRulesFromGitignore(cwd);
     this.watcher = chokidar.watch(["**/*.[jt]s", "**/*.[jt]sx"], {
-      ignored: rules.ignoredPaths,
+      ignored: ["**/node_modules", ...rules.ignoredPaths],
       cwd,
     });
 
