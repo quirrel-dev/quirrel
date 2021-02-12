@@ -13,7 +13,7 @@
     "!jest.config.js"
   ],
   "main": "dist/src/index.js",
-  "version": "1.0.4",
+  "version": "1.0.4-fix-94-1",
   "engines": {
     "node": "12 || 14 || 15",
     "npm": "7"
