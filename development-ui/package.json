@@ -23,7 +23,7 @@
     "tailwindcss": "^2.0.2"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.14",
+    "@types/chai": "^4.2.15",
     "@types/ioredis": "^4.17.11",
     "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.168",
