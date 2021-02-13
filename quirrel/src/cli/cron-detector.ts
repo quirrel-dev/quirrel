@@ -36,7 +36,7 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
     route: jobName,
     schedule: cronSchedule,
     framework: clientFramework,
-    isValid: cron.check(cronSchedule),
+    isValid: cron.safeParse(cronSchedule).success,
   };
 }
 
