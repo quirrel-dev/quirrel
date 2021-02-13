@@ -1,10 +1,9 @@
-import type { IncomingMessage } from "http";
-import { FastifyPluginCallback } from "fastify";
+import type { FastifyPluginCallback, FastifyRequest } from "fastify";
 import fastifyWebsocket from "fastify-websocket";
 import { JobsRepo } from "../jobs-repo";
 
 // https://stackoverflow.com/questions/4361173/http-headers-in-websockets-client-api
-function workAroundWebsocketAuth(req: IncomingMessage) {
+function workAroundWebsocketAuth(req: FastifyRequest) {
   const authToken = req.headers["sec-websocket-protocol"];
   if (!req.headers.authorization) {
     req.headers.authorization = `Bearer ${authToken}`;
