@@ -33,7 +33,7 @@
     "chai": "^4.2.0",
     "ioredis-mock": "^5.2.1",
     "jest": "^26.6.3",
-    "jest-playwright-preset": "^1.4.4",
+    "jest-playwright-preset": "^1.4.5",
     "nyc": "^15.1.0",
     "playwright": "^1.7.1",
     "start-server-and-test": "^1.11.7",
