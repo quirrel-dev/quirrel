@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@tailwindui/react": "^0.1.1",
-    "autoprefixer": "^10.1.0",
+    "autoprefixer": "^10.2.4",
     "clsx": "^1.1.1",
     "delay": "^4.4.1",
     "immer": "^8.0.1",
