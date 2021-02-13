@@ -108,7 +108,7 @@ function testAgainst(backend: "Redis" | "Mock") {
       async function sendTo(endpoint: string) {
         await request(quirrel)
           .post("/queues/" + encodeURIComponent(endpoint))
-          .send({ body: JSON.stringify({ foo: "bar" }) })
+          .send({ body: JSON.stringify({ foo: "bar" }), delay: 100 })
           .expect(201);
       }
 
