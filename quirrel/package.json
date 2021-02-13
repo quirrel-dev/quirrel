@@ -54,7 +54,7 @@
     "supertest": "^4.0.2",
     "ts-jest": "^26.3.0",
     "typescript": "^4.1.3",
-    "websocket": "^1.0.32"
+    "websocket": "^1.0.33"
   },
   "dependencies": {
     "@quirrel/owl": "^0.5.2",
