@@ -82,7 +82,7 @@
     "fastify-plugin": "2.3.3",
     "fastify-websocket": "2.1.0",
     "ioredis": "4.19.2",
-    "ioredis-mock": "5.1.0",
+    "ioredis-mock": "^5.2.1",
     "ms": "2.1.3",
     "open": "7.3.0",
     "parse-gitignore": "1.0.1",
