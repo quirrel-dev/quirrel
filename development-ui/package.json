@@ -16,7 +16,7 @@
     "lodash": "^4.17.20",
     "next": "^10.0.6",
     "postcss": "^8.2.1",
-    "quirrel": "^1.0.1",
+    "quirrel": "^1.0.4",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "secure-e2ee": "^0.4.0",
