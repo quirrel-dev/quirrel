@@ -82,9 +82,3 @@ In there, you can also manually invoke jobs, so you don't have to wait for 24 ho
 To use it, simply run `quirrel ui` or open [ui.quirrel.dev](https://ui.quirrel.dev) in your browser.
 
 <img src={require("./dev-ui.png").default} alt="Screenshot of the Development UI" height="400rem"/>
-
-:::caution
-The Development UI connects to your local Quirrel instance on the client-side.
-It thus currently does not work in Safari.
-:::
-
