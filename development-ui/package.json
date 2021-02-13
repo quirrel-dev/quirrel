@@ -11,7 +11,7 @@
     "@tailwindui/react": "^0.1.1",
     "autoprefixer": "^10.2.4",
     "clsx": "^1.1.1",
-    "delay": "^4.4.1",
+    "delay": "^5.0.0",
     "immer": "^8.0.1",
     "lodash": "^4.17.20",
     "next": "^10.0.6",
