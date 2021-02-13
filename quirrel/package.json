@@ -46,7 +46,7 @@
     "@types/uuid": "^8.3.0",
     "@types/websocket": "^1.0.1",
     "@types/ws": "^7.2.6",
-    "delay": "^4.4.0",
+    "delay": "^4.4.1",
     "jest": "^26.4.2",
     "json-schema-to-typescript": "^9.1.1",
     "next": "^10.0.3",
