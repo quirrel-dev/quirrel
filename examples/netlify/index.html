@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Greeter</title>
+</head>
+<body>
+  <form id="form">
+    <h1>Enqueue a Greeting!</h1>
+    <label>
+      Name
+      <input name="name" />
+    </label>
+
+    <button type="submit">Enqueue</button>
+  </form>
+
+  <script>
+    document.getElementById("form").onsubmit = (event) => {
+      event.preventDefault()
+
+      const form = new FormData(event.target)
+      const name = form.get("name")
+
+      fetch("/.netlify/functions/enqueue-greeting", { method: "POST", body: name }).then(() => {
+        window.alert("Enqueued!")
+      })
+    }
+  </script>
+</body>
+</html>
