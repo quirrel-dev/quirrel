@@ -18,19 +18,19 @@ test("getAll", async () => {
   const jobs = await quirrel.enqueueMany([
     {
       payload: "hello world",
-      opts: {
+      options: {
         delay: "20s",
       },
     },
     {
       payload: "hello world",
-      opts: {
+      options: {
         delay: "20s",
       },
     },
     {
       payload: "hello world",
-      opts: {
+      options: {
         delay: "20s",
       },
     },
