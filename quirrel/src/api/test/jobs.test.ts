@@ -453,7 +453,11 @@ function testAgainst(backend: "Redis" | "Mock") {
             times: 0,
           },
         })
-        .expect(201);
+        .expect(400, {
+          statusCode: 400,
+          error: "Bad Request",
+          message: "body.repeat.times should be >= 1",
+        });
 
       await delay(500);
 

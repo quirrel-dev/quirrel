@@ -35,7 +35,7 @@
         },
         "times": {
           "type": "number",
-          "minimum": 0
+          "minimum": 1
         },
         "cron": {
           "type": "string",

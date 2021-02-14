@@ -66,7 +66,10 @@ const vercelMs = z
 
 const timeDuration = (fieldName = "duration") =>
   z.union([
-    z.number().positive({ message: `${fieldName} must not be negative` }),
+    z
+      .number()
+      .positive({ message: `${fieldName} must not be negative` })
+      .min(1),
     vercelMs,
   ]);
 
