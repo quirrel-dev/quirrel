@@ -258,12 +258,7 @@ export class QuirrelClient<T> {
     });
   }
 
-  /**
-   * Enqueue a job to the specified endpoint.
-   * @param endpoint endpoint to execute the job against
-   * @param opts job options
-   */
-  async enqueue(payload: T, opts: EnqueueJobOpts = {}): Promise<Job<T>> {
+  private async payloadAndOptsToBody(payload: T, opts: EnqueueJobOptsSchema) {
     if (typeof payload === "undefined") {
       throw new Error("Passing `undefined` as Payload is not allowed");
     }
@@ -290,6 +285,24 @@ export class QuirrelClient<T> {
       stringifiedBody = await this.encryptor.encrypt(stringifiedBody);
     }
 
+    return {
+      ...this.defaultJobOptions,
+      body: stringifiedBody,
+      delay,
+      id: opts.id,
+      repeat: opts.repeat,
+      retry: opts.retry?.map(parseDuration),
+    };
+  }
+
+  /**
+   * Enqueue a job to the specified endpoint.
+   * @param endpoint endpoint to execute the job against
+   * @param opts job options
+   */
+  async enqueue(payload: T, opts: EnqueueJobOpts = {}): Promise<Job<T>> {
+    const body = await this.payloadAndOptsToBody(payload, opts);
+
     const res = await this.fetch(this.baseUrl, {
       method: "POST",
       headers: {
@@ -297,14 +310,7 @@ export class QuirrelClient<T> {
         ...this.defaultHeaders,
       },
       credentials: "omit",
-      body: JSON.stringify({
-        ...this.defaultJobOptions,
-        body: stringifiedBody,
-        delay,
-        id: opts.id,
-        repeat: opts.repeat,
-        retry: opts.retry?.map(parseDuration),
-      }),
+      body: JSON.stringify(body),
     });
 
     if (res.status === 201) {
