@@ -323,10 +323,12 @@ export class QuirrelClient<T> {
    * Enqueue multiple jobs
    */
   async enqueueMany(
-    jobs: [payload: T, opts?: EnqueueJobOpts][]
+    jobs: { payload: T; opts?: EnqueueJobOpts }[]
   ): Promise<Job<T>[]> {
     const body = await Promise.all(
-      jobs.map(([job, opts = {}]) => this.payloadAndOptsToBody(job, opts))
+      jobs.map(({ payload, opts = {} }) =>
+        this.payloadAndOptsToBody(payload, opts)
+      )
     );
 
     const res = await this.fetch(this.baseUrl + "/batch", {
