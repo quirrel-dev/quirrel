@@ -55,6 +55,19 @@ function testAgainst(backend: "Redis" | "Mock") {
       expect(lastBody).toEqual('{"foo":"bar"}');
     });
 
+    test("post multiple jobs", async () => {
+      const response = await request(quirrel)
+        .post("/queues/" + endpoint + "/batch")
+        .send([
+          { body: JSON.stringify({ first: "job" }) },
+          { body: JSON.stringify({ second: "job" }) },
+        ])
+        .expect(201);
+
+      expect(response.body[0].body).toBe(JSON.stringify({ first: "job" }));
+      expect(response.body[1].body).toBe(JSON.stringify({ second: "job" }));
+    });
+
     describe("enqueueing a job in the past", () => {
       it("should execute immediately", async () => {
         await request(quirrel)
