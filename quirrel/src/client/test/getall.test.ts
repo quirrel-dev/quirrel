@@ -15,16 +15,25 @@ test("getAll", async () => {
     },
   });
 
-  const jobs = await Promise.all([
-    quirrel.enqueue("hello world", {
-      delay: 20 * 1000,
-    }),
-    quirrel.enqueue("hello world", {
-      delay: 20 * 1000,
-    }),
-    quirrel.enqueue("hello world", {
-      delay: 20 * 1000,
-    }),
+  const jobs = await quirrel.enqueueMany([
+    [
+      "hello world",
+      {
+        delay: "20s",
+      },
+    ],
+    [
+      "hello world",
+      {
+        delay: "20s",
+      },
+    ],
+    [
+      "hello world",
+      {
+        delay: "20s",
+      },
+    ],
   ]);
 
   const iterator = quirrel.get();

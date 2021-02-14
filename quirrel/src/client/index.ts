@@ -297,7 +297,6 @@ export class QuirrelClient<T> {
 
   /**
    * Enqueue a job to the specified endpoint.
-   * @param endpoint endpoint to execute the job against
    * @param opts job options
    */
   async enqueue(payload: T, opts: EnqueueJobOpts = {}): Promise<Job<T>> {
@@ -315,6 +314,34 @@ export class QuirrelClient<T> {
 
     if (res.status === 201) {
       return await this.toJob(await res.json());
+    }
+
+    throw new Error(`Unexpected response: ${await res.text()}`);
+  }
+
+  /**
+   * Enqueue multiple jobs
+   */
+  async enqueueMany(
+    jobs: [payload: T, opts?: EnqueueJobOpts][]
+  ): Promise<Job<T>[]> {
+    const body = await Promise.all(
+      jobs.map(([job, opts = {}]) => this.payloadAndOptsToBody(job, opts))
+    );
+
+    const res = await this.fetch(this.baseUrl + "/batch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.defaultHeaders,
+      },
+      credentials: "omit",
+      body: JSON.stringify(body),
+    });
+
+    if (res.status === 201) {
+      const response = (await res.json()) as any[];
+      return await Promise.all(response.map((job) => this.toJob(job)));
     }
 
     throw new Error(`Unexpected response: ${await res.text()}`);
@@ -349,7 +376,6 @@ export class QuirrelClient<T> {
 
   /**
    * Iterate through scheduled jobs.
-   * @param endpoint filter for this endpoint
    * @example
    * for await (const jobs of queue.get()) {
    *   // do smth
