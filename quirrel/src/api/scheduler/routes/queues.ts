@@ -62,6 +62,14 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       const { tokenId, body } = request;
       const { endpoint } = request.params;
 
+      if (body.length > 1000) {
+        return reply
+          .status(400)
+          .send(
+            "That's a whole lot of jobs! If this wasn't a mistake, please get in touch with Simon to lift the 5k limit."
+          );
+      }
+
       const jobs = await Promise.all(
         body.map((b) => jobsRepo.enqueue(tokenId, endpoint, b))
       );
