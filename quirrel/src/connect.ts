@@ -52,6 +52,7 @@ export function Queue<Payload>(
   });
 
   server.enqueue = (payload, opts) => quirrel.enqueue(payload, opts);
+  server.enqueueMany = (jobs) => quirrel.enqueueMany(jobs);
   server.get = () => quirrel.get();
   server.delete = (id) => quirrel.delete(id);
   server.getById = (id) => quirrel.getById(id);
