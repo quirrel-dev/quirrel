@@ -83,7 +83,7 @@
     "ioredis": "4.22.0",
     "ioredis-mock": "5.2.2",
     "ms": "2.1.3",
-    "open": "7.4.0",
+    "open": "7.4.1",
     "parse-gitignore": "1.0.1",
     "pino": "6.11.1",
     "plausible-telemetry": "0.1.0",
