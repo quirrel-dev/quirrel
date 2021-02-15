@@ -54,8 +54,7 @@
     "supertest": "^6.1.3",
     "ts-jest": "^26.5.1",
     "typescript": "^4.1.5",
-    "websocket": "^1.0.33",
-    "zod": "^3.0.0-alpha.4"
+    "websocket": "^1.0.33"
   },
   "dependencies": {
     "@quirrel/owl": "^0.5.2",
@@ -90,6 +89,7 @@
     "plausible-telemetry": "0.1.0",
     "secure-e2ee": "0.4.0",
     "secure-webhooks": "0.2.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "zod": "^3.0.0-alpha.4"
   }
 }
