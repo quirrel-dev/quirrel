@@ -2,7 +2,7 @@ import request from "supertest";
 import { run } from "./runQuirrel";
 
 describe("owl-updates", () => {
-  test("0.5 to 0.6", async () => {
+  test("0.5 to 0.8", async () => {
     const quirrel = await run("Mock");
 
     await quirrel.redis.sadd(
