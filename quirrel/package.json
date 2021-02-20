@@ -40,7 +40,7 @@
     "@types/jest": "^26.0.20",
     "@types/ms": "^0.7.31",
     "@types/parse-gitignore": "^1.0.0",
-    "@types/pino": "^6.3.5",
+    "@types/pino": "^6.3.6",
     "@types/redis": "^2.8.28",
     "@types/supertest": "^2.0.10",
     "@types/uuid": "^8.3.0",
