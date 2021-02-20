@@ -3,7 +3,7 @@ import * as SearchPredicates from "../lib/search-predicates";
 
 interface TableRow<T> {
   title: string;
-  render: (v: T) => React.ReactChild;
+  render: (v: T) => React.ReactChild | null;
   renderTooltip?: (v: T) => string;
 }
 
