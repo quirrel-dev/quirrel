@@ -29,7 +29,7 @@ export default function Pending() {
           },
           {
             title: "Payload",
-            render: (job) => job.body,
+            render: (job) => JSON.stringify(job.body),
           },
         ]}
         endOfRow={(job) => (

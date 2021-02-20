@@ -43,7 +43,7 @@ export default function Activity() {
             render: (a) => {
               switch (a.type) {
                 case "scheduled":
-                  return a.payload.body;
+                  return JSON.stringify(a.payload.body);
                 case "rescheduled":
                   return a.payload.runAt;
                 default:
