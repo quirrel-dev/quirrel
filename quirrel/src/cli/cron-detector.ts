@@ -24,7 +24,9 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 
   const clientFramework = quirrelImport[1];
 
-  const jobNameResult = /CronJob\(\s*['"](.*)["'],\s*["'](.*)["']/.exec(file);
+  const jobNameResult = /CronJob\(\s*(?:\/\/.*)?\s*['"](.*)["'],\s*(?:\/\/.*)?\s*["'](.*)["']/.exec(
+    file
+  );
   if (!jobNameResult) {
     return null;
   }
