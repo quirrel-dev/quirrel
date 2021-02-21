@@ -11,12 +11,12 @@ import pack from "../../package.json";
 
 export { Job };
 
-export interface JobMeta {
-  id: string;
-  count: number;
-  exclusive: boolean;
-  nextRepetition?: Date;
-  retry: number[];
+export interface JobMeta
+  extends Pick<JobDTO, "id" | "count" | "exclusive" | "retry"> {
+  /**
+   * If this is a repeated job, the next repetition will be scheduled for this Date.
+   */
+  readonly nextRepetition?: Date;
 }
 
 export type QuirrelJobHandler<T> = (job: T, meta: JobMeta) => Promise<void>;
