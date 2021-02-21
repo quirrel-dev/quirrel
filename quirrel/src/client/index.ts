@@ -13,6 +13,10 @@ export { Job };
 
 export interface JobMeta {
   id: string;
+  count: number;
+  exclusive: boolean;
+  nextRepetition?: Date;
+  retry: number[];
 }
 
 export type QuirrelJobHandler<T> = (job: T, meta: JobMeta) => Promise<void>;
@@ -465,13 +469,19 @@ export class QuirrelClient<T> {
     }
 
     const payload = await this.decryptAndDecodeBody(body);
-    const { id } = JSON.parse((headers["x-quirrel-meta"] as string) ?? "{}");
+    const { id, count, retry, nextRepetition, exclusive } = JSON.parse(
+      (headers["x-quirrel-meta"] as string) ?? "{}"
+    );
 
     console.log(`Received job to ${this.route}: `, payload);
 
     try {
       await this.handler(payload, {
         id,
+        count,
+        retry,
+        nextRepetition,
+        exclusive,
       });
 
       return {

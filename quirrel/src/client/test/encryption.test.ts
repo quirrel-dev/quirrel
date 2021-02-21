@@ -59,6 +59,10 @@ test("encryption", async () => {
   expect(jobMetadata).toEqual([
     {
       id: job.id,
+      count: 1,
+      exclusive: false,
+      nextRepetition: undefined,
+      retry: [],
     },
   ]);
 
