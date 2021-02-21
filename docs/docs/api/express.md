@@ -10,7 +10,7 @@ const app = Express()
 
 const someQueue = Queue(
   "someQueue",
-  async (job) => {
+  async (job, meta) => {
     // do something
   }
 )
@@ -28,7 +28,7 @@ Since there's no convention for Express's default development port, you'll have 
 ```ts
 function Queue<T>(
     path: string,
-    worker: (job: T): Promise<void>,
+    worker: (job: T, meta: JobMeta): Promise<void>,
     defaultJobOptions?: { exclusive?: boolean }
 ): QueueInstance<T>
 ```

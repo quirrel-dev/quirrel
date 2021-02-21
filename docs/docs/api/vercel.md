@@ -7,7 +7,7 @@ import { Queue } from "quirrel/vercel";
 
 export default Queue(
   "api/someQueue",
-  async (job) => {
+  async (job, meta) => {
     // do something
   }
 );
@@ -21,7 +21,7 @@ Make sure to export it from a [Serverless Function](https://vercel.com/docs/serv
 ```ts
 function Queue<T>(
     path: string,
-    worker: (job: T): Promise<void>,
+    worker: (job: T, meta: JobMeta): Promise<void>,
     defaultJobOptions?: { exclusive?: boolean }
 ): QueueInstance<T>
 ```
