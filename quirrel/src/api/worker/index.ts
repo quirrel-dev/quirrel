@@ -83,6 +83,13 @@ export async function createWorker({
 
       const headers: Record<string, string> = {
         "Content-Type": "text/plain",
+        "x-quirrel-meta": JSON.stringify({
+          id: job.id,
+          count: job.count,
+          exclusive: job.exclusive,
+          retry: job.retry,
+          nextRepetition: jobMeta.nextExecDate,
+        }),
       };
 
       if (tokenId) {
