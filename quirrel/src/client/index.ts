@@ -11,7 +11,11 @@ import pack from "../../package.json";
 
 export { Job };
 
-export type QuirrelJobHandler<T> = (job: T) => Promise<void>;
+export interface JobMeta {
+  id: string;
+}
+
+export type QuirrelJobHandler<T> = (job: T, meta: JobMeta) => Promise<void>;
 export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive" | "retry">;
 
 interface CreateQuirrelClientArgs<T> {
@@ -459,12 +463,16 @@ export class QuirrelClient<T> {
         };
       }
     }
+
     const payload = await this.decryptAndDecodeBody(body);
+    const { id } = JSON.parse((headers["x-quirrel-meta"] as string) ?? "{}");
 
     console.log(`Received job to ${this.route}: `, payload);
 
     try {
-      await this.handler(payload);
+      await this.handler(payload, {
+        id,
+      });
 
       return {
         status: 200,

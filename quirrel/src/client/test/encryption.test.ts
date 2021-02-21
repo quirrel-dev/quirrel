@@ -1,4 +1,4 @@
-import { QuirrelClient } from "..";
+import { JobMeta, QuirrelClient } from "..";
 import { run } from "../../api/test/runQuirrel";
 import * as http from "http";
 import delay from "delay";
@@ -9,6 +9,7 @@ test("encryption", async () => {
 
   const encryptedBodies: string[] = [];
   const decryptedBodies: string[] = [];
+  const jobMetadata: JobMeta[] = [];
 
   let quirrel: QuirrelClient<any>;
 
@@ -30,7 +31,8 @@ test("encryption", async () => {
     .listen(0);
 
   quirrel = new QuirrelClient({
-    async handler(body) {
+    async handler(body, meta) {
+      jobMetadata.push(meta);
       decryptedBodies.push(body);
     },
     route: "/lol",
@@ -54,6 +56,11 @@ test("encryption", async () => {
   expect(encryptedBodies).toHaveLength(1);
   expect(encryptedBodies[0].startsWith("ddb7:")).toBe(true);
   expect(decryptedBodies).toEqual(["hello world"]);
+  expect(jobMetadata).toEqual([
+    {
+      id: job.id,
+    },
+  ]);
 
   server.teardown();
   endpoint.close();
