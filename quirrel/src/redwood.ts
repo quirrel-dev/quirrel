@@ -24,7 +24,10 @@ interface RedwoodResponse {
   headers: Record<string, string>;
 }
 
-export type Queue<Payload> = Omit<QuirrelClient<Payload>, "respondTo" | "makeRequest">;
+export type Queue<Payload> = Omit<
+  QuirrelClient<Payload>,
+  "respondTo" | "makeRequest"
+>;
 
 export function Queue<Payload>(
   route: string,
@@ -66,7 +69,7 @@ export function Queue<Payload>(
 export function CronJob(
   route: string,
   cronSchedule: string,
-  handler: QuirrelJobHandler<void>
+  handler: () => Promise<void>
 ) {
   return Queue(route, handler) as unknown;
 }
