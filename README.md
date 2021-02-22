@@ -28,3 +28,25 @@ Quirrel values ...
 If you want to learn about Quirrel, check out [the tutorial](https://dev.to/quirrel/building-a-water-drinking-reminder-with-next-js-and-quirrel-1ckj)!
 
 If you want to integrate Quirrel into an existing application, check out the [Getting Started Guide](https://docs.quirrel.dev).
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/Skn0tt"><img src="https://avatars.githubusercontent.com/u/14912729?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Simon Knott</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=Skn0tt" title="Code">💻</a> <a href="#ideas-Skn0tt" title="Ideas, Planning, & Feedback">🤔</a> <a href="#content-Skn0tt" title="Content">🖋</a></td>
+    <td align="center"><a href="https://github.com/batteredgherkin"><img src="https://avatars.githubusercontent.com/u/45402110?v=4?s=100" width="100px;" alt=""/><br /><sub><b>batteredgherkin</b></sub></a><br /><a href="#design-batteredgherkin" title="Design">🎨</a></td>
+    <td align="center"><a href="https://aalaap.com"><img src="https://avatars.githubusercontent.com/u/79404?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aalaap Ghag</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=aalaap" title="Documentation">📖</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
