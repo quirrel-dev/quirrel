@@ -14,7 +14,7 @@
 - [Landing Page](https://quirrel.dev)
 - [Documentation](https://docs.quirrel.dev)
 
-Quirrel makes job queueing simple as pie. It supports delayed jobs, fanout jobs, recurring jobs and CRON jobs.
+Quirrel makes job queueing as easy as pie. It supports delayed jobs, fanout jobs, recurring jobs and CRON jobs.
 
 Quirrel values ...
 
