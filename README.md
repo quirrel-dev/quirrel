@@ -1,7 +1,4 @@
 <img src="./logo.png" height="70px" align="left" />
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Quirrel
 
@@ -30,7 +27,6 @@ Quirrel values ...
 ## Getting Started
 
 If you want to learn about Quirrel, ceck out [the tutorial](https://dev.to/quirrel/building-a-water-drinking-reminder-with-next-js-and-quirrel-1ckj)!
-
 
 If you want to integrate Quirrel into an existing application, check out the [Getting Started Guide](https://docs.quirrel.dev).
 
