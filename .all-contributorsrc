@@ -1,0 +1,45 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "Skn0tt",
+      "name": "Simon Knott",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14912729?v=4",
+      "profile": "https://github.com/Skn0tt",
+      "contributions": [
+        "code",
+        "ideas",
+        "content"
+      ]
+    },
+    {
+      "login": "batteredgherkin",
+      "name": "batteredgherkin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45402110?v=4",
+      "profile": "https://github.com/batteredgherkin",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "aalaap",
+      "name": "Aalaap Ghag",
+      "avatar_url": "https://avatars.githubusercontent.com/u/79404?v=4",
+      "profile": "https://aalaap.com",
+      "contributions": [
+        "doc"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "quirrel",
+  "projectOwner": "quirrel-dev",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true,
+  "commitConvention": "none"
+}
