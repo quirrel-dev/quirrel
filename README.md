@@ -1,6 +1,6 @@
 <img src="./logo.png" height="70px" align="left" />
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Quirrel
@@ -43,6 +43,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
+    <td align="center"><a href="https://github.com/Skn0tt"><img src="https://avatars.githubusercontent.com/u/14912729?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Simon Knott</b></sub></a><br /><a href="#audio-Skn0tt" title="Audio">🔊</a> <a href="#blog-Skn0tt" title="Blogposts">📝</a> <a href="#business-Skn0tt" title="Business development">💼</a> <a href="https://github.com/quirrel-dev/quirrel/commits?author=Skn0tt" title="Code">💻</a> <a href="#content-Skn0tt" title="Content">🖋</a> <a href="https://github.com/quirrel-dev/quirrel/commits?author=Skn0tt" title="Documentation">📖</a> <a href="#ideas-Skn0tt" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-Skn0tt" title="Maintenance">🚧</a> <a href="#projectManagement-Skn0tt" title="Project Management">📆</a> <a href="#question-Skn0tt" title="Answering Questions">💬</a> <a href="#tutorial-Skn0tt" title="Tutorials">✅</a> <a href="https://github.com/quirrel-dev/quirrel/commits?author=Skn0tt" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://aalaap.com"><img src="https://avatars.githubusercontent.com/u/79404?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aalaap Ghag</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=aalaap" title="Documentation">📖</a></td>
   </tr>
 </table>
