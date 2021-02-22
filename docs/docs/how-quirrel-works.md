@@ -9,7 +9,7 @@ If you want to learn even more about it, feel free to read [the sources](https:/
 
 On a schematic level, Quirrel works the following way:
 
-1. Your application calls the Quirrel server with a request that goes like "In 5 minutes, call me back at https://my-application.com/api/queues/myQueue and supply payload `{ "foo": "bar" }`"
+1. Your application calls the Quirrel server with a request that goes like "In 5 minutes, call me back at https://my-application.com/api/queues/myQueue and supply payload `{ "foo": "bar" }`".
 2. Quirrel takes this job and gives it to the scheduler (more about that below).
 3. After 5 minutes have elapsed, the job is ready for execution, so the scheduler passes it back to the Quirrel server.
 4. The Quirrel server then makes an HTTP request to the specified location with the specified payload attached.
