@@ -16,7 +16,7 @@
 
 Quirrel makes job queueing as easy as pie. It supports delayed jobs, fanout jobs, recurring jobs and CRON jobs.
 
-Quirrel values...
+Quirrel values ...
 
 - great DX (through [tailormade client libraries](https://docs.quirrel.dev/api/queue) & the [development UI](https://docs.quirrel.dev/development-ui))
 - privacy (through end-to-end encryption)
