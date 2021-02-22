@@ -171,7 +171,7 @@ export class JobsRepo {
     }
 
     if (typeof repeat?.times === "number" && repeat.times < 1) {
-      return;
+      throw new Error("repeat.times must be positive")
     }
 
     let schedule_type: "every" | "cron" | undefined = undefined;

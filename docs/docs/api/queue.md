@@ -112,6 +112,18 @@ Retries a jobs three times, until it successd: After 10 seconds, 5 minutes and 1
 
 You can also specify `{ retry: [ ... ] }` as the third argument to the `Queue` constructor.
 
+### `.enqueueMany`
+
+```ts
+async enqueueMany(
+  jobs: { payload: T; options?: EnqueueJobOpts }[]
+): Promise<Job<T>[]>
+```
+
+Works just like [`.enqueue`](#enqueue), but creates multiple jobs at once.
+
+> Currently, there's a hard limit of 1000 jobs to be created at once.
+
 ### `.get`
 
 ```ts
@@ -199,7 +211,6 @@ count: number;
 
 The repetition of this execution.
 Starts at 1, increments with each repetition / retry.
-
 
 ### `repeat`
 

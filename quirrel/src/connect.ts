@@ -4,11 +4,12 @@ import {
   QuirrelClient,
   QuirrelJobHandler,
   EnqueueJobOpts,
+  EnqueueJobOptions,
   Job,
 } from "./client";
 import bodyParser from "body-parser";
 
-export { DefaultJobOptions, QuirrelJobHandler, EnqueueJobOpts, Job };
+export { DefaultJobOptions, QuirrelJobHandler, EnqueueJobOpts, EnqueueJobOptions, Job };
 
 export type Queue<Payload> = connect.Server &
   Omit<QuirrelClient<Payload>, "respondTo" | "makeRequest">;
@@ -51,7 +52,8 @@ export function Queue<Payload>(
     res.end();
   });
 
-  server.enqueue = (payload, opts) => quirrel.enqueue(payload, opts);
+  server.enqueue = (payload, options) => quirrel.enqueue(payload, options);
+  server.enqueueMany = (jobs) => quirrel.enqueueMany(jobs);
   server.get = () => quirrel.get();
   server.delete = (id) => quirrel.delete(id);
   server.getById = (id) => quirrel.getById(id);

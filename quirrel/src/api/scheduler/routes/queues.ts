@@ -34,13 +34,50 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const job = await jobsRepo.enqueue(tokenId, endpoint, body);
 
-      if (job) {
-        fastify.logger?.jobCreated({ ...job, tokenId });
+      fastify.logger?.jobCreated({ ...job, tokenId });
 
-        await queueRepo.add(endpoint, tokenId);
-      }
+      await queueRepo.add(endpoint, tokenId);
 
       reply.status(201).send(job);
+    }
+  );
+
+  fastify.post<{
+    Body: POSTQueuesEndpointBody[];
+    Params: QueuesEndpointParams;
+  }>(
+    "/:endpoint/batch",
+    {
+      schema: {
+        body: {
+          type: "array",
+          items: POSTQueuesEndpointBodySchema,
+        },
+        params: EndpointParamsSchema,
+      },
+    },
+    async (request, reply) => {
+      fastify.telemetrist?.dispatch("enqueue_batch");
+
+      const { tokenId, body } = request;
+      const { endpoint } = request.params;
+
+      if (body.length > 1000) {
+        return reply
+          .status(400)
+          .send(
+            "That's a whole lot of jobs! If this wasn't a mistake, please get in touch with Simon to lift the 5k limit."
+          );
+      }
+
+      const jobs = await Promise.all(
+        body.map((b) => jobsRepo.enqueue(tokenId, endpoint, b))
+      );
+
+      await queueRepo.add(endpoint, tokenId);
+      jobs.forEach((job) => fastify.logger?.jobCreated({ ...job, tokenId }));
+
+      reply.status(201).send(jobs);
     }
   );
 
