@@ -1,0 +1,24 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "aalaap",
+      "name": "Aalaap Ghag",
+      "avatar_url": "https://avatars.githubusercontent.com/u/79404?v=4",
+      "profile": "https://aalaap.com",
+      "contributions": [
+        "doc"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "quirrel",
+  "projectOwner": "quirrel-dev",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
