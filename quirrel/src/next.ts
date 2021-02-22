@@ -2,19 +2,23 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import {
   QuirrelClient,
   EnqueueJobOpts,
+  EnqueueJobOptions,
   Job,
   DefaultJobOptions,
   QuirrelJobHandler,
 } from "./client";
 import { registerDevelopmentDefaults } from "./client/config";
 
-export { Job, EnqueueJobOpts, DefaultJobOptions, QuirrelJobHandler };
+export { Job, EnqueueJobOpts, EnqueueJobOptions, DefaultJobOptions, QuirrelJobHandler };
 
 registerDevelopmentDefaults({
   applicationBaseUrl: "http://localhost:3000",
 });
 
-export type Queue<Payload> = Omit<QuirrelClient<Payload>, "respondTo" | "makeRequest">;
+export type Queue<Payload> = Omit<
+  QuirrelClient<Payload>,
+  "respondTo" | "makeRequest"
+>;
 
 export function Queue<Payload>(
   route: string,
@@ -36,8 +40,12 @@ export function Queue<Payload>(
     res.send(response.body);
   }
 
-  nextApiHandler.enqueue = (payload: Payload, opts: EnqueueJobOpts) =>
-    quirrel.enqueue(payload, opts);
+  nextApiHandler.enqueue = (payload: Payload, options: EnqueueJobOptions) =>
+    quirrel.enqueue(payload, options);
+
+  nextApiHandler.enqueueMany = (
+    jobs: { payload: Payload; options?: EnqueueJobOptions }[]
+  ) => quirrel.enqueueMany(jobs);
 
   nextApiHandler.delete = (jobId: string) => quirrel.delete(jobId);
 

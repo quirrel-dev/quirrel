@@ -12,7 +12,7 @@ import pack from "../../package.json";
 export { Job };
 
 export type QuirrelJobHandler<T> = (job: T) => Promise<void>;
-export type DefaultJobOptions = Pick<EnqueueJobOpts, "exclusive" | "retry">;
+export type DefaultJobOptions = Pick<EnqueueJobOptions, "exclusive" | "retry">;
 
 interface CreateQuirrelClientArgs<T> {
   route: string;
@@ -66,7 +66,10 @@ const vercelMs = z
 
 const timeDuration = (fieldName = "duration") =>
   z.union([
-    z.number().positive({ message: `${fieldName} must not be negative` }),
+    z
+      .number()
+      .positive({ message: `${fieldName} must not be negative` })
+      .min(1),
     vercelMs,
   ]);
 
@@ -77,7 +80,7 @@ export const cron = z
     "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference"
   );
 
-const EnqueueJobOptsSchema = z.object({
+const EnqueueJobOptionsSchema = z.object({
   id: z.string().optional(),
   exclusive: z.boolean().optional(),
   override: z.boolean().optional(),
@@ -98,13 +101,18 @@ const EnqueueJobOptsSchema = z.object({
     .optional(),
 });
 
-type EnqueueJobOptsSchema = z.TypeOf<typeof EnqueueJobOptsSchema>;
+type EnqueueJobOptionsSchema = z.TypeOf<typeof EnqueueJobOptionsSchema>;
 
-type EnqueueJobOptsSchemaMatchesDocs = AssertTrue<
-  IsExact<EnqueueJobOpts, EnqueueJobOptsSchema>
+type EnqueueJobOptionssSchemaMatchesDocs = AssertTrue<
+  IsExact<EnqueueJobOptions, EnqueueJobOptionsSchema>
 >;
 
-export interface EnqueueJobOpts {
+/**
+ * @deprecated renamed to EnqueueJobOptions
+ */
+export type EnqueueJobOpts = EnqueueJobOptions;
+
+export interface EnqueueJobOptions {
   /**
    * Can be used to make a job easier to manage.
    * If there's already a job with the same ID, this job will be trashed.
@@ -258,30 +266,28 @@ export class QuirrelClient<T> {
     });
   }
 
-  /**
-   * Enqueue a job to the specified endpoint.
-   * @param endpoint endpoint to execute the job against
-   * @param opts job options
-   */
-  async enqueue(payload: T, opts: EnqueueJobOpts = {}): Promise<Job<T>> {
+  private async payloadAndOptionsToBody(
+    payload: T,
+    options: EnqueueJobOptionsSchema
+  ) {
     if (typeof payload === "undefined") {
       throw new Error("Passing `undefined` as Payload is not allowed");
     }
 
-    if (opts.repeat && opts.retry?.length) {
+    if (options.repeat && options.retry?.length) {
       throw new Error("retry and repeat cannot be used together");
     }
 
-    opts = EnqueueJobOptsSchema.parse(opts);
+    options = EnqueueJobOptionsSchema.parse(options);
 
-    let delay = parseDuration(opts.delay);
+    let delay = parseDuration(options.delay);
 
-    if ("runAt" in opts && opts.runAt) {
-      delay = runAtToDelay(opts.runAt);
+    if ("runAt" in options && options.runAt) {
+      delay = runAtToDelay(options.runAt);
     }
 
-    if (opts.repeat) {
-      opts.repeat.every = parseDuration(opts.repeat?.every);
+    if (options.repeat) {
+      options.repeat.every = parseDuration(options.repeat?.every);
     }
 
     let stringifiedBody = JSON.stringify(payload);
@@ -290,6 +296,23 @@ export class QuirrelClient<T> {
       stringifiedBody = await this.encryptor.encrypt(stringifiedBody);
     }
 
+    return {
+      ...this.defaultJobOptions,
+      body: stringifiedBody,
+      delay,
+      id: options.id,
+      repeat: options.repeat,
+      retry: options.retry?.map(parseDuration),
+    };
+  }
+
+  /**
+   * Enqueue a job to the specified endpoint.
+   * @param options job options
+   */
+  async enqueue(payload: T, options: EnqueueJobOptions = {}): Promise<Job<T>> {
+    const body = await this.payloadAndOptionsToBody(payload, options);
+
     const res = await this.fetch(this.baseUrl, {
       method: "POST",
       headers: {
@@ -297,18 +320,41 @@ export class QuirrelClient<T> {
         ...this.defaultHeaders,
       },
       credentials: "omit",
-      body: JSON.stringify({
-        ...this.defaultJobOptions,
-        body: stringifiedBody,
-        delay,
-        id: opts.id,
-        repeat: opts.repeat,
-        retry: opts.retry?.map(parseDuration),
-      }),
+      body: JSON.stringify(body),
     });
 
     if (res.status === 201) {
       return await this.toJob(await res.json());
+    }
+
+    throw new Error(`Unexpected response: ${await res.text()}`);
+  }
+
+  /**
+   * Enqueue multiple jobs
+   */
+  async enqueueMany(
+    jobs: { payload: T; options?: EnqueueJobOptions }[]
+  ): Promise<Job<T>[]> {
+    const body = await Promise.all(
+      jobs.map(({ payload, options = {} }) =>
+        this.payloadAndOptionsToBody(payload, options)
+      )
+    );
+
+    const res = await this.fetch(this.baseUrl + "/batch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.defaultHeaders,
+      },
+      credentials: "omit",
+      body: JSON.stringify(body),
+    });
+
+    if (res.status === 201) {
+      const response = (await res.json()) as any[];
+      return await Promise.all(response.map((job) => this.toJob(job)));
     }
 
     throw new Error(`Unexpected response: ${await res.text()}`);
@@ -343,7 +389,6 @@ export class QuirrelClient<T> {
 
   /**
    * Iterate through scheduled jobs.
-   * @param endpoint filter for this endpoint
    * @example
    * for await (const jobs of queue.get()) {
    *   // do smth

@@ -1,13 +1,14 @@
 import {
   QuirrelClient,
   EnqueueJobOpts,
+  EnqueueJobOptions,
   Job,
   DefaultJobOptions,
   QuirrelJobHandler,
 } from "./client";
 import { registerDevelopmentDefaults } from "./client/config";
 
-export { Job, EnqueueJobOpts, DefaultJobOptions, QuirrelJobHandler };
+export { Job, EnqueueJobOpts, EnqueueJobOptions, DefaultJobOptions, QuirrelJobHandler };
 
 registerDevelopmentDefaults({
   applicationBaseUrl: "http://localhost:8911",
@@ -24,7 +25,10 @@ interface RedwoodResponse {
   headers: Record<string, string>;
 }
 
-export type Queue<Payload> = Omit<QuirrelClient<Payload>, "respondTo" | "makeRequest">;
+export type Queue<Payload> = Omit<
+  QuirrelClient<Payload>,
+  "respondTo" | "makeRequest"
+>;
 
 export function Queue<Payload>(
   route: string,
@@ -49,8 +53,12 @@ export function Queue<Payload>(
     };
   }
 
-  redwoodHandler.enqueue = (payload: Payload, opts: EnqueueJobOpts) =>
-    quirrel.enqueue(payload, opts);
+  redwoodHandler.enqueue = (payload: Payload, options: EnqueueJobOptions) =>
+    quirrel.enqueue(payload, options);
+
+  redwoodHandler.enqueueMany = (
+    jobs: { payload: Payload; options?: EnqueueJobOptions }[]
+  ) => quirrel.enqueueMany(jobs);
 
   redwoodHandler.delete = (jobId: string) => quirrel.delete(jobId);
 
