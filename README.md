@@ -8,25 +8,24 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/skn0tt?label=Stay%20updated&style=social)](https://twitter.com/skn0tt)
 
 <p align="middle">
-The Task Queueing Solution for Serverless.
+  The Task Queueing Solution for Serverless.
 </p>
 
 - [Landing Page](https://quirrel.dev)
 - [Documentation](https://docs.quirrel.dev)
 
-Quirrel makes job queueing simple as cake.
-It supports delayed jobs, fanout jobs, recurring jobs and CRON jobs.
+Quirrel makes job queueing simple as cake. It supports delayed jobs, fanout jobs, recurring jobs and CRON jobs.
 
 Quirrel values ...
 
-- ... great DX (through [tailormade client libraries](https://docs.quirrel.dev/api/queue) & the [development UI](https://docs.quirrel.dev/development-ui))
-- ... privacy (through end-to-end encryption)
-- ... free software (it's MIT licensed!)
-- ... easy setup (through [hosted offering](https://quirrel.dev) and easy on-prem)
+- great DX (through [tailormade client libraries](https://docs.quirrel.dev/api/queue) & the [development UI](https://docs.quirrel.dev/development-ui))
+- privacy (through end-to-end encryption)
+- free software (it's MIT licensed!)
+- easy setup (through [hosted offering](https://quirrel.dev) and easy on-prem)
 
 ## Getting Started
 
-If you want to learn about Quirrel, ceck out [the tutorial](https://dev.to/quirrel/building-a-water-drinking-reminder-with-next-js-and-quirrel-1ckj)!
+If you want to learn about Quirrel, check out [the tutorial](https://dev.to/quirrel/building-a-water-drinking-reminder-with-next-js-and-quirrel-1ckj)!
 
 If you want to integrate Quirrel into an existing application, check out the [Getting Started Guide](https://docs.quirrel.dev).
 
