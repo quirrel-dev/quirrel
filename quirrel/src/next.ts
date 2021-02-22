@@ -22,7 +22,7 @@ export type Queue<Payload> = Omit<
 
 export function Queue<Payload>(
   route: string,
-  handler: (payload: Payload) => Promise<void>,
+  handler: QuirrelJobHandler<Payload>,
   defaultJobOptions?: DefaultJobOptions
 ): Queue<Payload> {
   const quirrel = new QuirrelClient<Payload>({
@@ -61,7 +61,7 @@ export function Queue<Payload>(
 export function CronJob(
   route: string,
   cronSchedule: string,
-  handler: QuirrelJobHandler<void>
+  handler: () => Promise<void>
 ) {
   return Queue(route, handler) as unknown;
 }

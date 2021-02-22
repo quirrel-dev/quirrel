@@ -11,7 +11,15 @@ import pack from "../../package.json";
 
 export { Job };
 
-export type QuirrelJobHandler<T> = (job: T) => Promise<void>;
+export interface JobMeta
+  extends Pick<JobDTO, "id" | "count" | "exclusive" | "retry"> {
+  /**
+   * If this is a repeated job, the next repetition will be scheduled for this Date.
+   */
+  readonly nextRepetition?: Date;
+}
+
+export type QuirrelJobHandler<T> = (job: T, meta: JobMeta) => Promise<void>;
 export type DefaultJobOptions = Pick<EnqueueJobOptions, "exclusive" | "retry">;
 
 interface CreateQuirrelClientArgs<T> {
@@ -504,12 +512,22 @@ export class QuirrelClient<T> {
         };
       }
     }
+
     const payload = await this.decryptAndDecodeBody(body);
+    const { id, count, retry, nextRepetition, exclusive } = JSON.parse(
+      (headers["x-quirrel-meta"] as string) ?? "{}"
+    );
 
     console.log(`Received job to ${this.route}: `, payload);
 
     try {
-      await this.handler(payload);
+      await this.handler(payload, {
+        id,
+        count,
+        retry,
+        nextRepetition,
+        exclusive,
+      });
 
       return {
         status: 200,

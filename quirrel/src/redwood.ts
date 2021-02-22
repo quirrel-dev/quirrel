@@ -74,7 +74,7 @@ export function Queue<Payload>(
 export function CronJob(
   route: string,
   cronSchedule: string,
-  handler: QuirrelJobHandler<void>
+  handler: () => Promise<void>
 ) {
   return Queue(route, handler) as unknown;
 }
