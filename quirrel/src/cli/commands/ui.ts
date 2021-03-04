@@ -21,6 +21,6 @@ export default async function registerUI(program: Command) {
     .action(async () => {
       console.log("Opening Quirrel UI ...");
 
-      open("https://ui.quirrel.dev", { app: getChromeName() });
+      open("https://ui.quirrel.dev", { app: { name: getChromeName() } });
     });
 }
