@@ -35,7 +35,7 @@ This is all we need installed to create our first Queue!
 Create a new [API Route](https://nextjs.org/docs/api-routes/introduction) at `pages/api/queues/email.js` and paste the following: 
 
 ```js title="pages/api/queues/email.js"
-import { Queue } from "@quirrel/next"
+import { Queue } from "quirrel/next"
 
 export default Queue(
   "api/queues/email", // 👈 the route it's reachable on
