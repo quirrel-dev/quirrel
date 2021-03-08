@@ -24,4 +24,24 @@ describe("EnhancedJSON", () => {
       expect(EnhancedJSON.parse(oldJob)).toEqual(null);
     });
   });
+
+  describe(".stringify", () => {
+    it("should not include SuperJSON stuff when not needed", () => {
+      const input = { a: "regular object" };
+      expect(EnhancedJSON.stringify(input)).toEqual('{"a":"regular object"}');
+      expect(EnhancedJSON.parse(EnhancedJSON.stringify(input))).toEqual(input);
+
+      expect(
+        EnhancedJSON.parse(EnhancedJSON.stringify(new Date(10000)))
+      ).toEqual(new Date(10000));
+    });
+  });
+
+  it("should include SuperJSON stuff when needed", () => {
+    const input = new Date(10000);
+    expect(EnhancedJSON.stringify(input)).toEqual(
+      '{"json":"1970-01-01T00:00:10.000Z","_superjson":{"values":["Date"]}}'
+    );
+    expect(EnhancedJSON.parse(EnhancedJSON.stringify(input))).toEqual(input);
+  });
 });
