@@ -7,7 +7,7 @@ export function stringify(value: any): string {
 export function parse(string: string): any {
   const parsedJSON = JSON.parse(string);
 
-  if (typeof parsedJSON === "object" && parsedJSON.json) {
+  if (typeof parsedJSON === "object" && parsedJSON?.json) {
     return SuperJSON.deserialize(parsedJSON);
   }
 
