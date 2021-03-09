@@ -8,6 +8,7 @@ import ms from "ms";
 import fetch from "cross-fetch";
 import type { IncomingHttpHeaders } from "http";
 import pack from "../../package.json";
+import * as EnhancedJSON from "./enhanced-json";
 
 export { Job };
 
@@ -298,7 +299,7 @@ export class QuirrelClient<T> {
       options.repeat.every = parseDuration(options.repeat?.every);
     }
 
-    let stringifiedBody = JSON.stringify(payload);
+    let stringifiedBody = EnhancedJSON.stringify(payload);
 
     if (this.encryptor) {
       stringifiedBody = await this.encryptor.encrypt(stringifiedBody);
@@ -382,7 +383,7 @@ export class QuirrelClient<T> {
       }
     }
 
-    return JSON.parse(body);
+    return EnhancedJSON.parse(body);
   }
 
   private async toJob(dto: JobDTO): Promise<Job<T>> {
