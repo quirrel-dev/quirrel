@@ -60,8 +60,8 @@
   },
   "dependencies": {
     "@quirrel/owl": "^0.10.0",
-    "@sentry/node": "6.2.1",
-    "@sentry/tracing": "6.2.1",
+    "@sentry/node": "6.2.2",
+    "@sentry/tracing": "6.2.2",
     "basic-auth": "2.0.1",
     "body-parser": "1.19.0",
     "chalk": "4.1.0",
