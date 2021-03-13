@@ -35,6 +35,8 @@ export function EndpointModal() {
     connectedTo?.encryptionSecret ?? ""
   );
 
+  const [bookmarkUrl, setBookmarkUrl] = useState<string>();
+
   return (
     <>
       <button
@@ -185,9 +187,7 @@ export function EndpointModal() {
                     return;
                   }
 
-                  const fullUrl = location.origin + hash;
-
-                  window.alert(`Add this to your bookmarks.\n${fullUrl}`);
+                  setBookmarkUrl(location.origin + hash);
                 }}
                 className="text-gray-700 disabled:text-gray-400 transition text-s mt-3 inline-flex items-center"
                 disabled={!endpoint}
@@ -208,6 +208,19 @@ export function EndpointModal() {
                 </svg>
                 Add as Bookmark
               </button>
+
+              {bookmarkUrl && (
+                <p className="mt-2 max-w-sm text-green-600 items-center">
+                  Add this to your bookmarks:
+                  <a
+                    className="mt-1 text-gray-800 block overflow-ellipsis overflow-hidden bg-gray-200 rounded border-2 border-gray-300 p-1"
+                    href={bookmarkUrl}
+                    target="_blank"
+                  >
+                    {bookmarkUrl}
+                  </a>
+                </p>
+              )}
             </div>
           </div>
         </div>
