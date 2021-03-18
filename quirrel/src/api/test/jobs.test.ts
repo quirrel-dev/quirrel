@@ -91,6 +91,15 @@ function testAgainst(backend: "Redis" | "Mock") {
         );
     });
 
+    describe("enqueueing a job with delay > 32 bit", () => {
+      it("does not print TimeoutOverflowWarning", async () => {
+        await request(quirrel)
+          .post("/queues/" + endpoint)
+          .send({ body: JSON.stringify({ foo: "bar" }), delay: 3147483647 })
+          .expect(201);
+      });
+    });
+
     test("queue list", async () => {
       async function sendTo(endpoint: string) {
         await request(quirrel)
