@@ -41,6 +41,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/Skn0tt"><img src="https://avatars.githubusercontent.com/u/14912729?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Simon Knott</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=Skn0tt" title="Code">💻</a> <a href="#ideas-Skn0tt" title="Ideas, Planning, & Feedback">🤔</a> <a href="#content-Skn0tt" title="Content">🖋</a></td>
     <td align="center"><a href="https://github.com/batteredgherkin"><img src="https://avatars.githubusercontent.com/u/45402110?v=4?s=100" width="100px;" alt=""/><br /><sub><b>batteredgherkin</b></sub></a><br /><a href="#design-batteredgherkin" title="Design">🎨</a></td>
     <td align="center"><a href="https://aalaap.com"><img src="https://avatars.githubusercontent.com/u/79404?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aalaap Ghag</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=aalaap" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://producthunt.com/@twmatthieuh"><img src="https://avatars.githubusercontent.com/u/1550192?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matthieu Hostache</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3Amatthieuh" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
