@@ -33,6 +33,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "matthieuh",
+      "name": "Matthieu Hostache",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1550192?v=4",
+      "profile": "http://producthunt.com/@twmatthieuh",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
