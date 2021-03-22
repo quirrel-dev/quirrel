@@ -55,6 +55,19 @@ export default CronJob(
       schedule: "@hourly",
     },
   },
+  "repro tarshan": {
+    input: `
+import { CronJob } from 'quirrel/redwood'
+
+export const handler = CronJob('admin-report-email-task-daily', '0 15 * * *', async () => {})
+    `,
+    output: {
+      framework: "redwood",
+      isValid: true,
+      route: "admin-report-email-task-daily",
+      schedule: "0 15 * * *",
+    },
+  },
 };
 
 describe("detectQuirrelCronJob", () => {
