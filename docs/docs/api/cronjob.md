@@ -5,8 +5,6 @@ title: CronJob
 CronJobs are specified very similar to Queues:
 
 ```ts title="pages/api/someCronJob.ts"
-// This example is for Next.js,
-// it works very similar for the other frameworks.
 import { CronJob } from "quirrel/next";
 
 export default CronJob(
@@ -17,6 +15,11 @@ export default CronJob(
   }
 );
 ```
+
+:::note 🚨 Other Frameworks 🚨
+The example above is for Next.js.
+Take a look at how `Queue` works with _your_ framework - it's the same for `CronJob`.
+:::
 
 This creates a new CronJob, which will immediately be picked up by your local Quirrel instance:
 
