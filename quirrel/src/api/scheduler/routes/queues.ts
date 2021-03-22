@@ -11,12 +11,27 @@ import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 
 import { JobsRepo } from "../jobs-repo";
 import { QueueRepo } from "../queue-repo";
+import { isValidRegex } from "../../../shared/is-valid-regex";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = new JobsRepo(fastify.redisFactory);
   const queueRepo = new QueueRepo(fastify.redis, jobsRepo);
 
   fastify.addHook("preValidation", fastify.tokenAuthPreValidation);
+
+  function hasValidCronExpression(body: POSTQueuesEndpointBody): boolean {
+    if (body.repeat?.cron) {
+      return isValidRegex(body.repeat.cron);
+    }
+
+    return true;
+  }
+
+  const INVALID_CRON_EXPRESSION_ERROR = {
+    statusCode: 400,
+    error: "Bad Request",
+    message: "body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference.",
+  };
 
   fastify.post<{ Body: POSTQueuesEndpointBody; Params: QueuesEndpointParams }>(
     "/:endpoint",
@@ -31,6 +46,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const { tokenId, body } = request;
       const { endpoint } = request.params;
+
+      if (!hasValidCronExpression(body)) {
+        return reply.status(400).send(INVALID_CRON_EXPRESSION_ERROR);
+      }
 
       const job = await jobsRepo.enqueue(tokenId, endpoint, body);
 
@@ -66,8 +85,12 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         return reply
           .status(400)
           .send(
-            "That's a whole lot of jobs! If this wasn't a mistake, please get in touch with Simon to lift the 5k limit."
+            "That's a whole lot of jobs! If this wasn't a mistake, please get in touch to lift the 5k limit."
           );
+      }
+
+      if (!body.every(hasValidCronExpression)) {
+        return reply.status(400).send(INVALID_CRON_EXPRESSION_ERROR);
       }
 
       const jobs = await Promise.all(

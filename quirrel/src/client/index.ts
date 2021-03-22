@@ -9,6 +9,7 @@ import fetch from "cross-fetch";
 import type { IncomingHttpHeaders } from "http";
 import pack from "../../package.json";
 import * as EnhancedJSON from "./enhanced-json";
+import { isValidRegex } from "../shared/is-valid-regex";
 
 export { Job };
 
@@ -84,8 +85,8 @@ const timeDuration = (fieldName = "duration") =>
 
 export const cron = z
   .string()
-  .regex(
-    /(@(yearly|monthly|weekly|daily|hourly))|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,7})/,
+  .refine(
+    isValidRegex,
     "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference"
   );
 
