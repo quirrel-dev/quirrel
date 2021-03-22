@@ -17,7 +17,7 @@ export interface DetectedCronJob {
 }
 
 export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
-  const quirrelImport = /"quirrel\/(.*)"/.exec(file);
+  const quirrelImport = /["']quirrel\/(.*)["']/.exec(file);
   if (!quirrelImport) {
     return null;
   }
