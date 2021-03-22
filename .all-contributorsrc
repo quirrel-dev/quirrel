@@ -51,6 +51,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "viperfx",
+      "name": "Tharshan Muthulingam",
+      "avatar_url": "https://avatars.githubusercontent.com/u/328257?v=4",
+      "profile": "https://github.com/viperfx",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
