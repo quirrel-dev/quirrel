@@ -38,8 +38,7 @@
           "minimum": 1
         },
         "cron": {
-          "type": "string",
-          "pattern": "(@(yearly|monthly|weekly|daily|hourly))|((((\\d+,)+\\d+|(\\d+(\\/|-)\\d+)|\\d+|\\*) ?){5,7})"
+          "type": "string"
         }
       },
       "additionalProperties": false

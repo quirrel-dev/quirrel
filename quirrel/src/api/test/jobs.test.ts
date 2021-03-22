@@ -91,6 +91,19 @@ function testAgainst(backend: "Redis" | "Mock") {
         );
     });
 
+    test("enqueueing a job with an invalid cron regex", async () => {
+      await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: JSON.stringify({ foo: "bar" }),
+          repeat: { cron: "invalid" },
+        })
+        .expect(
+          400,
+          '{"statusCode":400,"error":"Bad Request","message":"body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference."}'
+        );
+    });
+
     describe("enqueueing a job with delay > 32 bit", () => {
       it("does not print TimeoutOverflowWarning", async () => {
         await request(quirrel)
