@@ -19,7 +19,11 @@ export function prefixWithProtocol(string: string): string {
     return string;
   }
 
-  return "https://" + string;
+  if (isProduction()) {
+    return "https://" + string;
+  } else {
+    return "http://" + string;
+  }
 }
 
 export function getQuirrelBaseUrl(): string | undefined {
