@@ -7,7 +7,10 @@
     "skipLibCheck": true,
     "declaration": true,
     "esModuleInterop": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "target": "ES2019",
+    "module": "ES2015",
+    "moduleResolution": "node"
   },
   "exclude": ["dist", "./*.d.ts"]
 }
