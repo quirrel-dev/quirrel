@@ -47,8 +47,10 @@ export function getOldEncryptionSecrets(): string[] | null {
   return JSON.parse(process.env.QUIRREL_OLD_SECRETS ?? "null");
 }
 
+let developmentApplicationBaseUrl: string | undefined;
+
 export function getApplicationBaseUrl(): string {
-  const baseUrl = process.env.QUIRREL_BASE_URL;
+  const baseUrl = process.env.QUIRREL_BASE_URL || developmentApplicationBaseUrl;
 
   if (!baseUrl) {
     throw new Error("Please specify QUIRREL_BASE_URL.");
@@ -62,7 +64,9 @@ export function registerDevelopmentDefaults({
 }: {
   applicationBaseUrl: string;
 }) {
-  if (!isProduction() && !process.env.QUIRREL_BASE_URL) {
-    process.env.QUIRREL_BASE_URL = applicationBaseUrl;
+  if (isProduction()) {
+    return;
   }
+
+  developmentApplicationBaseUrl = applicationBaseUrl;
 }

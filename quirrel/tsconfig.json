@@ -1,13 +1,16 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "dist/cjs",
     "strict": true,
     "sourceMap": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "declaration": true,
     "esModuleInterop": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "target": "ES2019",
+    "module": "CommonJS",
+    "moduleResolution": "node"
   },
   "exclude": ["dist", "./*.d.ts"]
 }

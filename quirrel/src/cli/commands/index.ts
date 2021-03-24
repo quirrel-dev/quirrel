@@ -1,5 +1,5 @@
 import { runQuirrel } from "../../api";
-import IORedis = require("ioredis");
+import IORedis from "ioredis";
 import { createRedisFactory } from "../../api/shared/create-redis";
 import { CronDetector } from "../cron-detector";
 import { Command } from "commander";

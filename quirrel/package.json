@@ -13,20 +13,22 @@
     "!jest.config.js",
     "README.md"
   ],
-  "main": "dist/src/index.js",
+  "main": "dist/cjs/src/index.js",
+  "module": "dist/esm/src/index.js",
   "version": "1.3.4",
   "engines": {
     "node": "12 || 14 || 15"
   },
   "bin": {
-    "quirrel": "dist/src/cli/index.js"
+    "quirrel": "dist/cjs/src/cli/index.js"
   },
   "scripts": {
-    "start": "node dist/src/cli/index.js",
+    "start": "node dist/cjs/src/cli/index.js",
     "test": "DISABLE_TELEMETRY=true jest --forceExit --runInBand",
-    "build": "run-s build:schemas build:proxies build:tsc ",
+    "build": "run-s build:schemas build:proxies build:tsc:* ",
     "build:schemas": "json2ts -i src/api/scheduler/schemas/ -o src/api/scheduler/types/",
-    "build:tsc": "tsc",
+    "build:tsc:esm": "tsc --module es2015 --outDir dist/esm",
+    "build:tsc:cjs": "tsc",
     "build:proxies": "./generate-proxies.sh",
     "prepack:readme": "cp ../README.md README.md",
     "prepack": "run-s prepack:readme build"

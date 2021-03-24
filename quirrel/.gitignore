@@ -4,6 +4,8 @@ src/api/scheduler/types
 dist/
 
 /*.js
+/*.cjs
+/*.mjs
 /*.d.ts
 
 *.tgz
