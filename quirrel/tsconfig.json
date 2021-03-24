@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "dist/cjs",
     "strict": true,
     "sourceMap": true,
     "resolveJsonModule": true,
@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "downlevelIteration": true,
     "target": "ES2019",
-    "module": "ES2015",
+    "module": "CommonJS",
     "moduleResolution": "node"
   },
   "exclude": ["dist", "./*.d.ts"]
