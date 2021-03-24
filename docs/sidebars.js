@@ -38,6 +38,7 @@ module.exports = {
         "api/next",
         "api/blitz",
         "api/redwood",
+        "api/sveltekit",
         "api/nuxt",
         "api/express",
         "api/vercel",
