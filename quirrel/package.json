@@ -9,7 +9,8 @@
   "files": [
     "dist",
     "*.d.ts",
-    "*.js",
+    "*.cjs",
+    "*.mjs",
     "!jest.config.js",
     "README.md"
   ],
