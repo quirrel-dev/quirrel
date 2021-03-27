@@ -102,7 +102,7 @@ describeAcrossBackends("Activity", (backend) => {
       );
     });
 
-    expectToBeInRange(time, [300, 350]);
+    expectToBeInRange(time, [300, 400]);
 
     conn?.close();
 
