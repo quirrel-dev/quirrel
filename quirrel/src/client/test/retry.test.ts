@@ -38,11 +38,11 @@ test("retry", async () => {
 
   await $tries("2");
   const secondTry = Date.now();
+  expectToBeInRange(secondTry - enqueueDate, [5, 300]);
 
   const jobAfterFirstRetry = await quirrel.getById("retry");
   const nextIteration = jobAfterFirstRetry?.count;
   expect(nextIteration).toBe(3);
-  expectToBeInRange(secondTry - enqueueDate, [5, 100]);
 
   await $tries("4");
   const lastTry = Date.now();
