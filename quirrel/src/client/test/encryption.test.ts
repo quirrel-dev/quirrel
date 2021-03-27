@@ -2,7 +2,7 @@ import { JobMeta, QuirrelClient } from "..";
 import { run } from "../../api/test/runQuirrel";
 import * as http from "http";
 import delay from "delay";
-import { getAddress } from "./ms.test";
+import { getAddress } from "./util";
 
 test("encryption", async () => {
   const server = await run("Mock");

@@ -1,32 +1,18 @@
 import { QuirrelClient } from "..";
 import { run } from "../../api/test/runQuirrel";
-import type { AddressInfo } from "net";
 import * as http from "http";
-import delay from "delay";
+import { expectToBeInRange, getAddress, makeSignal, stopTime } from "./util";
 
-export function getAddress(server: http.Server): string {
-  let { address, port } = server.address() as AddressInfo;
-
-  if (address === "::") {
-    address = "localhost";
-  }
-
-  return `http://${address}:${port}`;
-}
-
-test("encryption", async () => {
+test("ms", async () => {
   const server = await run("Mock");
 
-  const bodies: string[] = [];
+  const jobExecuted = makeSignal();
 
   const endpoint = http
     .createServer((req) => {
-      let body = "";
-      req.on("data", (data) => {
-        body += data;
-      });
+      req.on("data", () => {});
       req.on("end", () => {
-        bodies.push(body);
+        jobExecuted.signal();
       });
     })
     .listen(0);
@@ -40,13 +26,15 @@ test("encryption", async () => {
     },
   });
 
-  await quirrel.enqueue("hello world", {
-    delay: "1s",
+  const duration = await stopTime(async () => {
+    await quirrel.enqueue("hello world", {
+      delay: "50ms",
+    });
+
+    await jobExecuted();
   });
 
-  await delay(1500);
-
-  expect(bodies).toHaveLength(1);
+  expectToBeInRange(duration, [50, 200]);
 
   server.teardown();
   endpoint.close();

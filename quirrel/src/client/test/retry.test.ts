@@ -1,18 +1,18 @@
-import delay from "delay";
 import { QuirrelClient } from "..";
 import { run } from "../../api/test/runQuirrel";
-import { getAddress } from "./ms.test";
 import http from "http";
 import type { AddressInfo } from "net";
+import { expectToBeInRange, getAddress, makeSignal } from "./util";
 
 test("retry", async () => {
   const server = await run("Mock");
 
   let tries = 0;
+  const $tries = makeSignal();
 
   const receiver = http
     .createServer((req, res) => {
-      tries++;
+      $tries.signal("" + ++tries);
       res.statusCode = 500;
       res.end();
     })
@@ -30,18 +30,25 @@ test("retry", async () => {
     },
   });
 
+  const enqueueDate = Date.now();
   await quirrel.enqueue("hello world", {
     retry: ["10ms", "100ms", "200ms"],
     id: "retry",
   });
 
-  await delay(50);
+  await $tries("2");
+  const secondTry = Date.now();
+  expectToBeInRange(secondTry - enqueueDate, [5, 300]);
+
   const jobAfterFirstRetry = await quirrel.getById("retry");
   const nextIteration = jobAfterFirstRetry?.count;
   expect(nextIteration).toBe(3);
 
-  await delay(180);
+  await $tries("4");
+  const lastTry = Date.now();
   expect(tries).toBe(4);
+  expectToBeInRange(lastTry - enqueueDate, [195, 250]);
+
   const jobAfterAllRetries = await quirrel.getById("retry");
   expect(jobAfterAllRetries).toBeNull();
 
