@@ -1,4 +1,23 @@
 import { EventEmitter } from "events";
+import type * as http from "http";
+import type { AddressInfo } from "ws";
+
+export type Backend = "Mock" | "Redis";
+
+export function describeAcrossBackends(
+  topic: string,
+  runTests: (backend: Backend) => void
+) {
+  describe(topic, () => {
+    describe("Redis", () => {
+      runTests("Redis");
+    });
+
+    describe("Mock", () => {
+      runTests("Mock");
+    });
+  });
+}
 
 type Signal = ((key?: string) => Promise<void>) & {
   signal(key?: string): void;
@@ -59,9 +78,26 @@ export function expectToBeInRange(
   expect(value).toBeLessThanOrEqual(to);
 }
 
+export function expectToHaveEqualMembers(actual: any[], expected: any[]) {
+  expect(actual).toHaveLength(expected.length);
+  for (const e of expected) {
+    expect(actual).toContainEqual(e);
+  }
+}
+
 export async function stopTime(doIt: () => Promise<void>) {
   const start = Date.now();
   await doIt();
   const end = Date.now();
   return end - start;
+}
+
+export function getAddress(server: http.Server): string {
+  let { address, port } = server.address() as AddressInfo;
+
+  if (address === "::") {
+    address = "localhost";
+  }
+
+  return `http://${address}:${port}`;
 }

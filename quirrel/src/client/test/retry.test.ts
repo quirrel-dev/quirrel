@@ -1,9 +1,8 @@
 import { QuirrelClient } from "..";
 import { run } from "../../api/test/runQuirrel";
-import { getAddress } from "./ms.test";
 import http from "http";
 import type { AddressInfo } from "net";
-import { expectToBeInRange, makeSignal } from "./util";
+import { expectToBeInRange, getAddress, makeSignal } from "./util";
 
 test("retry", async () => {
   const server = await run("Mock");

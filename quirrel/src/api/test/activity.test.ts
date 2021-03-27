@@ -1,16 +1,21 @@
 import { run } from "./runQuirrel";
 import fastify from "fastify";
-import delay from "delay";
 import request from "supertest";
 import websocket from "websocket";
 import type { AddressInfo } from "net";
+import {
+  describeAcrossBackends,
+  expectToBeInRange,
+  expectToHaveEqualMembers,
+  makeSignal,
+  stopTime,
+  waitUntil,
+} from "../../client/test/util";
 
 jest.setTimeout(20 * 1000);
 
-function testAgainst(backend: "Redis" | "Mock") {
-  test(backend + " > activity", async () => {
-    const now = Date.now();
-
+describeAcrossBackends("Activity", (backend) => {
+  it("works", async () => {
     const { server: quirrel, teardown: teardownQuirrel, redis } = await run(
       backend
     );
@@ -34,6 +39,8 @@ function testAgainst(backend: "Redis" | "Mock") {
 
     let conn: websocket.connection | undefined;
 
+    const closed$ = makeSignal();
+
     await new Promise<void>((resolve) => {
       client.on("connect", (connection) => {
         conn = connection;
@@ -46,9 +53,10 @@ function testAgainst(backend: "Redis" | "Mock") {
 
         connection.on("close", () => {
           log.push("close");
+          closed$.signal();
         });
 
-        resolve();
+        setTimeout(resolve, 10);
       });
 
       client.on("connectFailed", (error) => {
@@ -60,70 +68,104 @@ function testAgainst(backend: "Redis" | "Mock") {
       client.connect(`ws://${address}:${port}/activity`);
     });
 
-    const {
-      body: { id: job1id },
-    } = await request(quirrel)
-      .post("/queues/" + endpoint)
-      .send({ body: JSON.stringify({ foo: "bar" }) })
-      .expect(201);
+    let id1 = "";
+    let id2 = "";
 
-    const {
-      body: { id: job2id },
-    } = await request(quirrel)
-      .post("/queues/" + endpoint)
-      .send({
-        body: JSON.stringify({ qux: "baz" }),
-        runAt: new Date(now + 300).toISOString(),
-      })
-      .expect(201);
+    const now = Date.now();
+    const time = await stopTime(async () => {
+      const {
+        body: { id: job1id },
+      } = await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: JSON.stringify({ foo: "bar" }),
+          runAt: new Date(now).toISOString(),
+        })
+        .expect(201);
 
-    await delay(500);
+      id1 = job1id;
+
+      const {
+        body: { id: job2id },
+      } = await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({
+          body: JSON.stringify({ qux: "baz" }),
+          runAt: new Date(now + 300).toISOString(),
+        })
+        .expect(201);
+      id2 = job2id;
+
+      await waitUntil(
+        () => log.filter((entry) => entry[0] === "completed").length === 2,
+        400
+      );
+    });
+
+    expectToBeInRange(time, [300, 350]);
 
     conn?.close();
 
-    await delay(500);
+    await closed$();
 
-    expect(log).toContainEqual([
-      "completed",
-      {
-        endpoint: decodeURIComponent(endpoint),
-        id: job1id,
-      },
+    expectToHaveEqualMembers(log, [
+      "connect",
+      [
+        "scheduled",
+        {
+          body: JSON.stringify({ foo: "bar" }),
+          endpoint: decodeURIComponent(endpoint),
+          id: id1,
+          retry: [],
+          count: 1,
+          runAt: new Date(now).toISOString(),
+          exclusive: false,
+        },
+      ],
+      [
+        "scheduled",
+        {
+          body: JSON.stringify({ qux: "baz" }),
+          endpoint: decodeURIComponent(endpoint),
+          id: id2,
+          retry: [],
+          count: 1,
+          runAt: new Date(now + 300).toISOString(),
+          exclusive: false,
+        },
+      ],
+      [
+        "started",
+        {
+          endpoint: decodeURIComponent(endpoint),
+          id: id1,
+        },
+      ],
+      [
+        "started",
+        {
+          endpoint: decodeURIComponent(endpoint),
+          id: id2,
+        },
+      ],
+      [
+        "completed",
+        {
+          endpoint: decodeURIComponent(endpoint),
+          id: id1,
+        },
+      ],
+      [
+        "completed",
+        {
+          endpoint: decodeURIComponent(endpoint),
+          id: id2,
+        },
+      ],
+      "close",
     ]);
-    expect(log).toContainEqual([
-      "started",
-      {
-        endpoint: decodeURIComponent(endpoint),
-        id: job2id,
-      },
-    ]);
-    expect(log).toContainEqual([
-      "scheduled",
-      {
-        body: JSON.stringify({ qux: "baz" }),
-        endpoint: decodeURIComponent(endpoint),
-        id: job2id,
-        retry: [],
-        count: 1,
-        runAt: new Date(now + 300).toISOString(),
-        exclusive: false,
-      },
-    ]);
-    expect(log).toContainEqual([
-      "completed",
-      {
-        endpoint: decodeURIComponent(endpoint),
-        id: job2id,
-      },
-    ]);
-
-    expect(log).toContainEqual("connect");
-    expect(log).toContainEqual("close");
 
     await teardownQuirrel();
     await server.close();
   });
-}
-
-testAgainst("Mock");
-testAgainst("Redis");
+});
