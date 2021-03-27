@@ -34,7 +34,7 @@ test("ms", async () => {
     await jobExecuted();
   });
 
-  expectToBeInRange(duration, [50, 100]);
+  expectToBeInRange(duration, [50, 200]);
 
   server.teardown();
   endpoint.close();
