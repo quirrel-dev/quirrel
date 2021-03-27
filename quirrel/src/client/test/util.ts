@@ -58,3 +58,10 @@ export function expectToBeInRange(
   expect(value).toBeGreaterThanOrEqual(from);
   expect(value).toBeLessThanOrEqual(to);
 }
+
+export async function stopTime(doIt: () => Promise<void>) {
+  const start = Date.now();
+  await doIt();
+  const end = Date.now();
+  return end - start;
+}
