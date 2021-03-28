@@ -4,6 +4,11 @@ import delay from "delay";
 import type http from "http";
 import request from "supertest";
 import { Redis } from "ioredis";
+import {
+  expectToBeInRange,
+  makeSignal,
+  stopTime,
+} from "../../client/test/util";
 
 function testAgainst(backend: "Redis" | "Mock") {
   describe(backend + " > jobs", () => {
@@ -15,6 +20,8 @@ function testAgainst(backend: "Redis" | "Mock") {
     let endpoint: string;
     let bodies: any[] = [];
     let lastBody: any = undefined;
+
+    let bodies$ = makeSignal();
 
     beforeAll(async () => {
       const result = await run(backend);
@@ -28,6 +35,7 @@ function testAgainst(backend: "Redis" | "Mock") {
       server.post("/", (request, reply) => {
         lastBody = request.body;
         bodies.push(lastBody);
+        bodies$.signal(lastBody);
         reply.status(200).send("OK");
       });
 
@@ -526,13 +534,13 @@ function testAgainst(backend: "Redis" | "Mock") {
           })
           .expect(201);
 
-        await delay(1000);
+        const firstExecutionTime = await stopTime(() => bodies$("cron"));
+        expectToBeInRange(firstExecutionTime, [0, 1200]);
 
         expect(bodies).toEqual(["cron"]);
 
-        await delay(1200);
-
-        expect(bodies).toEqual(["cron", "cron"]);
+        const secondExecutionTime = await stopTime(() => bodies$("cron"));
+        expectToBeInRange(secondExecutionTime, [0, 1200]);
 
         await delay(1200);
 
