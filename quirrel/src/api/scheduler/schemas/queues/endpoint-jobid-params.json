@@ -3,14 +3,16 @@
   "title": "/queues/:endpoint/:id params",
   "type": "object",
   "properties": {
-    "id": {
-      "type": "string"
-    },
     "endpoint": {
       "type": "string",
-      "format": "uri"
+      "format": "uri",
+      "description": "The endpoint that jobs are sent to."
+    },
+    "id": {
+      "type": "string",
+      "description": "The job's ID"
     }
   },
-  "required": ["id", "endpoint"],
+  "required": ["endpoint", "id"],
   "additionalProperties": false
 }

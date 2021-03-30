@@ -1,5 +1,5 @@
 import type { Redis } from "ioredis";
-import { POSTQueuesEndpointBody } from "./types/queues/POST/body";
+import { EnqueueJob } from "./types/queues/POST/body";
 import {
   encodeQueueDescriptor,
   decodeQueueDescriptor,
@@ -152,7 +152,7 @@ export class JobsRepo {
       override,
       exclusive,
       retry,
-    }: POSTQueuesEndpointBody
+    }: EnqueueJob
   ) {
     if (typeof id === "undefined") {
       id = uuid.v4();
@@ -171,7 +171,7 @@ export class JobsRepo {
     }
 
     if (typeof repeat?.times === "number" && repeat.times < 1) {
-      throw new Error("repeat.times must be positive")
+      throw new Error("repeat.times must be positive");
     }
 
     let schedule_type: "every" | "cron" | undefined = undefined;

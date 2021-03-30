@@ -4,7 +4,7 @@ import EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
 import SCANQueryStringSchema from "../schemas/queues/scan-querystring.json";
 import EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
 import POSTQueuesEndpointBodySchema from "../schemas/queues/POST/body.json";
-import { POSTQueuesEndpointBody } from "../types/queues/POST/body";
+import { EnqueueJob } from "../types/queues/POST/body";
 import { SCANQuerystringParams } from "../types/queues/scan-querystring";
 import { QueuesEndpointParams } from "../types/queues/endpoint-params";
 import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
@@ -19,7 +19,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
   fastify.addHook("preValidation", fastify.tokenAuthPreValidation);
 
-  function hasValidCronExpression(body: POSTQueuesEndpointBody): boolean {
+  function hasValidCronExpression(body: EnqueueJob): boolean {
     if (body.repeat?.cron) {
       return isValidRegex(body.repeat.cron);
     }
@@ -46,7 +46,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       "body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference.",
   };
 
-  fastify.post<{ Body: POSTQueuesEndpointBody; Params: QueuesEndpointParams }>(
+  fastify.post<{ Body: EnqueueJob; Params: QueuesEndpointParams }>(
     "/:endpoint",
     {
       schema: {
@@ -77,7 +77,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   );
 
   fastify.post<{
-    Body: POSTQueuesEndpointBody[];
+    Body: EnqueueJob[];
     Params: QueuesEndpointParams;
   }>(
     "/:endpoint/batch",

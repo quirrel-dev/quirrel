@@ -5,10 +5,11 @@
     "properties": {
       "cursor": {
         "type": "number",
-        "default": 0
+        "default": 0,
+        "description": "Start with 0, the next cursor will be included in the response."
       }
     },
-    "required": [],
+    "required": ["cursor"],
     "additionalProperties": false
   }
   
