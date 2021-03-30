@@ -9,10 +9,20 @@ import { DELETETokensTokenParams } from "../types/tokens/DELETE/params";
 const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.addHook("onRequest", fastify.basicAuth);
 
+  const baseSchema = {
+    tags: ["Admin"],
+    security: [
+      {
+        Admin: [],
+      },
+    ],
+  };
+
   fastify.put<{ Params: POSTTokensParams }>("/:id", {
     schema: {
+      ...baseSchema,
       params: POSTTokensParamsSchema,
-      tags: ["Admin"],
+      summary: "Issue new token",
     },
 
     async handler(request, reply) {
@@ -27,8 +37,9 @@ const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {
 
   fastify.delete<{ Params: DELETETokensTokenParams }>("/:id", {
     schema: {
+      ...baseSchema,
       params: DELETETokenParamsSchema,
-      tags: ["Admin"],
+      summary: "Revoke token",
     },
 
     async handler(request, reply) {

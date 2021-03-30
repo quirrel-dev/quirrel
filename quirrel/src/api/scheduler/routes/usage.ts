@@ -15,6 +15,12 @@ const usageRoute: FastifyPluginCallback = (fastify, opts, done) => {
         200: DELETEUsageResponseSchema,
       },
       tags: ["Admin"],
+      summary: "Fetch & reset usage statistics",
+      security: [
+        {
+          "Admin": []
+        }
+      ]
     },
     async handler(request, reply) {
       const usage = await usageMeter.readAndReset();

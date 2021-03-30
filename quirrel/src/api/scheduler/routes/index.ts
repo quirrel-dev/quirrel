@@ -28,9 +28,13 @@ take a look at the <a href="/documentation">OpenAPI spec</a>.
 `.trim();
 
 const index: FastifyPluginCallback = (fastify, opts, done) => {
-  fastify.get("/", { schema: { tags: ["Admin"] } }, (request, reply) => {
-    reply.status(200).header("Content-Type", "text/html").send(welcomePage);
-  });
+  fastify.get(
+    "/",
+    { schema: { tags: ["Admin"], summary: "About Page" } },
+    (request, reply) => {
+      reply.status(200).header("Content-Type", "text/html").send(welcomePage);
+    }
+  );
   done();
 };
 

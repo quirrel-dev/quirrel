@@ -21,6 +21,16 @@ const activityPlugin: FastifyPluginCallback = (fastify, _opts, done) => {
       websocket: true,
       schema: {
         tags: ["DX"],
+        summary: "Activity feed, published as websocket",
+        description: "Token is passed via Websocket protocol.",
+        security: fastify.authEnabled
+          ? [
+              {
+                Admin: [],
+                Impersonation: [],
+              },
+            ]
+          : undefined,
       },
     },
     async (connection, req) => {

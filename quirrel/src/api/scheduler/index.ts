@@ -32,6 +32,12 @@ export interface QuirrelServerConfig {
   logger?: Logger;
 }
 
+declare module "fastify" {
+  interface FastifyInstance {
+    authEnabled: boolean;
+  }
+}
+
 export async function createServer({
   port = 9181,
   host = "0.0.0.0",
@@ -55,6 +61,10 @@ export async function createServer({
     origin: "*",
   });
 
+  const enableAuth = !!passphrases?.length;
+
+  app.decorate("authEnabled", enableAuth);
+
   app.register(swagger, {
     routePrefix: "/documentation",
     openapi: {
@@ -77,19 +87,27 @@ export async function createServer({
         description: "Find general documentation here",
       },
       components: {
-        securitySchemes: {
-          Token: {
-            type: "http",
-            scheme: "bearer",
-            description: "Main auth scheme. Tokens are issued by admin.",
-          },
-          Admin: {
-            type: "http",
-            scheme: "basic",
-            description:
-              "Used for admin tasks like issuing new tokens. Username is ignored, password is specified via environment variables. Can also be used for impersonation, where username must be the token ID to be impersonated.",
-          },
-        },
+        securitySchemes: enableAuth
+          ? {
+              Token: {
+                type: "http",
+                scheme: "bearer",
+                description: "Main auth scheme. Tokens are issued by admin.",
+              },
+              Admin: {
+                type: "http",
+                scheme: "basic",
+                description:
+                  "Used for admin tasks like issuing new tokens. Username is ignored, password is specified via environment variables.",
+              },
+              Impersonation: {
+                type: "http",
+                scheme: "basic",
+                description:
+                  "Username must be the token ID to be impersonated, password is admin password.",
+              },
+            }
+          : undefined,
       },
       tags: [
         {
@@ -109,8 +127,6 @@ export async function createServer({
   app.register(loggerPlugin, {
     logger,
   });
-
-  const enableAuth = !!passphrases?.length;
 
   app.register(redisPlugin, { redisFactory });
   app.register(owlPlugin);

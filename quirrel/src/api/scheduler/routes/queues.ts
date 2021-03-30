@@ -27,6 +27,18 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     return true;
   }
 
+  const baseSchema = {
+    tags: ["Queueing"],
+    security: fastify.authEnabled
+      ? [
+          {
+            Admin: [],
+            Impersonation: [],
+          },
+        ]
+      : undefined,
+  };
+
   const INVALID_CRON_EXPRESSION_ERROR = {
     statusCode: 400,
     error: "Bad Request",
@@ -38,9 +50,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     "/:endpoint",
     {
       schema: {
+        ...baseSchema,
         body: POSTQueuesEndpointBodySchema,
         params: EndpointParamsSchema,
-        tags: ["Queueing"],
+        summary: "Enqueue a job",
       },
     },
     async (request, reply) => {
@@ -70,12 +83,13 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     "/:endpoint/batch",
     {
       schema: {
+        ...baseSchema,
         body: {
           type: "array",
           items: POSTQueuesEndpointBodySchema,
         },
         params: EndpointParamsSchema,
-        tags: ["Queueing"],
+        summary: "Enqueue multiple jobs",
       },
     },
     async (request, reply) => {
@@ -109,7 +123,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
   fastify.get("/", {
     schema: {
-      tags: ["Queueing"],
+      ...baseSchema,
+      summary: "List existing queues",
+      description:
+        "Lists all queues that were used at some point, including currently empty ones.",
     },
     async handler(request, reply) {
       fastify.telemetrist?.dispatch("get_queues");
@@ -124,9 +141,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     Querystring: SCANQuerystringParams;
   }>("/:endpoint", {
     schema: {
+      ...baseSchema,
       params: EndpointParamsSchema,
       querystring: SCANQueryStringSchema,
-      tags: ["Queueing"],
+      summary: "Iterate pending jobs",
     },
     async handler(request, reply) {
       fastify.telemetrist?.dispatch("scan_endpoint");
@@ -148,8 +166,9 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
   fastify.get<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
+      ...baseSchema,
       params: EndpointJobIDParamsSchema,
-      tags: ["Queueing"],
+      summary: "Fetch specific job",
     },
 
     async handler(request, reply) {
@@ -168,8 +187,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
   fastify.post<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
+      ...baseSchema,
       params: EndpointJobIDParamsSchema,
-      tags: ["Queueing"],
+      summary: "Invoke job",
+      description: "Moves a job to the beginning of the queue.",
     },
 
     async handler(request, reply) {
@@ -189,8 +210,9 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
   fastify.delete<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
+      ...baseSchema,
       params: EndpointJobIDParamsSchema,
-      tags: ["Queueing"],
+      summary: "Delete job",
     },
 
     async handler(request, reply) {

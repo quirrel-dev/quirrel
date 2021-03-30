@@ -24,6 +24,7 @@ const health: FastifyPluginCallback = (app, opts, done) => {
           200: GetHealthResponseSchema,
         },
         tags: ["Admin"],
+        summary: "Check availability"
       },
     },
     async (request, reply) => {
