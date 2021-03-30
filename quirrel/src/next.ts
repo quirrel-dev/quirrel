@@ -1,4 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import {
   QuirrelClient,
   EnqueueJobOpts,
@@ -8,8 +7,26 @@ import {
   QuirrelJobHandler,
 } from "./client";
 import { registerDevelopmentDefaults } from "./client/config";
+import type { IncomingHttpHeaders } from "http";
 
-export { Job, EnqueueJobOpts, EnqueueJobOptions, DefaultJobOptions, QuirrelJobHandler };
+interface NextApiRequest {
+  body: any;
+  headers: IncomingHttpHeaders;
+}
+
+interface NextApiResponse {
+  setHeader(key: string, value: string): void;
+  status(code: number): void;
+  send(body: string): void;
+}
+
+export {
+  Job,
+  EnqueueJobOpts,
+  EnqueueJobOptions,
+  DefaultJobOptions,
+  QuirrelJobHandler,
+};
 
 registerDevelopmentDefaults({
   applicationBaseUrl: "http://localhost:3000",
