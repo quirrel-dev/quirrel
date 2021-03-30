@@ -30,7 +30,8 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const INVALID_CRON_EXPRESSION_ERROR = {
     statusCode: 400,
     error: "Bad Request",
-    message: "body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference.",
+    message:
+      "body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference.",
   };
 
   fastify.post<{ Body: POSTQueuesEndpointBody; Params: QueuesEndpointParams }>(
@@ -39,6 +40,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       schema: {
         body: POSTQueuesEndpointBodySchema,
         params: EndpointParamsSchema,
+        tags: ["Queueing"],
       },
     },
     async (request, reply) => {
@@ -73,6 +75,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
           items: POSTQueuesEndpointBodySchema,
         },
         params: EndpointParamsSchema,
+        tags: ["Queueing"],
       },
     },
     async (request, reply) => {
@@ -105,6 +108,9 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   );
 
   fastify.get("/", {
+    schema: {
+      tags: ["Queueing"],
+    },
     async handler(request, reply) {
       fastify.telemetrist?.dispatch("get_queues");
       const queues = await queueRepo.get(request.tokenId);
@@ -120,6 +126,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     schema: {
       params: EndpointParamsSchema,
       querystring: SCANQueryStringSchema,
+      tags: ["Queueing"],
     },
     async handler(request, reply) {
       fastify.telemetrist?.dispatch("scan_endpoint");
@@ -142,6 +149,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.get<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
       params: EndpointJobIDParamsSchema,
+      tags: ["Queueing"],
     },
 
     async handler(request, reply) {
@@ -161,6 +169,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.post<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
       params: EndpointJobIDParamsSchema,
+      tags: ["Queueing"],
     },
 
     async handler(request, reply) {
@@ -181,6 +190,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.delete<{ Params: QueuesEndpointIdParams }>("/:endpoint/:id", {
     schema: {
       params: EndpointJobIDParamsSchema,
+      tags: ["Queueing"],
     },
 
     async handler(request, reply) {

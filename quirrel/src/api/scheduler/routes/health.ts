@@ -23,6 +23,7 @@ const health: FastifyPluginCallback = (app, opts, done) => {
         response: {
           200: GetHealthResponseSchema,
         },
+        tags: ["Admin"],
       },
     },
     async (request, reply) => {

@@ -15,22 +15,31 @@ const activityPlugin: FastifyPluginCallback = (fastify, _opts, done) => {
 
   const jobsRepo = new JobsRepo(fastify.redisFactory);
 
-  fastify.get("/", { websocket: true }, async (connection, req) => {
-    workAroundWebsocketAuth(req);
+  fastify.get(
+    "/",
+    {
+      websocket: true,
+      schema: {
+        tags: ["DX"],
+      },
+    },
+    async (connection, req) => {
+      workAroundWebsocketAuth(req);
 
-    const tokenId = await fastify.tokenAuth.authenticate(req);
+      const tokenId = await fastify.tokenAuth.authenticate(req);
 
-    if (!tokenId) {
-      connection.socket.close();
-      return;
+      if (!tokenId) {
+        connection.socket.close();
+        return;
+      }
+
+      const close = jobsRepo.onEvent(tokenId, (event, job) => {
+        connection.socket.send(JSON.stringify([event, job]));
+      });
+
+      connection.on("close", close);
     }
-
-    const close = jobsRepo.onEvent(tokenId, (event, job) => {
-      connection.socket.send(JSON.stringify([event, job]));
-    });
-
-    connection.on("close", close);
-  });
+  );
 
   fastify.addHook("onClose", async () => {
     await jobsRepo.close();

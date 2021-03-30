@@ -23,21 +23,12 @@ As an end-user, you're most likely looking for something else:
 
 <p>
 If you didn't get here by accident, but want to interface directly with the Quirrel API,
-take a look at the OpenAPI spec:
+take a look at the <a href="/documentation">OpenAPI spec</a>.
 </p>
-
-<ul>
-  <li>
-    <a href="/documentation">Swagger Docs</a>
-  </li>
-  <li>
-    <a href="/documentation/docs.html">ReDocs</a>
-  </li>
-</ul>
 `.trim();
 
 const index: FastifyPluginCallback = (fastify, opts, done) => {
-  fastify.get("/", (request, reply) => {
+  fastify.get("/", { schema: { tags: ["Admin"] } }, (request, reply) => {
     reply.status(200).header("Content-Type", "text/html").send(welcomePage);
   });
   done();

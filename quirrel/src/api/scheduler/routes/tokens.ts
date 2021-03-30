@@ -12,6 +12,7 @@ const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.put<{ Params: POSTTokensParams }>("/:id", {
     schema: {
       params: POSTTokensParamsSchema,
+      tags: ["Admin"],
     },
 
     async handler(request, reply) {
@@ -27,6 +28,7 @@ const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.delete<{ Params: DELETETokensTokenParams }>("/:id", {
     schema: {
       params: DELETETokenParamsSchema,
+      tags: ["Admin"],
     },
 
     async handler(request, reply) {
