@@ -7,7 +7,7 @@ import tokensRoute from "./routes/tokens";
 import health from "./routes/health";
 import queues from "./routes/queues";
 import usageRoute from "./routes/usage";
-import oas from "fastify-oas";
+import swagger from "fastify-swagger";
 import pack from "../../../package.json";
 import basicAuthPlugin from "./basic-auth";
 import type { AddressInfo } from "net";
@@ -30,6 +30,12 @@ export interface QuirrelServerConfig {
   runningInDocker?: boolean;
   disableTelemetry?: boolean;
   logger?: Logger;
+}
+
+declare module "fastify" {
+  interface FastifyInstance {
+    authEnabled: boolean;
+  }
 }
 
 export async function createServer({
@@ -55,20 +61,65 @@ export async function createServer({
     origin: "*",
   });
 
-  app.register(oas, {
+  const enableAuth = !!passphrases?.length;
+
+  app.decorate("authEnabled", enableAuth);
+
+  app.register(swagger, {
     routePrefix: "/documentation",
-    swagger: {
+    openapi: {
       info: {
         title: "Quirrel API",
-        description: "The Queueing Solution for Next.js x Vercel",
+        description: "The Queueing Solution for Serverless.",
         version: pack.version,
+        contact: {
+          email: "info@quirrel.dev",
+          name: "Quirrel",
+          url: "https://quirrel.dev",
+        },
+        license: {
+          name: "MIT License",
+          url: "https://github.com/quirrel-dev/quirrel/blob/main/LICENSE",
+        },
       },
       externalDocs: {
-        url: "https://quirrel.dev",
-        description: "Find more info here",
+        url: "https://docs.quirrel.dev",
+        description: "Find general documentation here",
       },
-      consumes: ["application/json"],
-      produces: ["application/json"],
+      components: {
+        securitySchemes: enableAuth
+          ? {
+              Token: {
+                type: "http",
+                scheme: "bearer",
+                description: "Main auth scheme. Tokens are issued by admin.",
+              },
+              Admin: {
+                type: "http",
+                scheme: "basic",
+                description:
+                  "Used for admin tasks like issuing new tokens. Username is ignored, password is specified via environment variables.",
+              },
+              Impersonation: {
+                type: "http",
+                scheme: "basic",
+                description:
+                  "Username must be the token ID to be impersonated, password is admin password.",
+              },
+            }
+          : undefined,
+      },
+      tags: [
+        {
+          name: "Queueing",
+        },
+        {
+          name: "DX",
+        },
+        {
+          name: "Admin",
+        },
+      ],
     },
     exposeRoute: true,
   });
@@ -76,8 +127,6 @@ export async function createServer({
   app.register(loggerPlugin, {
     logger,
   });
-
-  const enableAuth = !!passphrases?.length;
 
   app.register(redisPlugin, { redisFactory });
   app.register(owlPlugin);
@@ -109,7 +158,7 @@ export async function createServer({
       app.blipp();
     }
 
-    await app.oas();
+    app.swagger();
 
     app.telemetrist?.dispatch("ready");
 

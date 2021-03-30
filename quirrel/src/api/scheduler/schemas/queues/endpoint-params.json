@@ -5,7 +5,8 @@
   "properties": {
     "endpoint": {
       "type": "string",
-      "format": "uri"
+      "format": "uri",
+      "description": "The endpoint that jobs are sent to."
     }
   },
   "required": ["endpoint"],

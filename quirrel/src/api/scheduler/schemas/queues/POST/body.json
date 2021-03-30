@@ -1,19 +1,25 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "POST /queues/:endpoint body",
+  "title": "EnqueueJob",
   "type": "object",
   "properties": {
     "body": {
-      "type": "string"
+      "type": "string",
+      "description": "The job's payload."
     },
     "runAt": {
       "type": "string",
       "format": "date-time",
       "description": "@deprecated. Use `delay` instead."
     },
-    "delay": { "type": "number", "minimum": 0 },
+    "delay": {
+      "type": "number",
+      "minimum": 0,
+      "description": "delay in milliseconds"
+    },
     "id": {
-      "type": "string"
+      "type": "string",
+      "description": "allows to specify the ID upfront"
     },
     "retry": {
       "type": "array",
