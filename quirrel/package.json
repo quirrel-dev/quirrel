@@ -95,6 +95,6 @@
     "secure-webhooks": "0.2.0",
     "superjson": "^1.7.3",
     "uuid": "^8.3.2",
-    "zod": "^3.0.0-alpha.4"
+    "zod": "^3.0.0-alpha.29"
   }
 }
