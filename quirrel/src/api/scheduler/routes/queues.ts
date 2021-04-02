@@ -14,7 +14,7 @@ import { QueueRepo } from "../queue-repo";
 import { isValidRegex } from "../../../shared/is-valid-regex";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
-  const jobsRepo = new JobsRepo(fastify.redisFactory);
+  const jobsRepo = new JobsRepo(fastify.owl);
   const queueRepo = new QueueRepo(fastify.redis, jobsRepo);
 
   fastify.addHook("preValidation", fastify.tokenAuthPreValidation);

@@ -1,4 +1,3 @@
-import type { Redis } from "ioredis";
 import { EnqueueJob } from "./types/queues/POST/body";
 import {
   encodeQueueDescriptor,
@@ -6,8 +5,8 @@ import {
 } from "../shared/queue-descriptor";
 
 import * as uuid from "uuid";
-import { createOwl, cron } from "../shared/owl";
-import type { Job } from "@quirrel/owl";
+import { cron } from "../shared/owl";
+import Owl, { Job } from "@quirrel/owl";
 
 interface PaginationOpts {
   cursor: number;
@@ -31,12 +30,10 @@ interface JobDTO {
 }
 
 export class JobsRepo {
-  protected owl;
   protected producer;
 
-  constructor(redisFactory: () => Redis) {
-    this.owl = createOwl(redisFactory);
-    this.producer = this.owl.createProducer();
+  constructor(private readonly owl: Owl<"every" | "cron">) {
+    this.producer = owl.createProducer();
   }
 
   private static toJobDTO(job: Job<"every" | "cron">): JobDTO {
@@ -72,6 +69,7 @@ export class JobsRepo {
     { count, cursor }: PaginationOpts
   ) {
     const { newCursor, jobs } = await this.producer.scanQueue(
+      "",
       encodeQueueDescriptor(byTokenId, endpoint),
       cursor,
       count
@@ -85,6 +83,7 @@ export class JobsRepo {
 
   public async findAll({ count, cursor }: PaginationOpts) {
     const { newCursor, jobs } = await this.producer.scanQueuePattern(
+      "",
       encodeQueueDescriptor("*", "*"),
       cursor,
       count
@@ -107,6 +106,7 @@ export class JobsRepo {
     { count, cursor }: PaginationOpts
   ) {
     const { newCursor, jobs } = await this.producer.scanQueuePattern(
+      "",
       encodeQueueDescriptor(byTokenId, "*"),
       cursor,
       count
@@ -120,6 +120,7 @@ export class JobsRepo {
 
   public async findById(tokenId: string, endpoint: string, id: string) {
     const job = await this.producer.findById(
+      "",
       encodeQueueDescriptor(tokenId, endpoint),
       id
     );
@@ -128,6 +129,7 @@ export class JobsRepo {
 
   public async invoke(tokenId: string, endpoint: string, id: string) {
     return await this.producer.invoke(
+      "",
       encodeQueueDescriptor(tokenId, endpoint),
       id
     );
@@ -135,6 +137,7 @@ export class JobsRepo {
 
   public async delete(tokenId: string, endpoint: string, id: string) {
     return await this.producer.delete(
+      "",
       encodeQueueDescriptor(tokenId, endpoint),
       id
     );
@@ -188,6 +191,7 @@ export class JobsRepo {
     }
 
     const createdJob = await this.producer.enqueue({
+      tenant: "",
       queue: encodeQueueDescriptor(tokenId, endpoint),
       id,
       payload: body ?? "",
@@ -215,6 +219,7 @@ export class JobsRepo {
     ) => void
   ) {
     const activity = this.owl.createActivity(
+      "",
       async (event) => {
         if (event.type === "scheduled") {
           cb(
