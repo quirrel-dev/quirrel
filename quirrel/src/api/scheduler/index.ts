@@ -21,6 +21,7 @@ import loggerPlugin from "./logger";
 import indexRoute from "./routes/index";
 import { StructuredLogger } from "../shared/structured-logger";
 import { Logger } from "../shared/logger";
+import graphqlRoute from "./routes/graphql";
 
 export interface QuirrelServerConfig {
   redisFactory: () => Redis;
@@ -151,6 +152,16 @@ export async function createServer({
   app.register(health, { prefix: "/health" });
   app.register(queues, { prefix: "/queues" });
   app.register(activityPlugin, { prefix: "/activity" });
+  app.register((app, opts, done) => {
+    if (passphrases) {
+      app.register(basicAuthPlugin, { passphrases });
+      app.addHook("onRequest", app.basicAuth);
+    }
+
+    app.register(graphqlRoute);
+
+    done();
+  });
 
   app.ready(async () => {
     const debug = false;
