@@ -16,7 +16,7 @@
   ],
   "main": "dist/cjs/src/index.js",
   "module": "dist/esm/src/index.js",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "engines": {
     "node": "12 || 14 || 15"
   },
