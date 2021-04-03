@@ -41,7 +41,7 @@
     "@types/cross-spawn": "^6.0.2",
     "@types/easy-table": "^0.0.32",
     "@types/expand-tilde": "^2.0.0",
-    "@types/ioredis": "4.22.1",
+    "@types/ioredis": "4.22.2",
     "@types/jest": "^26.0.22",
     "@types/ms": "^0.7.31",
     "@types/parse-gitignore": "^1.0.0",
@@ -62,8 +62,8 @@
   },
   "dependencies": {
     "@quirrel/owl": "^0.10.2",
-    "@sentry/node": "6.2.3",
-    "@sentry/tracing": "6.2.3",
+    "@sentry/node": "6.2.5",
+    "@sentry/tracing": "6.2.5",
     "basic-auth": "2.0.1",
     "body-parser": "1.19.0",
     "chalk": "4.1.0",
@@ -72,7 +72,7 @@
     "conditional-type-checks": "1.0.5",
     "connect": "3.7.0",
     "cron-parser": "3.3.0",
-    "cross-fetch": "3.1.2",
+    "cross-fetch": "3.1.3",
     "cross-spawn": "7.0.3",
     "easy-table": "1.1.1",
     "expand-tilde": "2.0.2",
@@ -84,7 +84,7 @@
     "fastify-plugin": "3.0.0",
     "fastify-swagger": "^4.4.2",
     "fastify-websocket": "3.1.0",
-    "ioredis": "4.24.5",
+    "ioredis": "4.24.6",
     "ioredis-mock": "5.4.1",
     "ms": "2.1.3",
     "open": "8.0.4",
@@ -95,6 +95,6 @@
     "secure-webhooks": "0.2.0",
     "superjson": "^1.7.3",
     "uuid": "^8.3.2",
-    "zod": "^3.0.0-alpha.4"
+    "zod": "^3.0.0-alpha.29"
   }
 }

@@ -49,7 +49,7 @@ describe("DX", () => {
 
       await expect(() =>
         quirrel.enqueue("", { delay: -1 })
-      ).rejects.toThrowError("delay must not be negative");
+      ).rejects.toThrowError("delay must be positive");
     });
   });
 
