@@ -312,6 +312,7 @@ export class QuirrelClient<T> {
       id: options.id,
       repeat: options.repeat,
       retry: options.retry?.map(parseDuration),
+      override: options.override
     };
   }
 
