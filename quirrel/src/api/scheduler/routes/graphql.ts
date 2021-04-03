@@ -1,27 +1,44 @@
-import { FastifyPluginCallback, FastifyRequest } from "fastify";
+import { FastifyPluginCallback } from "fastify";
 import { ApolloServer } from "apollo-server-fastify";
-import { makeSchema, queryType } from "nexus";
+import { makeSchema, queryType, stringArg } from "nexus";
 
-const Query = queryType({
-  definition(t) {
-    t.string("hello", { resolve: () => "hello world!" });
-  },
-});
+const graphqlRoute: FastifyPluginCallback = async (app) => {
+  const Query = queryType({
+    definition(t) {
+      t.list.field("tokens", {
+        type: "String",
+        resolve() {
+          if (app.authEnabled) {
+            return app.tokens.getAll();
+          } else {
+            return ["anonymous"];
+          }
+        },
+      });
 
-const schema = makeSchema({
-  types: [Query],
-});
+      t.list.field("queues", {
+        type: "String",
+        args: {
+          tokenId: stringArg(),
+        },
+        resolve(_root, { tokenId }) {
+          return app.queues.get(tokenId);
+        },
+      });
+    },
+  });
 
-const server = new ApolloServer({
-  schema,
-  playground: true,
-  introspection: true,
-});
+  const schema = makeSchema({
+    types: [Query],
+  });
 
-interface GraphqlOptions {
-  passphrases: string[];
-}
+  const server = new ApolloServer({
+    schema,
+    playground: true,
+    introspection: true,
+  });
 
-const graphqlRoute: FastifyPluginCallback<GraphqlOptions> = server.createHandler();
+  return await server.createHandler()(app);
+};
 
 export default graphqlRoute;

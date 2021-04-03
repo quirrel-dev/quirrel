@@ -53,4 +53,10 @@ export class TokenRepo {
 
     return !!result;
   }
+
+  async getAll() {
+    const idToToken = await this.redis.hgetall(ID_TOKEN);
+
+    return Object.keys(idToToken);
+  }
 }
