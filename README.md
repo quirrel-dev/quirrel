@@ -18,7 +18,7 @@ Quirrel makes job queueing simple as cake. It supports delayed jobs, fanout jobs
 
 Quirrel values ...
 
-- great DX (through [tailormade client libraries](https://docs.quirrel.dev/api/queue) & the [development UI](https://docs.quirrel.dev/development-ui))
+- great DX (through [tailormade client libraries](https://docs.quirrel.dev/api/queue) & the [development UI](https://docs.quirrel.dev/getting-started/next-js#meet-the-development-ui))
 - privacy (through end-to-end encryption)
 - free software (it's MIT licensed!)
 - easy setup (through [hosted offering](https://quirrel.dev) and easy on-prem)
