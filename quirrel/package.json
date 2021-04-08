@@ -41,7 +41,7 @@
     "@types/cross-spawn": "^6.0.2",
     "@types/easy-table": "^0.0.32",
     "@types/expand-tilde": "^2.0.0",
-    "@types/ioredis": "4.22.2",
+    "@types/ioredis": "4.22.3",
     "@types/jest": "^26.0.22",
     "@types/ms": "^0.7.31",
     "@types/parse-gitignore": "^1.0.0",
