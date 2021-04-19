@@ -6,11 +6,11 @@ import { truncateUrl } from "../lib/truncate-url";
 
 export default function Cron() {
   const { pending, invoke } = useQuirrel();
-  const cronJob = pending.filter((job) => !!job.repeat?.cron);
+  const cronJobs = Object.values(pending).filter((job) => !!job.repeat?.cron);
   return (
     <BaseLayout selectedPage="cron">
       <Table
-        items={cronJob}
+        items={cronJobs}
         extractKey={(item) => item.endpoint + item.id}
         columns={[
           {
