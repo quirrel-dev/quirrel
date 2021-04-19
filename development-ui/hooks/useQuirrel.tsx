@@ -336,32 +336,43 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
   const connectActivityStream = useCallback(
     (instanceDetails: QuirrelInstanceDetails) => {
-      const { baseUrl, token } = instanceDetails;
-      const isSecure = baseUrl.startsWith("https://");
-      const baseUrlWithoutProtocol = baseUrl.slice(
-        isSecure ? "https://".length : "http://".length
-      );
-      const socket = new WebSocket(
-        `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`,
-        token || "ignored"
-      );
+      function connect() {
+        const { baseUrl, token } = instanceDetails;
+        const isSecure = baseUrl.startsWith("https://");
+        const baseUrlWithoutProtocol = baseUrl.slice(
+          isSecure ? "https://".length : "http://".length
+        );
+        const socket = new WebSocket(
+          `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`,
+          token || "ignored"
+        );
 
-      socket.onopen = () => {
-        connectedSocket.current?.close();
-        connectedSocket.current = socket;
+        socket.onopen = () => {
+          connectedSocket.current?.close();
+          connectedSocket.current = socket;
 
-        console.log("Connected successfully.");
-      };
+          console.log("Connected successfully.");
+        };
 
-      socket.onclose = (ev) => {
-        console.log(`Socket to ${baseUrl} was closed.`);
-        quirrelClient.connectionWasAborted();
-      };
+        socket.onclose = (ev) => {
+          console.log(`Socket to ${baseUrl} was closed.`);
 
-      socket.onmessage = (evt) => {
-        const data = JSON.parse(evt.data);
-        onActivity({ type: data[0], payload: data[1], date: Date.now() });
-      };
+          const isAbnormal = ev.code === 1006;
+          if (isAbnormal) {
+            console.log(`Reconnecting ...`);
+            connect();
+          } else {
+            quirrelClient.connectionWasAborted();
+          }
+        };
+
+        socket.onmessage = (evt) => {
+          const data = JSON.parse(evt.data);
+          onActivity({ type: data[0], payload: data[1], date: Date.now() });
+        };
+      }
+
+      connect();
     },
     [dump, connectedSocket, quirrelClient.connectionWasAborted, onActivity]
   );
