@@ -1,4 +1,3 @@
-import type { Redis } from "ioredis";
 import { EnqueueJob } from "./types/queues/POST/body";
 import {
   encodeQueueDescriptor,
@@ -6,8 +5,8 @@ import {
 } from "../shared/queue-descriptor";
 
 import * as uuid from "uuid";
-import { createOwl, cron } from "../shared/owl";
-import type { Job } from "@quirrel/owl";
+import { cron } from "../shared/owl";
+import Owl, { Closable, Job } from "@quirrel/owl";
 
 interface PaginationOpts {
   cursor: number;
@@ -30,12 +29,10 @@ interface JobDTO {
   };
 }
 
-export class JobsRepo {
-  protected owl;
+export class JobsRepo implements Closable {
   protected producer;
 
-  constructor(redisFactory: () => Redis) {
-    this.owl = createOwl(redisFactory);
+  constructor(protected readonly owl: Owl<"every" | "cron">) {
     this.producer = this.owl.createProducer();
   }
 

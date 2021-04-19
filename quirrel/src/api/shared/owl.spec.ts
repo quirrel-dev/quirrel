@@ -7,7 +7,7 @@ describe("owl config", () => {
         expect(
           cron(
             new Date(2020, 10, 10, 10, 10, 10, 0),
-            "* * * * * *" // every second)
+            "* * * * * *" // every second
           )
         ).toEqual(new Date(2020, 10, 10, 10, 10, 11, 0));
       });
