@@ -1,4 +1,4 @@
-import { cron, every, isValidTimezone } from "./owl";
+import { cron, every, isValidTimezone } from "./repeat";
 
 describe("owl config", () => {
   test("isValidTimezone", () => {

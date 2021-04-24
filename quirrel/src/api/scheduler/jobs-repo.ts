@@ -5,7 +5,7 @@ import {
 } from "../shared/queue-descriptor";
 
 import * as uuid from "uuid";
-import { cron } from "../shared/owl";
+import { cron } from "../../shared/repeat";
 import Owl, { Closable, Job } from "@quirrel/owl";
 
 interface PaginationOpts {
@@ -26,6 +26,7 @@ interface JobDTO {
     times?: number;
     count: number;
     cron?: string;
+    cron_tz?: string;
   };
 }
 
