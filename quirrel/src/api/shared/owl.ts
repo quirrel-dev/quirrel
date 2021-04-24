@@ -2,10 +2,23 @@ import Owl from "@quirrel/owl";
 import { Redis } from "ioredis";
 import cronParser from "cron-parser";
 
+export function isValidTimezone(tz: string) {
+  try {
+    const expr = cronParser.parseExpression("* * * * *", {
+      tz,
+    });
+    expr.next();
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 export function cron(lastDate: Date, cronExpression: string): Date {
-  const expr = cronParser.parseExpression(cronExpression, {
-    utc: true,
+  const [cron, tz = "Etc/UTC"] = cronExpression.split(";");
+  const expr = cronParser.parseExpression(cron, {
     currentDate: lastDate,
+    tz,
   });
 
   const nextExecution = expr.next().toDate();
