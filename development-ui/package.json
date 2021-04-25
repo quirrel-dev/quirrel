@@ -20,7 +20,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "secure-e2ee": "^0.4.0",
-    "tailwindcss": "^2.0.4"
+    "tailwindcss": "^2.1.2"
   },
   "devDependencies": {
     "@types/chai": "^4.2.16",
