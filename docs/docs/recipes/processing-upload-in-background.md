@@ -39,17 +39,17 @@ import db from "db"
 import {Queue} from "quirrel/blitz"
 
 export default Queue("api/process-csv", async (uploadId: number) => {
-  const upload = await db.uplodadedCsv.findUnique({
+  const upload = await db.uploadedCsv.findUnique({
     where: {id: uploadId},
   })
 
   await doYourProcessing(upload.data)
 
-  await db.uplodadedCsv.delete({where: {id: uploadId}})
+  await db.uploadedCsv.delete({where: {id: uploadId}})
 })
 ```
 
-Now when you want to know wether an upload has already been processed, you can look it up in your own database:
+Now when you want to know whether an upload has already been processed, you can look it up in your own database:
 
 ```ts
 // app/queries/hasFinishedProcessing
