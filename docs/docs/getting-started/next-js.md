@@ -54,7 +54,7 @@ The second one is a worker function that actually executes the job.
 In this example, it sends an email.
 
 
-Now that we declared the Queue, using it is straight forwward.
+Now that we declared the Queue, using it is straight forward.
 Simply import it and enqueue a new job:
 
 ```ts {6-9}
