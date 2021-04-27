@@ -60,6 +60,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "0xflotus",
+      "name": "0xflotus",
+      "avatar_url": "https://avatars.githubusercontent.com/u/26602940?v=4",
+      "profile": "http://0xflotus.github.io",
+      "contributions": [
+        "content"
+      ]
     }
   ],
   "contributorsPerLine": 7,
