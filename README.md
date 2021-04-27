@@ -44,6 +44,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://producthunt.com/@twmatthieuh"><img src="https://avatars.githubusercontent.com/u/1550192?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matthieu Hostache</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3Amatthieuh" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://aditsachde.com"><img src="https://avatars.githubusercontent.com/u/23707194?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Adit Sachde</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=aditsachde" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/viperfx"><img src="https://avatars.githubusercontent.com/u/328257?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Tharshan Muthulingam</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3Aviperfx" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://0xflotus.github.io"><img src="https://avatars.githubusercontent.com/u/26602940?v=4?s=100" width="100px;" alt=""/><br /><sub><b>0xflotus</b></sub></a><br /><a href="#content-0xflotus" title="Content">🖋</a></td>
   </tr>
 </table>
 
