@@ -41,7 +41,7 @@ If you still want to host Quirrel yourself, you can do so using the [Docker Imag
 Here's a rough guideline on how to acquire tokens:
 
 1. Think of a good password and supply it via the `PASSPHRASES` env var.
-2. Start up your instance and run `curl --user ignored:put_password_here localhost:9181/tokens/local`
+2. Start up your instance and run `curl --user ignored:put_password_here -X PUT localhost:9181/tokens/local`
 3. Use the obtained token for setting your application's `QUIRREL_TOKEN` env var.
 
 Using self-hosted Quirrel requires you to set the `QUIRREL_URL` variable to the location of your deployment (it defaults to `https://api.quirrel.dev`).
