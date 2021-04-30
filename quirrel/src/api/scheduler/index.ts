@@ -145,9 +145,12 @@ export async function createServer({
 
   if (passphrases) {
     app.register(basicAuthPlugin, { passphrases });
-    app.register(tokensPlugin);
-    app.register(tokensRoute, { prefix: "/tokens" });
     app.register(usageRoute, { prefix: "/usage" });
+
+    if (!jwtPublicKey) {
+      app.register(tokensPlugin);
+      app.register(tokensRoute, { prefix: "/tokens" });
+    }
   }
 
   app.register(indexRoute);
