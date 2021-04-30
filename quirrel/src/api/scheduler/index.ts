@@ -27,6 +27,7 @@ export interface QuirrelServerConfig {
   port?: number;
   host?: string;
   passphrases?: string[];
+  jwtPublicKey?: string;
   runningInDocker?: boolean;
   disableTelemetry?: boolean;
   logger?: Logger;
@@ -34,7 +35,7 @@ export interface QuirrelServerConfig {
 
 declare module "fastify" {
   interface FastifyInstance {
-    authEnabled: boolean;
+    adminBasedAuthEnabled: boolean;
   }
 }
 
@@ -46,6 +47,7 @@ export async function createServer({
   passphrases,
   disableTelemetry,
   logger,
+  jwtPublicKey,
 }: QuirrelServerConfig) {
   const app = fastify({
     logger: logger instanceof StructuredLogger ? logger.pino : undefined,
@@ -61,9 +63,9 @@ export async function createServer({
     origin: "*",
   });
 
-  const enableAuth = !!passphrases?.length;
+  const enableAdminBasedAuth = !!passphrases?.length;
 
-  app.decorate("authEnabled", enableAuth);
+  app.decorate("adminBasedAuthEnabled", enableAdminBasedAuth);
 
   app.register(swagger, {
     routePrefix: "/documentation",
@@ -87,7 +89,7 @@ export async function createServer({
         description: "Find general documentation here",
       },
       components: {
-        securitySchemes: enableAuth
+        securitySchemes: enableAdminBasedAuth
           ? {
               Token: {
                 type: "http",
@@ -132,8 +134,9 @@ export async function createServer({
   app.register(owlPlugin);
 
   app.register(tokenAuthPlugin, {
-    auth: enableAuth,
+    enable: enableAdminBasedAuth,
     passphrases: passphrases ?? [],
+    jwtPublicKey,
   });
 
   if (!disableTelemetry) {

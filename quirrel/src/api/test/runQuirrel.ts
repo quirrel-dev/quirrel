@@ -4,7 +4,8 @@ import { createRedisFactory } from "../shared/create-redis";
 export async function run(
   backend: "Redis" | "Mock",
   passphrases?: string[],
-  incidentReceiver?: QuirrelConfig["incidentReceiver"]
+  incidentReceiver?: QuirrelConfig["incidentReceiver"],
+  jwtPublicKey?: string
 ) {
   const redisFactory = createRedisFactory(
     backend === "Redis"
@@ -18,6 +19,7 @@ export async function run(
     disableTelemetry: true,
     logger: "none",
     incidentReceiver,
+    jwtPublicKey,
   });
 
   const redis = redisFactory();

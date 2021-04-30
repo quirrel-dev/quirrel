@@ -1,8 +1,14 @@
-import { FastifyPluginCallback, FastifyReply, FastifyRequest } from "fastify";
+import {
+  FastifyPluginCallback,
+  FastifyReply,
+  FastifyRequest,
+  preValidationHookHandler,
+} from "fastify";
 import fp from "fastify-plugin";
 import { IncomingMessage, IncomingHttpHeaders } from "http";
 import { UsageMeter } from "../shared/usage-meter";
 import basicAuth from "basic-auth";
+import jwt from "jsonwebtoken";
 
 interface TokenAuthService {
   authenticate(
@@ -13,7 +19,7 @@ interface TokenAuthService {
 declare module "fastify" {
   interface FastifyInstance {
     tokenAuth: TokenAuthService;
-    tokenAuthPreValidation: any;
+    tokenAuthPreValidation: preValidationHookHandler;
   }
 
   interface FastifyRequest {
@@ -22,8 +28,9 @@ declare module "fastify" {
 }
 
 interface TokenAuthPluginOpts {
-  auth: boolean;
+  enable: boolean;
   passphrases: string[];
+  jwtPublicKey?: string;
 }
 
 const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
@@ -31,7 +38,52 @@ const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
   opts,
   done
 ) => {
-  const usageMeter = new UsageMeter(fastify.redis);
+  fastify.decorateRequest("tokenId", null);
+  fastify.decorate(
+    "tokenAuthPreValidation",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const tokenId = await fastify.tokenAuth.authenticate(request);
+
+      if (tokenId === null) {
+        reply.status(401).send("Unauthenticated");
+      } else {
+        request.tokenId = tokenId;
+      }
+    }
+  );
+
+  function decorateTokenAuth(service: TokenAuthService) {
+    fastify.decorate("tokenAuth", service);
+  }
+
+  if (!opts.enable) {
+    decorateTokenAuth({
+      async authenticate() {
+        return "anonymous";
+      },
+    });
+
+    return done();
+  }
+
+  async function checkJwt(token: string): Promise<string | undefined> {
+    const { jwtPublicKey } = opts;
+    if (!jwtPublicKey) {
+      return undefined;
+    }
+
+    return await new Promise<string | undefined>((resolve) => {
+      jwt.verify(token, jwtPublicKey, (err, result) => {
+        if (err) {
+          return resolve(undefined);
+        }
+
+        const { sub } = result as { sub?: string };
+
+        resolve(sub);
+      });
+    });
+  }
 
   async function getTokenID(headers: IncomingHttpHeaders) {
     const { authorization } = headers;
@@ -41,11 +93,17 @@ const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
 
     if (authorization.startsWith("Bearer ")) {
       const [_, token] = authorization.split("Bearer ");
-      const tokenId = await fastify.tokens.check(token);
-      if (!tokenId) {
-        return null;
+      const jwtTokenId = await checkJwt(token);
+      if (jwtTokenId) {
+        return { tokenId: jwtTokenId, countUsage: true };
       }
-      return { tokenId, countUsage: true };
+
+      const redisTokenId = await fastify.tokens.check(token);
+      if (redisTokenId) {
+        return { tokenId: redisTokenId, countUsage: true };
+      }
+
+      return null;
     } else if (authorization.startsWith("Basic ")) {
       const basicCredentials = basicAuth.parse(authorization);
 
@@ -63,10 +121,10 @@ const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
     return null;
   }
 
-  async function authenticate(
-    request: FastifyRequest | IncomingMessage
-  ): Promise<string | null> {
-    if (opts.auth) {
+  const usageMeter = new UsageMeter(fastify.redis);
+
+  decorateTokenAuth({
+    async authenticate(request) {
       const result = await getTokenID(request.headers);
       if (!result) {
         return null;
@@ -79,34 +137,12 @@ const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
       }
 
       return tokenId;
-    }
+    },
+  });
 
-    return "anonymous";
-  }
-
-  const service: TokenAuthService = {
-    authenticate,
-  };
-
-  fastify.decorateRequest("tokenId", null);
-  fastify.decorate("tokenAuth", service);
-
-  fastify.decorate(
-    "tokenAuthPreValidation",
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      const tokenId = await fastify.tokenAuth.authenticate(request);
-
-      if (tokenId === null) {
-        reply.status(401).send("Unauthenticated");
-      } else {
-        request.tokenId = tokenId;
-      }
-    }
-  );
-
-  done();
+  return done();
 };
 
-export default (fp as any)(tokenAuthServicePlugin) as FastifyPluginCallback<
-  TokenAuthPluginOpts
->;
+export default (fp as any)(
+  tokenAuthServicePlugin
+) as FastifyPluginCallback<TokenAuthPluginOpts>;

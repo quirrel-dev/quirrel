@@ -10,6 +10,7 @@ const {
   DISABLE_TELEMETRY,
   INCIDENT_RECEIVER_ENDPOINT,
   INCIDENT_RECEIVER_PASSPHRASE,
+  JWT_PUBLIC_KEY,
 } = process.env;
 
 process.on("unhandledRejection", (reason, promise) => {
@@ -23,6 +24,7 @@ async function main() {
     host: HOST,
     redisFactory: createRedisFactory(REDIS_URL),
     passphrases: !!PASSPHRASES ? PASSPHRASES.split(":") : undefined,
+    jwtPublicKey: JWT_PUBLIC_KEY,
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
     disableTelemetry: Boolean(DISABLE_TELEMETRY),
     logger: "structured",
