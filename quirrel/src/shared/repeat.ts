@@ -12,6 +12,14 @@ export function isValidTimezone(tz: string) {
   }
 }
 
+export function embedTimezone(cronExpression: string, tz: string) {
+  if (!isValidTimezone(tz)) {
+    throw new Error("Invalid timezone " + tz)
+  }
+
+  return cronExpression + ";" + tz
+}
+
 export function cron(lastDate: Date, cronExpression: string): Date {
   const [cron, tz = "Etc/UTC"] = cronExpression.split(";");
   const expr = cronParser.parseExpression(cron, {

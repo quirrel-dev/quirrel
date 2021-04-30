@@ -5,7 +5,7 @@ import {
 } from "../shared/queue-descriptor";
 
 import * as uuid from "uuid";
-import { cron } from "../../shared/repeat";
+import { cron, embedTimezone, isValidTimezone } from "../../shared/repeat";
 import Owl, { Closable, Job } from "@quirrel/owl";
 
 interface PaginationOpts {
@@ -177,7 +177,12 @@ export class JobsRepo implements Closable {
 
     if (repeat?.cron) {
       schedule_type = "cron";
-      schedule_meta = repeat.cron;
+
+      if (repeat?.cronTimezone) {
+        schedule_meta = embedTimezone(repeat.cron, repeat.cronTimezone);
+      } else {
+        schedule_meta = repeat.cron;
+      }
     }
 
     if (repeat?.every) {

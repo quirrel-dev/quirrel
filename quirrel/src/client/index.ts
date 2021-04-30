@@ -10,6 +10,7 @@ import type { IncomingHttpHeaders } from "http";
 import pack from "../../package.json";
 import * as EnhancedJSON from "./enhanced-json";
 import { isValidRegex } from "../shared/is-valid-regex";
+import { isValidTimezone } from "../shared/repeat";
 
 export { Job };
 
@@ -76,9 +77,7 @@ const vercelMs = z
 
 const timeDuration = (fieldName = "duration") =>
   z.union([
-    z
-      .number()
-      .min(1, { message: `${fieldName} must be positive` }),
+    z.number().min(1, { message: `${fieldName} must be positive` }),
     vercelMs,
   ]);
 
@@ -106,6 +105,7 @@ const EnqueueJobOptionsSchema = z.object({
       every: timeDuration("every").optional(),
       times: z.number().nonnegative().optional(),
       cron: cron.optional(),
+      cronTimezone: z.string().refine(isValidTimezone).optional(),
     })
     .optional(),
 });
@@ -182,6 +182,12 @@ export interface EnqueueJobOptions {
      * If `delay` isn't set, the first repetition will be executed immediately.
      */
     cron?: string;
+
+    /**
+     * IANA timezone.
+     * @defaults to Etc/UTC.
+     */
+    cronTimezone?: string;
   };
 }
 
@@ -312,7 +318,7 @@ export class QuirrelClient<T> {
       id: options.id,
       repeat: options.repeat,
       retry: options.retry?.map(parseDuration),
-      override: options.override
+      override: options.override,
     };
   }
 
