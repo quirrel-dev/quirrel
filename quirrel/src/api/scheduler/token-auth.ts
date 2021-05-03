@@ -66,23 +66,30 @@ const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
     return done();
   }
 
-  async function checkJwt(token: string): Promise<string | undefined> {
+  async function checkJwt(
+    token: string
+  ): Promise<["not_a_jwt"] | ["success", string] | ["invalid"]> {
     const { jwtPublicKey } = opts;
     if (!jwtPublicKey) {
-      return undefined;
+      return ["not_a_jwt"];
     }
 
-    return await new Promise<string | undefined>((resolve) => {
-      jwt.verify(token, jwtPublicKey, (err, result) => {
-        if (err) {
-          return resolve(undefined);
-        }
+    return await new Promise<["not_a_jwt"] | ["success", string] | ["invalid"]>(
+      (resolve) => {
+        jwt.verify(token, jwtPublicKey, (err, result) => {
+          if (err) {
+            return resolve(["invalid"]);
+          }
 
-        const { sub } = result as { sub?: string };
-
-        resolve(sub);
-      });
-    });
+          const { sub } = result as { sub?: string };
+          if (sub) {
+            resolve(["success", sub]);
+          } else {
+            resolve(["invalid"]);
+          }
+        });
+      }
+    );
   }
 
   async function getTokenID(headers: IncomingHttpHeaders) {
@@ -93,12 +100,17 @@ const tokenAuthServicePlugin: FastifyPluginCallback<TokenAuthPluginOpts> = (
 
     if (authorization.startsWith("Bearer ")) {
       const [_, token] = authorization.split("Bearer ");
-      const jwtTokenId = await checkJwt(token);
-      if (jwtTokenId) {
-        return { tokenId: jwtTokenId, countUsage: true };
+      const [result, jwtTokenId] = await checkJwt(token);
+      switch (result) {
+        case "not_a_jwt":
+          break;
+        case "invalid":
+          return null;
+        case "success":
+          return { tokenId: jwtTokenId!, countUsage: true };
       }
 
-      const redisTokenId = await fastify.tokens.check(token);
+      const redisTokenId = await fastify.tokens?.check(token);
       if (redisTokenId) {
         return { tokenId: redisTokenId, countUsage: true };
       }
