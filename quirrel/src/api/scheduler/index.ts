@@ -2,7 +2,6 @@ import fastify from "fastify";
 import { Redis } from "ioredis";
 import owlPlugin from "./owl";
 import redisPlugin from "./redis";
-import tokensPlugin from "./tokens";
 import tokensRoute from "./routes/tokens";
 import health from "./routes/health";
 import queues from "./routes/queues";
@@ -148,7 +147,6 @@ export async function createServer({
     app.register(usageRoute, { prefix: "/usage" });
 
     if (!jwtPublicKey) {
-      app.register(tokensPlugin);
       app.register(tokensRoute, { prefix: "/tokens" });
     }
   }
