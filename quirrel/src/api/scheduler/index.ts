@@ -3,6 +3,7 @@ import { Redis } from "ioredis";
 import owlPlugin from "./owl";
 import redisPlugin from "./redis";
 import tokensRoute from "./routes/tokens";
+import tokensRepoPlugin from "./tokens";
 import health from "./routes/health";
 import queues from "./routes/queues";
 import usageRoute from "./routes/usage";
@@ -88,27 +89,38 @@ export async function createServer({
         description: "Find general documentation here",
       },
       components: {
-        securitySchemes: enableAdminBasedAuth
-          ? {
-              Token: {
-                type: "http",
-                scheme: "bearer",
-                description: "Main auth scheme. Tokens are issued by admin.",
-              },
-              Admin: {
+        securitySchemes: {
+          Token:
+            enableAdminBasedAuth || jwtPublicKey
+              ? {
+                  type: "http",
+                  scheme: "bearer",
+                  description: `Main auth scheme. Tokens can be issued via ${
+                    enableAdminBasedAuth
+                      ? jwtPublicKey
+                        ? "JWT / Admin"
+                        : "Admin"
+                      : "JWT"
+                  }.`,
+                }
+              : undefined,
+          Admin: enableAdminBasedAuth
+            ? {
                 type: "http",
                 scheme: "basic",
                 description:
                   "Used for admin tasks like issuing new tokens. Username is ignored, password is specified via environment variables.",
-              },
-              Impersonation: {
+              }
+            : undefined,
+          Impersonation: enableAdminBasedAuth
+            ? {
                 type: "http",
                 scheme: "basic",
                 description:
                   "Username must be the token ID to be impersonated, password is admin password.",
-              },
-            }
-          : undefined,
+              }
+            : undefined,
+        } as any,
       },
       tags: [
         {
@@ -147,6 +159,7 @@ export async function createServer({
     app.register(usageRoute, { prefix: "/usage" });
 
     if (!jwtPublicKey) {
+      app.register(tokensRepoPlugin);
       app.register(tokensRoute, { prefix: "/tokens" });
     }
   }

@@ -5,12 +5,9 @@ import { POSTTokensParams } from "../types/tokens/PUT/params";
 
 import DELETETokenParamsSchema from "../schemas/tokens/DELETE/params.json";
 import { DELETETokensTokenParams } from "../types/tokens/DELETE/params";
-import tokensRepoPlugin from "../tokens";
 
 const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.addHook("onRequest", fastify.basicAuth);
-
-  fastify.register(tokensRepoPlugin);
 
   const baseSchema = {
     tags: ["Admin"],
