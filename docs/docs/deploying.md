@@ -36,7 +36,7 @@ created on, excluding them from future bugfixes.
 
 For most people, the [hosted version](https://quirrel.dev) of Quirrel is the easiest, and probably also cheapest way of using Quirrel (there's a free tier if your project is just starting out, and OSS and side projects can apply for discounts).
 
-If you still want to host Quirrel yourself, you can do so using the [Docker Image](https://github.com/orgs/quirrel-dev/packages/container/package/quirrel). `REDIS_URL` should be set to a Redis connection string. For production deployments, `PASSPHRASES` should be set to a `:`-separated list of passphrases used for securing the token endpoints. Additionally, the deployment should be secured using HTTPS.
+If you still want to host Quirrel yourself, you can do so using the [Docker Image](https://github.com/orgs/quirrel-dev/packages/container/package/quirrel). `REDIS_URL` should be set to a Redis connection string. Make sure your Redis instance is persistent. For production deployments, `PASSPHRASES` should be set to a `:`-separated list of passphrases used for securing the token endpoints. Additionally, the deployment should be secured using HTTPS.
 
 Here's a rough guideline on how to acquire tokens:
 
