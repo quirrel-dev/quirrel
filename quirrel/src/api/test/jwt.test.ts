@@ -50,7 +50,10 @@ describe("JWT Authentication", () => {
   let teardown: () => Promise<void>;
 
   beforeAll(async () => {
-    const res = await run("Mock", ["root"], undefined, publicKey);
+    const res = await run("Mock", {
+      passphrases: ["root"],
+      jwtPublicKey: publicKey,
+    });
     quirrel = res.server;
     teardown = res.teardown;
   });
