@@ -43,6 +43,10 @@ export function getEncryptionSecret(): string | undefined {
   return process.env.QUIRREL_ENCRYPTION_SECRET;
 }
 
+export function getSignaturePublicKey(): string | undefined {
+  return process.env.QUIRREL_SIGNATURE_PUBLIC_KEY;
+}
+
 export function getOldEncryptionSecrets(): string[] | null {
   return JSON.parse(process.env.QUIRREL_OLD_SECRETS ?? "null");
 }

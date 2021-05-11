@@ -27,7 +27,7 @@ const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {
 
     async handler(request, reply) {
       const { id } = request.params;
-      const token = await fastify.tokens.create(id);
+      const token = await fastify.tokens!.create(id);
 
       fastify.telemetrist?.dispatch("token created");
 
@@ -43,7 +43,7 @@ const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {
     },
 
     async handler(request, reply) {
-      const success = await fastify.tokens.revoke(request.params.id);
+      const success = await fastify.tokens!.revoke(request.params.id);
 
       fastify.telemetrist?.dispatch("token revoked");
 

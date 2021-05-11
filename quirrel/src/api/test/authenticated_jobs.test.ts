@@ -18,7 +18,9 @@ describeAcrossBackends("Authenticated Jobs", (backend) => {
   let lastSignature: any;
 
   beforeAll(async () => {
-    const res = await run(backend, [passphrase]);
+    const res = await run(backend, {
+      passphrases: [passphrase],
+    });
     quirrel = res.server;
     teardown = res.teardown;
 
