@@ -3,7 +3,7 @@ import * as config from "./config";
 import * as z from "zod";
 import type { IsExact, AssertTrue } from "conditional-type-checks";
 import Encryptor from "secure-e2ee";
-import { verify } from "secure-webhooks";
+import { symmetric, asymmetric } from "secure-webhooks";
 import ms from "ms";
 import fetch from "cross-fetch";
 import type { IncomingHttpHeaders } from "http";
@@ -56,6 +56,12 @@ interface CreateQuirrelClientArgs<T> {
     encryptionSecret?: string;
 
     /**
+     * Public key used for verifying signatures.
+     * Recommended way to set this: process.env.QUIRREL_SIGNATURE_PUBLIC_KEY
+     */
+    signaturePublicKey?: string;
+
+    /**
      * Old Secrets that have been rotated out.
      * @see https://docs.quirrel.dev/docs/faq#my-encryption-secret-has-been-leaked-what-now
      * Recommended way to set this: process.env.QUIRREL_OLD_SECRETS
@@ -76,9 +82,7 @@ const vercelMs = z
 
 const timeDuration = (fieldName = "duration") =>
   z.union([
-    z
-      .number()
-      .min(1, { message: `${fieldName} must be positive` }),
+    z.number().min(1, { message: `${fieldName} must be positive` }),
     vercelMs,
   ]);
 
@@ -233,6 +237,7 @@ export class QuirrelClient<T> {
   private token;
   private fetch;
   private catchDecryptionErrors;
+  private signaturePublicKey;
 
   constructor(args: CreateQuirrelClientArgs<T>) {
     this.handler = args.handler;
@@ -262,6 +267,8 @@ export class QuirrelClient<T> {
     );
     this.catchDecryptionErrors = args.catchDecryptionErrors;
     this.fetch = args.fetch ?? fetch;
+    this.signaturePublicKey =
+      args.config?.signaturePublicKey ?? config.getSignaturePublicKey();
   }
 
   async makeRequest(uri: string, init?: RequestInit) {
@@ -312,7 +319,7 @@ export class QuirrelClient<T> {
       id: options.id,
       repeat: options.repeat,
       retry: options.retry?.map(parseDuration),
-      override: options.override
+      override: options.override,
     };
   }
 
@@ -487,6 +494,14 @@ export class QuirrelClient<T> {
     throw new Error("Unexpected response: " + (await res.text()));
   }
 
+  private isValidSignature(body: string, signature: string): boolean {
+    if (this.signaturePublicKey) {
+      return asymmetric.verify(body, this.signaturePublicKey, signature);
+    } else {
+      return symmetric.verify(body, this.token!, signature);
+    }
+  }
+
   async respondTo(
     body: string,
     headers: IncomingHttpHeaders
@@ -505,8 +520,7 @@ export class QuirrelClient<T> {
         };
       }
 
-      const valid = verify(body, this.token!, signature);
-      if (!valid) {
+      if (!this.isValidSignature(body, signature)) {
         return {
           status: 401,
           headers: {},
