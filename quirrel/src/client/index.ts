@@ -37,7 +37,7 @@ interface CreateQuirrelClientArgs<T> {
     /**
      * Overrides URL of the Quirrel Endpoint.
      * @default https://api.quirrel.dev or http://localhost:9181
-     * Recommended way to set this: process.env.QUIRREL_URL
+     * Recommended way to set this: process.env.QUIRREL_API_URL
      */
     quirrelBaseUrl?: string;
 
