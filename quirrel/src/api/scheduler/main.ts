@@ -11,6 +11,7 @@ cliWithConfig(async (config) => {
     PASSPHRASES,
     RUNNING_IN_DOCKER,
     DISABLE_TELEMETRY,
+    JWT_PUBLIC_KEY
   } = config;
 
   const scheduler = await createServer({
@@ -18,6 +19,7 @@ cliWithConfig(async (config) => {
     host: HOST,
     redisFactory: createRedisFactory(REDIS_URL ?? "redis://localhost:6379"),
     passphrases: !!PASSPHRASES ? PASSPHRASES.split(":") : undefined,
+    jwtPublicKey: JWT_PUBLIC_KEY,
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
     disableTelemetry: Boolean(DISABLE_TELEMETRY),
     logger: new StructuredLogger(),

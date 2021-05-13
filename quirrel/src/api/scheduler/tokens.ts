@@ -4,7 +4,7 @@ import { TokenRepo } from "../shared/token-repo";
 
 declare module "fastify" {
   interface FastifyInstance {
-    tokens: TokenRepo;
+    tokens?: TokenRepo;
   }
 }
 

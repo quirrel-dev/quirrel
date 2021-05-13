@@ -2,8 +2,8 @@ import fastify from "fastify";
 import { Redis } from "ioredis";
 import owlPlugin from "./owl";
 import redisPlugin from "./redis";
-import tokensPlugin from "./tokens";
 import tokensRoute from "./routes/tokens";
+import tokensRepoPlugin from "./tokens";
 import health from "./routes/health";
 import queues from "./routes/queues";
 import usageRoute from "./routes/usage";
@@ -27,6 +27,7 @@ export interface QuirrelServerConfig {
   port?: number;
   host?: string;
   passphrases?: string[];
+  jwtPublicKey?: string;
   runningInDocker?: boolean;
   disableTelemetry?: boolean;
   logger?: Logger;
@@ -34,7 +35,7 @@ export interface QuirrelServerConfig {
 
 declare module "fastify" {
   interface FastifyInstance {
-    authEnabled: boolean;
+    adminBasedAuthEnabled: boolean;
   }
 }
 
@@ -46,6 +47,7 @@ export async function createServer({
   passphrases,
   disableTelemetry,
   logger,
+  jwtPublicKey,
 }: QuirrelServerConfig) {
   const app = fastify({
     logger: logger instanceof StructuredLogger ? logger.pino : undefined,
@@ -61,9 +63,9 @@ export async function createServer({
     origin: "*",
   });
 
-  const enableAuth = !!passphrases?.length;
+  const enableAdminBasedAuth = !!passphrases?.length;
 
-  app.decorate("authEnabled", enableAuth);
+  app.decorate("adminBasedAuthEnabled", enableAdminBasedAuth);
 
   app.register(swagger, {
     routePrefix: "/documentation",
@@ -87,27 +89,38 @@ export async function createServer({
         description: "Find general documentation here",
       },
       components: {
-        securitySchemes: enableAuth
-          ? {
-              Token: {
-                type: "http",
-                scheme: "bearer",
-                description: "Main auth scheme. Tokens are issued by admin.",
-              },
-              Admin: {
+        securitySchemes: {
+          Token:
+            enableAdminBasedAuth || jwtPublicKey
+              ? {
+                  type: "http",
+                  scheme: "bearer",
+                  description: `Main auth scheme. Tokens can be issued via ${
+                    enableAdminBasedAuth
+                      ? jwtPublicKey
+                        ? "JWT / Admin"
+                        : "Admin"
+                      : "JWT"
+                  }.`,
+                }
+              : undefined,
+          Admin: enableAdminBasedAuth
+            ? {
                 type: "http",
                 scheme: "basic",
                 description:
                   "Used for admin tasks like issuing new tokens. Username is ignored, password is specified via environment variables.",
-              },
-              Impersonation: {
+              }
+            : undefined,
+          Impersonation: enableAdminBasedAuth
+            ? {
                 type: "http",
                 scheme: "basic",
                 description:
                   "Username must be the token ID to be impersonated, password is admin password.",
-              },
-            }
-          : undefined,
+              }
+            : undefined,
+        } as any,
       },
       tags: [
         {
@@ -132,8 +145,9 @@ export async function createServer({
   app.register(owlPlugin);
 
   app.register(tokenAuthPlugin, {
-    auth: enableAuth,
+    enable: enableAdminBasedAuth,
     passphrases: passphrases ?? [],
+    jwtPublicKey,
   });
 
   if (!disableTelemetry) {
@@ -142,9 +156,12 @@ export async function createServer({
 
   if (passphrases) {
     app.register(basicAuthPlugin, { passphrases });
-    app.register(tokensPlugin);
-    app.register(tokensRoute, { prefix: "/tokens" });
     app.register(usageRoute, { prefix: "/usage" });
+
+    if (!jwtPublicKey) {
+      app.register(tokensRepoPlugin);
+      app.register(tokensRoute, { prefix: "/tokens" });
+    }
   }
 
   app.register(indexRoute);
