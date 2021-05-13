@@ -29,7 +29,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
   const baseSchema = {
     tags: ["Queueing"],
-    security: fastify.authEnabled
+    security: fastify.adminBasedAuthEnabled
       ? [
           {
             Admin: [],

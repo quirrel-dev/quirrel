@@ -36,12 +36,12 @@ created on, excluding them from future bugfixes.
 
 For most people, the [hosted version](https://quirrel.dev) of Quirrel is the easiest, and probably also cheapest way of using Quirrel (there's a free tier if your project is just starting out, and OSS and side projects can apply for discounts).
 
-If you still want to host Quirrel yourself, you can do so using the [Docker Image](https://github.com/orgs/quirrel-dev/packages/container/package/quirrel). `REDIS_URL` should be set to a Redis connection string. For production deployments, `PASSPHRASES` should be set to a `:`-separated list of passphrases used for securing the token endpoints. Additionally, the deployment should be secured using HTTPS.
+If you still want to host Quirrel yourself, you can do so using the [Docker Image](https://github.com/orgs/quirrel-dev/packages/container/package/quirrel). `REDIS_URL` should be set to a Redis connection string. Make sure your Redis instance is persistent. For production deployments, `PASSPHRASES` should be set to a `:`-separated list of passphrases used for securing the token endpoints. Additionally, the deployment should be secured using HTTPS.
 
 Here's a rough guideline on how to acquire tokens:
 
 1. Think of a good password and supply it via the `PASSPHRASES` env var.
-2. Start up your instance and run `curl --user ignored:put_password_here localhost:9181/tokens/local`
+2. Start up your instance and run `curl --user ignored:put_password_here -X PUT localhost:9181/tokens/local`
 3. Use the obtained token for setting your application's `QUIRREL_TOKEN` env var.
 
 Using self-hosted Quirrel requires you to set the `QUIRREL_API_URL` variable to the location of your deployment (it defaults to `https://api.quirrel.dev`).

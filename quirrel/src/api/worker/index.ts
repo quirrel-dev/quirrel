@@ -2,7 +2,7 @@ import { decodeQueueDescriptor } from "../shared/queue-descriptor";
 import { UsageMeter } from "../shared/usage-meter";
 import fetch from "cross-fetch";
 import { TokenRepo } from "../shared/token-repo";
-import { sign } from "secure-webhooks";
+import { asymmetric, sign, symmetric } from "secure-webhooks";
 import { Redis } from "ioredis";
 import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
@@ -37,6 +37,7 @@ export interface QuirrelWorkerConfig {
   disableTelemetry?: boolean;
   logger?: Logger;
   incidentReceiver?: { endpoint: string; passphrase: string };
+  webhookSigningPrivateKey?: string;
 }
 
 export async function createWorker({
@@ -47,6 +48,7 @@ export async function createWorker({
   disableTelemetry,
   logger,
   incidentReceiver,
+  webhookSigningPrivateKey,
 }: QuirrelWorkerConfig) {
   const incidentForwarder = incidentReceiver
     ? new IncidentForwarder(
@@ -60,7 +62,9 @@ export async function createWorker({
     ? undefined
     : new Telemetrist(runningInDocker ?? false);
 
-  const tokenRepo = new TokenRepo(redisClient);
+  const tokenRepo = webhookSigningPrivateKey
+    ? undefined
+    : new TokenRepo(redisClient);
 
   let usageMeter: UsageMeter | undefined = undefined;
   if (enableUsageMetering) {
@@ -93,10 +97,17 @@ export async function createWorker({
       };
 
       if (tokenId) {
-        const token = await tokenRepo.getById(tokenId);
-        if (token) {
-          const signature = sign(body ?? "", token);
-          headers["x-quirrel-signature"] = signature;
+        const payload = body ?? "";
+        if (webhookSigningPrivateKey) {
+          headers["x-quirrel-signature"] = asymmetric.sign(
+            payload,
+            webhookSigningPrivateKey
+          );
+        } else {
+          const token = await tokenRepo?.getById(tokenId);
+          if (token) {
+            headers["x-quirrel-signature"] = symmetric.sign(payload, token);
+          }
         }
       }
 
