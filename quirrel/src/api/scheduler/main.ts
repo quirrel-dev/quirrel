@@ -1,22 +1,18 @@
 import { createServer } from ".";
+import { cliWithConfig } from "../../shared/cliWithConfig";
 import { createRedisFactory } from "../shared/create-redis";
 import { StructuredLogger } from "../shared/structured-logger";
 
-const {
-  PORT = 9181,
-  REDIS_URL,
-  HOST,
-  PASSPHRASES,
-  RUNNING_IN_DOCKER,
-  DISABLE_TELEMETRY,
-} = process.env;
+cliWithConfig(async (config) => {
+  const {
+    PORT = 9181,
+    REDIS_URL,
+    HOST,
+    PASSPHRASES,
+    RUNNING_IN_DOCKER,
+    DISABLE_TELEMETRY,
+  } = config;
 
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-  process.exit(1);
-});
-
-async function main() {
   const scheduler = await createServer({
     port: +PORT,
     host: HOST,
@@ -27,14 +23,7 @@ async function main() {
     logger: new StructuredLogger(),
   });
 
-  async function teardown(signal: string) {
-    await scheduler.close();
-    console.log("Received %s - terminating server app ...", signal);
-    process.exit(2);
-  }
-
-  process.on("SIGTERM", teardown);
-  process.on("SIGINT", teardown);
-}
-
-main();
+  return {
+    teardown: scheduler.close,
+  };
+});
