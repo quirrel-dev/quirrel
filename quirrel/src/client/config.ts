@@ -27,7 +27,7 @@ export function prefixWithProtocol(string: string): string {
 }
 
 export function getQuirrelBaseUrl(): string | undefined {
-  const fromEnvironment = process.env.QUIRREL_URL;
+  const fromEnvironment = process.env.QUIRREL_API_URL ?? process.env.QUIRREL_URL;
   if (fromEnvironment) {
     return prefixWithProtocol(withoutTrailingSlash(fromEnvironment));
   }
@@ -41,6 +41,10 @@ export function getQuirrelToken(): string | undefined {
 
 export function getEncryptionSecret(): string | undefined {
   return process.env.QUIRREL_ENCRYPTION_SECRET;
+}
+
+export function getSignaturePublicKey(): string | undefined {
+  return process.env.QUIRREL_SIGNATURE_PUBLIC_KEY;
 }
 
 export function getOldEncryptionSecrets(): string[] | null {

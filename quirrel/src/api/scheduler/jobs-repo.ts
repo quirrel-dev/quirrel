@@ -6,7 +6,7 @@ import {
 
 import * as uuid from "uuid";
 import { cron } from "../shared/owl";
-import Owl, { Job } from "@quirrel/owl";
+import Owl, { Job, Closable } from "@quirrel/owl";
 
 interface PaginationOpts {
   cursor: number;
@@ -29,11 +29,11 @@ interface JobDTO {
   };
 }
 
-export class JobsRepo {
+export class JobsRepo implements Closable {
   protected producer;
 
-  constructor(private readonly owl: Owl<"every" | "cron">) {
-    this.producer = owl.createProducer();
+  constructor(protected readonly owl: Owl<"every" | "cron">) {
+    this.producer = this.owl.createProducer();
   }
 
   private static toJobDTO(job: Job<"every" | "cron">): JobDTO {

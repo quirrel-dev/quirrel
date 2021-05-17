@@ -27,8 +27,8 @@ export interface QuirrelInstanceDetails {
 namespace Quirrel {
   export interface ContextValue {
     activity: Quirrel.Activity[];
-    pending: Quirrel.JobDescriptor[];
-    completed: Quirrel.JobDescriptor[];
+    pending: Record<string, Quirrel.JobDescriptor>;
+    completed: Record<string, Quirrel.JobDescriptor>;
     invoke(job: Quirrel.JobDescriptor): Promise<void>;
     delete(job: Quirrel.JobDescriptor): Promise<void>;
     connectedTo?: QuirrelInstanceDetails;
@@ -81,10 +81,14 @@ namespace Quirrel {
   }
 }
 
+function jobKey(descriptor: Pick<Quirrel.JobDescriptor, "endpoint" | "id">) {
+  return descriptor.endpoint + ";" + descriptor.id;
+}
+
 const mockCtxValue: Quirrel.ContextValue = {
   activity: [],
-  pending: [],
-  completed: [],
+  pending: {},
+  completed: {},
   invoke: async () => {},
   delete: async () => {},
   connectTo: () => {},
@@ -113,19 +117,19 @@ function useJobsReducer() {
     Pick<Quirrel.ContextValue, "activity" | "pending" | "completed">
   >({
     activity: [],
-    completed: [],
-    pending: [],
+    completed: {},
+    pending: {},
   });
 
   const dump = useCallback(
     (jobs: JobDTO[]) =>
       setState((state) => {
-        state.pending.push(
-          ...jobs.map((j) => ({
+        jobs.forEach((j) => {
+          state.pending[jobKey(j)] = {
             ...j,
             started: false,
-          }))
-        );
+          };
+        });
       }),
     [setState]
   );
@@ -135,17 +139,8 @@ function useJobsReducer() {
       setState((state) => {
         state.activity.push(action);
 
-        function findBy({ endpoint, id }: { endpoint: string; id: string }) {
-          return (job: Quirrel.JobDescriptor) =>
-            job.id === id && job.endpoint === endpoint;
-        }
-
-        function findJobIndex(arg: { endpoint: string; id: string }) {
-          return state.pending.findIndex(findBy(arg));
-        }
-
         function findJob(arg: { endpoint: string; id: string }) {
-          return state.pending[findJobIndex(arg)];
+          return state.pending[jobKey(arg)];
         }
 
         switch (action.type) {
@@ -156,10 +151,10 @@ function useJobsReducer() {
           }
 
           case "scheduled": {
-            state.pending.push({
+            state.pending[jobKey(action.payload)] = {
               ...action.payload,
               started: false,
-            });
+            };
             break;
           }
 
@@ -170,30 +165,24 @@ function useJobsReducer() {
           }
 
           case "deleted": {
-            const jobIndex = findJobIndex(action.payload);
-            state.pending.splice(jobIndex, 1);
+            delete state.pending[jobKey(action.payload)];
             break;
           }
 
           case "rescheduled": {
-            const rescheduledJobIndex = state.completed.findIndex(
-              findBy(action.payload)
-            );
-
-            const rescheduledJob = state.completed[rescheduledJobIndex];
-            state.completed.splice(rescheduledJobIndex, 1);
+            const rescheduledJob = state.completed[jobKey(action.payload)];
+            delete state.completed[jobKey(action.payload)];
 
             rescheduledJob.runAt = action.payload.runAt;
-            state.pending.push(rescheduledJob);
+            state.pending[jobKey(rescheduledJob)] = rescheduledJob;
             break;
           }
 
           case "completed": {
-            const completedJobIndex = findJobIndex(action.payload);
-            const completedJob = state.pending[completedJobIndex];
+            const completedJob = state.pending[jobKey(action.payload)];
+            state.completed[jobKey(completedJob)] = completedJob;
 
-            state.completed.push(completedJob);
-            state.pending.splice(completedJobIndex, 1);
+            delete state.pending[jobKey(action.payload)];
 
             break;
           }
@@ -347,32 +336,43 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
   const connectActivityStream = useCallback(
     (instanceDetails: QuirrelInstanceDetails) => {
-      const { baseUrl, token } = instanceDetails;
-      const isSecure = baseUrl.startsWith("https://");
-      const baseUrlWithoutProtocol = baseUrl.slice(
-        isSecure ? "https://".length : "http://".length
-      );
-      const socket = new WebSocket(
-        `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`,
-        token || "ignored"
-      );
+      function connect() {
+        const { baseUrl, token } = instanceDetails;
+        const isSecure = baseUrl.startsWith("https://");
+        const baseUrlWithoutProtocol = baseUrl.slice(
+          isSecure ? "https://".length : "http://".length
+        );
+        const socket = new WebSocket(
+          `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`,
+          token || "ignored"
+        );
 
-      socket.onopen = () => {
-        connectedSocket.current?.close();
-        connectedSocket.current = socket;
+        socket.onopen = () => {
+          connectedSocket.current?.close();
+          connectedSocket.current = socket;
 
-        console.log("Connected successfully.");
-      };
+          console.log("Connected successfully.");
+        };
 
-      socket.onclose = (ev) => {
-        console.log(`Socket to ${baseUrl} was closed.`);
-        quirrelClient.connectionWasAborted();
-      };
+        socket.onclose = (ev) => {
+          console.log(`Socket to ${baseUrl} was closed.`);
 
-      socket.onmessage = (evt) => {
-        const data = JSON.parse(evt.data);
-        onActivity({ type: data[0], payload: data[1], date: Date.now() });
-      };
+          const isAbnormal = ev.code === 1006;
+          if (isAbnormal) {
+            console.log(`Reconnecting ...`);
+            connect();
+          } else {
+            quirrelClient.connectionWasAborted();
+          }
+        };
+
+        socket.onmessage = (evt) => {
+          const data = JSON.parse(evt.data);
+          onActivity({ type: data[0], payload: data[1], date: Date.now() });
+        };
+      }
+
+      connect();
     },
     [dump, connectedSocket, quirrelClient.connectionWasAborted, onActivity]
   );

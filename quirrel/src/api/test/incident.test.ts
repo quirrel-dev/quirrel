@@ -38,9 +38,11 @@ function testAgainst(backend: "Redis" | "Mock") {
     const incidentReceiverEndpoint =
       (await incidentReceiver.listen(0)) + "/incident";
 
-    const res = await run(backend, [], {
-      endpoint: incidentReceiverEndpoint,
-      passphrase: "super-secret",
+    const res = await run(backend, {
+      incidentReceiver: {
+        endpoint: incidentReceiverEndpoint,
+        passphrase: "super-secret",
+      },
     });
 
     const quirrel = res.server;

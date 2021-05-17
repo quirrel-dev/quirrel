@@ -5,9 +5,10 @@ function generate_proxy() {
 
   withoutExtension=$(echo $file | cut -f 1 -d '.')
   echo "module.exports = require('./dist/cjs/src/$withoutExtension');" > $withoutExtension.cjs
-  echo "export * from './dist/esm/src/$withoutExtension'
-export { default } from './dist/esm/src/$withoutExtension'" > $withoutExtension.d.ts
-  echo "export * from './dist/esm/src/$withoutExtension'" > $withoutExtension.mjs
+  cp $withoutExtension.cjs $withoutExtension.js
+  echo "export * from './dist/esm/src/$withoutExtension.js'
+export { default } from './dist/esm/src/$withoutExtension.js'" > $withoutExtension.d.ts
+  echo "export * from './dist/esm/src/$withoutExtension.js'" > $withoutExtension.mjs
 }
 
 for file in $(ls -p src | grep -v /)
