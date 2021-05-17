@@ -7,9 +7,8 @@ import { Redis } from "ioredis";
 import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
 import type { Logger } from "../shared/logger";
-import { IncidentForwarder } from "../shared/incident-forwarder";
 
-interface ExecutionError {
+export interface ExecutionError {
   toString(): string;
   endpoint: string;
   tokenId: string;
@@ -50,13 +49,6 @@ export async function createWorker({
   incidentReceiver,
   webhookSigningPrivateKey,
 }: QuirrelWorkerConfig) {
-  const incidentForwarder = incidentReceiver
-    ? new IncidentForwarder(
-        incidentReceiver.endpoint,
-        incidentReceiver.passphrase
-      )
-    : undefined;
-
   const redisClient = redisFactory();
   const telemetrist = disableTelemetry
     ? undefined
@@ -71,113 +63,82 @@ export async function createWorker({
     usageMeter = new UsageMeter(redisClient);
   }
 
-  const owl = createOwl(redisFactory);
+  const owl = await createOwl(redisFactory, incidentReceiver, telemetrist);
 
-  const worker = owl.createWorker(
-    async (job, jobMeta) => {
-      let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
-      const body = job.payload;
+  const worker = await owl.createWorker(async (job, ack) => {
+    let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
+    const body = job.payload;
 
-      const executionDone = logger?.startingExecution({
-        tokenId,
-        endpoint,
-        body,
+    const executionDone = logger?.startingExecution({
+      tokenId,
+      endpoint,
+      body,
+      id: job.id,
+    });
+
+    const headers: Record<string, string> = {
+      "Content-Type": "text/plain",
+      "x-quirrel-meta": JSON.stringify({
         id: job.id,
-      });
+        count: job.count,
+        exclusive: job.exclusive,
+        retry: job.retry,
+        nextRepetition: ack.nextExecutionDate,
+      }),
+    };
 
-      const headers: Record<string, string> = {
-        "Content-Type": "text/plain",
-        "x-quirrel-meta": JSON.stringify({
-          id: job.id,
-          count: job.count,
-          exclusive: job.exclusive,
-          retry: job.retry,
-          nextRepetition: jobMeta.nextExecDate,
-        }),
-      };
-
-      if (tokenId) {
-        const payload = body ?? "";
-        if (webhookSigningPrivateKey) {
-          headers["x-quirrel-signature"] = asymmetric.sign(
-            payload,
-            webhookSigningPrivateKey
-          );
-        } else {
-          const token = await tokenRepo?.getById(tokenId);
-          if (token) {
-            headers["x-quirrel-signature"] = symmetric.sign(payload, token);
-          }
-        }
-      }
-
-      if (runningInDocker) {
-        endpoint = replaceLocalhostWithDockerHost(endpoint);
-      }
-
-      const [response] = await Promise.all([
-        fetch(endpoint, {
-          method: "POST",
-          body,
-          headers,
-        }),
-        usageMeter?.record(tokenId),
-      ]);
-
-      if (response.status >= 200 && response.status < 300) {
-        executionDone?.();
-
-        telemetrist?.dispatch("dispatch_job");
-      } else {
-        const responseBody = await response.text();
-
-        logger?.executionErrored(
-          { endpoint, tokenId, body: job.payload, id: job.id },
-          responseBody
+    if (tokenId) {
+      const payload = body ?? "";
+      if (webhookSigningPrivateKey) {
+        headers["x-quirrel-signature"] = asymmetric.sign(
+          payload,
+          webhookSigningPrivateKey
         );
-
-        if (response.status === 404) {
-          jobMeta.dontReschedule();
+      } else {
+        const token = await tokenRepo?.getById(tokenId);
+        if (token) {
+          headers["x-quirrel-signature"] = symmetric.sign(payload, token);
         }
-
-        const error: ExecutionError = {
-          tokenId,
-          endpoint,
-          responseBody,
-          responseStatus: response.status,
-          toString() {
-            return responseBody;
-          },
-        };
-
-        throw error;
       }
-    },
-    async (job, _error) => {
-      const {
+    }
+
+    if (runningInDocker) {
+      endpoint = replaceLocalhostWithDockerHost(endpoint);
+    }
+
+    const [response] = await Promise.all([
+      fetch(endpoint, {
+        method: "POST",
+        body,
+        headers,
+      }),
+      usageMeter?.record(tokenId),
+    ]);
+
+    if (response.status >= 200 && response.status < 300) {
+      executionDone?.();
+
+      telemetrist?.dispatch("dispatch_job");
+
+      await worker.acknowledger.acknowledge(ack);
+    } else {
+      const responseBody = await response.text();
+
+      const error: ExecutionError = {
         tokenId,
         endpoint,
         responseBody,
-        responseStatus,
-      } = (_error as any) as ExecutionError;
-
-      await incidentForwarder?.dispatch(
-        {
-          endpoint,
-          tokenId,
-          payload: job.payload,
-          id: job.id,
-          runAt: job.runAt,
+        responseStatus: response.status,
+        toString() {
+          return responseBody;
         },
-        {
-          body: responseBody,
-          status: responseStatus,
-        }
-      );
+      };
 
-      await telemetrist?.dispatch("execution_errored");
+      await worker.acknowledger.reportFailure(ack, job, error, {
+        dontReschedule: response.status === 404,
+      });
     }
-  );
+  });
 
   async function close() {
     await worker.close();
