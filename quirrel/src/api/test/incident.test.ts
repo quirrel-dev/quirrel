@@ -144,7 +144,7 @@ function testAgainst(backend: "Redis" | "Mock") {
     });
 
     describe("with retry", () => {
-      it.only("retries", async () => {
+      it("retries", async () => {
         const {
           teardown,
           quirrel,
