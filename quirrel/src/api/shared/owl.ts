@@ -61,7 +61,7 @@ export async function createOwl(
   });
 
   if (!process.env.SKIP_OWL_MIGRATIONS) {
-    // await owl.runMigrations();
+    await owl.runMigrations();
   }
 
   return owl;
