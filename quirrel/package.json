@@ -10,6 +10,7 @@
     "dist",
     "*.d.ts",
     "*.cjs",
+    "*.js",
     "*.mjs",
     "!jest.config.js",
     "README.md"
