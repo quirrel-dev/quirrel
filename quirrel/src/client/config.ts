@@ -27,7 +27,8 @@ export function prefixWithProtocol(string: string): string {
 }
 
 export function getQuirrelBaseUrl(): string | undefined {
-  const fromEnvironment = process.env.QUIRREL_API_URL ?? process.env.QUIRREL_URL;
+  const fromEnvironment =
+    process.env.QUIRREL_API_URL ?? process.env.QUIRREL_URL;
   if (fromEnvironment) {
     return prefixWithProtocol(withoutTrailingSlash(fromEnvironment));
   }
@@ -69,6 +70,10 @@ export function registerDevelopmentDefaults({
   applicationBaseUrl: string;
 }) {
   if (isProduction()) {
+    return;
+  }
+
+  if (developmentApplicationBaseUrl) {
     return;
   }
 
