@@ -1,3 +1,4 @@
+import "./shared/tracer"
 import { runQuirrel } from ".";
 import { cliWithConfig } from "../shared/cliWithConfig";
 import { createRedisFactory } from "./shared/create-redis";

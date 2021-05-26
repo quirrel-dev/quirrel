@@ -2,7 +2,7 @@ import { decodeQueueDescriptor } from "../shared/queue-descriptor";
 import { UsageMeter } from "../shared/usage-meter";
 import fetch from "cross-fetch";
 import { TokenRepo } from "../shared/token-repo";
-import { asymmetric, sign, symmetric } from "secure-webhooks";
+import { asymmetric, symmetric } from "secure-webhooks";
 import { Redis } from "ioredis";
 import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
