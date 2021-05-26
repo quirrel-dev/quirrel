@@ -2,7 +2,7 @@ import React from "react";
 import ReactDom from "react-dom";
 import { QuirrelDevelopmentUI, Route } from "..";
 
-function getInitialRoute(): Route {
+function getCurrentRoute(): Route {
   const { pathname } = window.location;
   switch (pathname) {
     case "/activity":
@@ -19,16 +19,16 @@ function getInitialRoute(): Route {
 ReactDom.render(
   <QuirrelDevelopmentUI
     router={{
-      initial: getInitialRoute(),
+      initial: getCurrentRoute(),
       onChange(newRoute) {
         window.history.pushState(null, newRoute, "/" + newRoute);
       },
       listenToNavigationChanges(onChange) {
         function listener(event: any) {
-          console.log(event);
+          onChange(getCurrentRoute())
         }
-        window.addEventListener("onpopstate", listener);
-        return () => window.removeEventListener("onpopstate", listener);
+        window.addEventListener("popstate", listener);
+        return () => window.removeEventListener("popstate", listener);
       },
     }}
   />,

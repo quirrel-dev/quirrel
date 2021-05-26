@@ -60,8 +60,6 @@ function MenuButton(props: Omit<RouterAnchorProps, "getClassName">) {
 }
 
 export function Nav() {
-  const router = useContext(RouterContext);
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
