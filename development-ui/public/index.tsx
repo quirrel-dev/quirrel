@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDom from "react-dom";
-import { QuirrelDevelopmentUI, Route } from "..";
+import { QuirrelDevelopmentUI, Route } from "../src";
 
 function getCurrentRoute(): Route {
   const { pathname } = window.location;
