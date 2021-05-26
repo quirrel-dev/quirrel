@@ -8,7 +8,7 @@ module.exports = {
       collectCoverage: true,
     },
   },
-  watchPathIgnorePatterns: ["node_modules", ".nyc_output", ".next"],
+  watchPathIgnorePatterns: ["node_modules", ".nyc_output", "dist", ".parcel-cache"],
   globals: {
     "ts-jest": {
       tsconfig: "tsconfig.test.json",
