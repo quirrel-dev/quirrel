@@ -1,10 +1,10 @@
 import { PropsWithChildren } from "react";
-import { Nav, NavProps } from "../components/Nav";
+import { Nav } from "../components/Nav";
 
-export function BaseLayout(props: PropsWithChildren<NavProps>) {
+export function BaseLayout(props: PropsWithChildren<{}>) {
   return (
     <>
-      <Nav {...props} />
+      <Nav />
 
       <main className="max-w-6xl mx-auto">{props.children}</main>
     </>

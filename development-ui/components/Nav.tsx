@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { PropsWithChildren, useContext, useState } from "react";
 import clsx from "clsx";
-import Link from "next/link";
 import React from "react";
 import { EndpointModal } from "./EndpointModal";
 import { SearchBar } from "./SearchBar";
+import { RouterContext, Route } from "../index";
+import horn from "url:../public/img/horn_transparent.png"
 
 const PillButton = React.forwardRef(
   (
@@ -63,12 +64,23 @@ const MenuButton = React.forwardRef(
   }
 );
 
-export interface NavProps {
-  selectedPage?: "activity" | "pending" | "cron";
+function RouterLink({ to, children }: PropsWithChildren<{ to: Route }>) {
+  const router = useContext(RouterContext);
+  return (
+    <a
+      href={"/" + to}
+      onClick={(evt) => {
+        evt.preventDefault();
+        router.navigate(to);
+      }}
+    >
+      {children}
+    </a>
+  );
 }
 
-export function Nav(props: NavProps) {
-  const { selectedPage } = props;
+export function Nav() {
+  const router = useContext(RouterContext);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -82,7 +94,7 @@ export function Nav(props: NavProps) {
           >
             <img
               className="h-10 w-auto"
-              src="/img/horn_transparent.png"
+              src={horn}
               alt="Quirrel Logo"
             />
 
@@ -91,22 +103,25 @@ export function Nav(props: NavProps) {
           <div className="flex items-center">
             <div className="hidden md:block">
               <div className="flex items-baseline space-x-4">
-                <Link href="/activity">
+                <RouterLink to="activity">
                   <PillButton
                     title="Activity"
-                    selected={selectedPage === "activity"}
+                    selected={router.current === "activity"}
                   />
-                </Link>
-                <Link href="/pending">
+                </RouterLink>
+                <RouterLink to="pending">
                   <PillButton
                     title="Pending"
-                    selected={selectedPage === "pending"}
+                    selected={router.current === "pending"}
                   />
-                </Link>
+                </RouterLink>
 
-                <Link href="/cron">
-                  <PillButton title="Cron" selected={selectedPage === "cron"} />
-                </Link>
+                <RouterLink to="cron">
+                  <PillButton
+                    title="Cron"
+                    selected={router.current === "cron"}
+                  />
+                </RouterLink>
               </div>
             </div>
           </div>
@@ -162,20 +177,23 @@ export function Nav(props: NavProps) {
 
       <div className={clsx(isMenuOpen ? "block" : "hidden", "md:hidden")}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <Link href="/activity">
+          <RouterLink to="activity">
             <MenuButton
               title="Activity"
-              selected={selectedPage === "activity"}
+              selected={router.current === "activity"}
             />
-          </Link>
+          </RouterLink>
 
-          <Link href="/pending">
-            <MenuButton title="Pending" selected={selectedPage === "pending"} />
-          </Link>
+          <RouterLink to="pending">
+            <MenuButton
+              title="Pending"
+              selected={router.current === "pending"}
+            />
+          </RouterLink>
 
-          <Link href="/cron">
-            <MenuButton title="Cron" selected={selectedPage === "cron"} />
-          </Link>
+          <RouterLink to="cron">
+            <MenuButton title="Cron" selected={router.current === "cron"} />
+          </RouterLink>
 
           <a
             href="https://github.com/quirrel-dev/quirrel/issues/new/choose"

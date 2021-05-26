@@ -1,6 +1,5 @@
 import { Table } from "../components/Table";
 import { useQuirrel } from "../hooks/useQuirrel";
-import { BaseLayout } from "../layouts/BaseLayout";
 import { truncateUrl } from "../lib/truncate-url";
 
 const intl = new Intl.DateTimeFormat([], {
@@ -16,43 +15,41 @@ function formatTime(date: Date) {
 export default function Activity() {
   const { activity } = useQuirrel();
   return (
-    <BaseLayout selectedPage="activity">
-      <Table
-        items={activity}
-        extractKey={(item) => "" + item.date}
-        columns={[
-          {
-            title: "Time",
-            render: (a) => formatTime(new Date(a.date)),
+    <Table
+      items={activity}
+      extractKey={(item) => "" + item.date}
+      columns={[
+        {
+          title: "Time",
+          render: (a) => formatTime(new Date(a.date)),
+        },
+        {
+          title: "Endpoint",
+          render: (a) => truncateUrl(a.payload.endpoint),
+          renderTooltip: (a) => a.payload.endpoint,
+        },
+        {
+          title: "ID",
+          render: (a) => a.payload.id,
+        },
+        {
+          title: "Event",
+          render: (a) => a.type,
+        },
+        {
+          title: "",
+          render: (a) => {
+            switch (a.type) {
+              case "scheduled":
+                return JSON.stringify(a.payload.body);
+              case "rescheduled":
+                return a.payload.runAt;
+              default:
+                return null;
+            }
           },
-          {
-            title: "Endpoint",
-            render: (a) => truncateUrl(a.payload.endpoint),
-            renderTooltip: (a) => a.payload.endpoint,
-          },
-          {
-            title: "ID",
-            render: (a) => a.payload.id,
-          },
-          {
-            title: "Event",
-            render: (a) => a.type,
-          },
-          {
-            title: "",
-            render: (a) => {
-              switch (a.type) {
-                case "scheduled":
-                  return JSON.stringify(a.payload.body);
-                case "rescheduled":
-                  return a.payload.runAt;
-                default:
-                  return null;
-              }
-            },
-          },
-        ]}
-      />
-    </BaseLayout>
+        },
+      ]}
+    />
   );
 }
