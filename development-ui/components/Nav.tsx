@@ -1,81 +1,61 @@
-import { PropsWithChildren, useContext, useState } from "react";
+import { useContext, useState } from "react";
 import clsx from "clsx";
 import React from "react";
 import { EndpointModal } from "./EndpointModal";
 import { SearchBar } from "./SearchBar";
 import { RouterContext, Route } from "../index";
-import horn from "url:../public/img/horn_transparent.png"
+import horn from "url:../public/img/horn_transparent.png";
 
-const PillButton = React.forwardRef(
-  (
-    {
-      selected,
-      title,
-      ...rest
-    }: React.HTMLProps<HTMLAnchorElement> & {
-      selected: boolean;
-      title: string;
-    },
-    ref
-  ) => {
-    return (
-      <a
-        {...rest}
-        ref={ref as any}
-        className={clsx(
-          selected
-            ? "text-white bg-orange-500"
-            : "text-gray-800 hover:text-white hover:bg-orange-300",
-          "px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
-        )}
-      >
-        {title}
-      </a>
-    );
-  }
-);
+type RouterAnchorProps = React.HTMLProps<HTMLAnchorElement> & {
+  to: Route;
+  getClassName(selected: boolean): string;
+};
 
-const MenuButton = React.forwardRef(
-  (
-    {
-      selected,
-      title,
-      ...rest
-    }: React.HTMLProps<HTMLAnchorElement> & {
-      selected: boolean;
-      title: string;
-    },
-    ref
-  ) => {
-    return (
-      <a
-        {...rest}
-        ref={ref as any}
-        className={clsx(
-          selected
-            ? "text-white bg-orange-500"
-            : "text-gray-800 hover:text-white hover:bg-orange-300",
-          "block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
-        )}
-      >
-        {title}
-      </a>
-    );
-  }
-);
-
-function RouterLink({ to, children }: PropsWithChildren<{ to: Route }>) {
+function RouterAnchor({ to, getClassName, ...rest }: RouterAnchorProps) {
   const router = useContext(RouterContext);
+  const selected = router.current === to;
   return (
     <a
+      {...rest}
       href={"/" + to}
       onClick={(evt) => {
         evt.preventDefault();
         router.navigate(to);
       }}
-    >
-      {children}
-    </a>
+      className={getClassName(selected)}
+    />
+  );
+}
+
+function PillButton(props: Omit<RouterAnchorProps, "getClassName">) {
+  return (
+    <RouterAnchor
+      {...props}
+      getClassName={(selected) =>
+        clsx(
+          selected
+            ? "text-white bg-orange-500"
+            : "text-gray-800 hover:text-white hover:bg-orange-300",
+          "px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
+        )
+      }
+    />
+  );
+}
+
+function MenuButton(props: Omit<RouterAnchorProps, "getClassName">) {
+  return (
+    <RouterAnchor
+      {...props}
+      getClassName={(selected) =>
+        clsx(
+          selected
+            ? "text-white bg-orange-500"
+            : "text-gray-800 hover:text-white hover:bg-orange-300",
+          "block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
+        )
+      }
+    />
   );
 }
 
@@ -92,36 +72,16 @@ export function Nav() {
             className="flex-shrink-0 flex items-center justify-start space-x-8"
             style={{ width: "300px" }}
           >
-            <img
-              className="h-10 w-auto"
-              src={horn}
-              alt="Quirrel Logo"
-            />
+            <img className="h-10 w-auto" src={horn} alt="Quirrel Logo" />
 
             <EndpointModal />
           </div>
           <div className="flex items-center">
             <div className="hidden md:block">
               <div className="flex items-baseline space-x-4">
-                <RouterLink to="activity">
-                  <PillButton
-                    title="Activity"
-                    selected={router.current === "activity"}
-                  />
-                </RouterLink>
-                <RouterLink to="pending">
-                  <PillButton
-                    title="Pending"
-                    selected={router.current === "pending"}
-                  />
-                </RouterLink>
-
-                <RouterLink to="cron">
-                  <PillButton
-                    title="Cron"
-                    selected={router.current === "cron"}
-                  />
-                </RouterLink>
+                <PillButton to="activity">Activity</PillButton>
+                <PillButton to="pending">Pending</PillButton>
+                <PillButton to="cron">Cron</PillButton>
               </div>
             </div>
           </div>
@@ -177,23 +137,9 @@ export function Nav() {
 
       <div className={clsx(isMenuOpen ? "block" : "hidden", "md:hidden")}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <RouterLink to="activity">
-            <MenuButton
-              title="Activity"
-              selected={router.current === "activity"}
-            />
-          </RouterLink>
-
-          <RouterLink to="pending">
-            <MenuButton
-              title="Pending"
-              selected={router.current === "pending"}
-            />
-          </RouterLink>
-
-          <RouterLink to="cron">
-            <MenuButton title="Cron" selected={router.current === "cron"} />
-          </RouterLink>
+          <MenuButton to="activity">Activity</MenuButton>
+          <MenuButton to="pending">Pending</MenuButton>
+          <MenuButton to="cron">Cron</MenuButton>
 
           <a
             href="https://github.com/quirrel-dev/quirrel/issues/new/choose"

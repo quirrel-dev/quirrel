@@ -1,6 +1,7 @@
 import React, {
   createContext,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -17,13 +18,11 @@ interface QuirrelDevelopmentUIProps {
   router: {
     initial: Route;
     onChange(route: Route): void;
+    listenToNavigationChanges(onChange: (newRoute: Route) => void): () => void;
   };
 }
 
-const pageMap: Record<
-  Route,
-  React.FunctionComponent
-> = {
+const pageMap: Record<Route, React.FunctionComponent> = {
   activity: Activity,
   cron: Cron,
   pending: Pending,
@@ -40,7 +39,7 @@ export const RouterContext = createContext<Router>({
 });
 
 export function QuirrelDevelopmentUI(props: QuirrelDevelopmentUIProps) {
-  const { initial, onChange } = props.router;
+  const { initial, onChange, listenToNavigationChanges } = props.router;
   const [route, setRoute] = useState(initial);
   const navigate = useCallback(
     (newRoute: Route) => {
@@ -54,6 +53,10 @@ export function QuirrelDevelopmentUI(props: QuirrelDevelopmentUIProps) {
     () => ({ current: route, navigate }),
     [route, navigate]
   );
+
+  useEffect(() => {
+    return listenToNavigationChanges(setRoute);
+  }, [listenToNavigationChanges, setRoute]);
 
   let Page = pageMap[route];
 

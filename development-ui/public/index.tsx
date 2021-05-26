@@ -16,15 +16,20 @@ function getInitialRoute(): Route {
   }
 }
 
-function onChange(newRoute: string) {
-  window.history.pushState(null, newRoute, "/" + newRoute);
-}
-
 ReactDom.render(
   <QuirrelDevelopmentUI
     router={{
       initial: getInitialRoute(),
-      onChange,
+      onChange(newRoute) {
+        window.history.pushState(null, newRoute, "/" + newRoute);
+      },
+      listenToNavigationChanges(onChange) {
+        function listener(event: any) {
+          console.log(event);
+        }
+        window.addEventListener("onpopstate", listener);
+        return () => window.removeEventListener("onpopstate", listener);
+      },
     }}
   />,
   document.getElementById("app")
