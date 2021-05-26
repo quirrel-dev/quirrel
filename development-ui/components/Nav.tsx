@@ -4,7 +4,7 @@ import React from "react";
 import { EndpointModal } from "./EndpointModal";
 import { SearchBar } from "./SearchBar";
 import { RouterContext, Route } from "../index";
-import horn from "url:../public/img/horn_transparent.png";
+import horn from "url:../img/horn_transparent.png";
 
 type RouterAnchorProps = React.HTMLProps<HTMLAnchorElement> & {
   to: Route;
