@@ -5,12 +5,12 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { GlobalSearchProvider } from "../hooks/useGlobalSearch";
-import { QuirrelProvider } from "../hooks/useQuirrel";
-import { BaseLayout } from "../layouts/BaseLayout";
-import Activity from "../pages/activity";
-import Cron from "../pages/cron";
-import Pending from "../pages/pending";
+import { GlobalSearchProvider } from "./hooks/useGlobalSearch";
+import { QuirrelProvider } from "./hooks/useQuirrel";
+import { BaseLayout } from "./layouts/BaseLayout";
+import Activity from "./pages/activity";
+import Cron from "./pages/cron";
+import Pending from "./pages/pending";
 
 export type Route = "cron" | "activity" | "pending";
 

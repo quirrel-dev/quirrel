@@ -1,11 +1,11 @@
 {
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "build:coverage": "NODE_ENV=test next build",
-    "start": "next start",
+    "dev": "parcel public/index.html",
+    "build": "parcel build public/index.html",
+    "build:coverage": "NODE_ENV=test npm run build",
+    "start": "serve -l 1234 dist",
     "test": "jest --runInBand --forceExit",
-    "test:ci": "npm run build:coverage && start-server-and-test start http://localhost:3000 test && npx nyc report --reporter=lcov"
+    "test:ci": "npm run build:coverage && start-server-and-test start http://localhost:1234 test && npx nyc report --reporter=lcov"
   },
   "dependencies": {
     "@tailwindui/react": "^0.1.1",
@@ -39,6 +39,7 @@
     "nyc": "^15.1.0",
     "parcel": "^2.0.0-beta.3.1",
     "playwright": "^1.10.0",
+    "serve": "^11.3.2",
     "start-server-and-test": "^1.12.1",
     "ts-jest": "^26.5.4",
     "typescript": "^4.2.3"

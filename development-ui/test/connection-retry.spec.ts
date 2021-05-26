@@ -27,7 +27,7 @@ export async function expectToShowJobTable() {
 }
 
 it("automatically connects when Quirrel is started", async () => {
-  await page.goto("http://localhost:3000/pending");
+  await page.goto("http://localhost:1234/pending");
 
   await expectToShowAttachingToQuirrel();
 

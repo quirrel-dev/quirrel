@@ -16,7 +16,7 @@ it("shows activity feed", async () => {
   const quirrel = await runQuirrel();
   cleanup.push(quirrel.cleanup);
 
-  await page.goto("http://localhost:3000/activity");
+  await page.goto("http://localhost:1234/activity");
 
   await delay(500);
 
