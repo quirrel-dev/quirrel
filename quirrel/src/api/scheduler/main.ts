@@ -1,4 +1,4 @@
-import "../shared/tracer"
+require("../shared/tracer")("quirrel-scheduler");
 import { createServer } from ".";
 import { cliWithConfig } from "../../shared/cliWithConfig";
 import { createRedisFactory } from "../shared/create-redis";
@@ -12,7 +12,7 @@ cliWithConfig(async (config) => {
     PASSPHRASES,
     RUNNING_IN_DOCKER,
     DISABLE_TELEMETRY,
-    JWT_PUBLIC_KEY
+    JWT_PUBLIC_KEY,
   } = config;
 
   const scheduler = await createServer({
