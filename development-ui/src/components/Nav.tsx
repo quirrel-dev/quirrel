@@ -3,7 +3,7 @@ import clsx from "clsx";
 import React from "react";
 import { EndpointModal } from "./EndpointModal";
 import { SearchBar } from "./SearchBar";
-import { RouterContext, Route } from "../index";
+import { RouterContext, Route, ConfigContext } from "../index";
 import horn from "url:../img/horn_transparent.png";
 
 type RouterAnchorProps = React.HTMLProps<HTMLAnchorElement> & {
@@ -62,6 +62,10 @@ function MenuButton(props: Omit<RouterAnchorProps, "getClassName">) {
 export function Nav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const config = useContext(ConfigContext);
+  const showEndpointModal =
+    !config.fixedEndpoint || config.authentication.enabled;
+
   return (
     <nav className="bg-orange-200">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
@@ -72,7 +76,7 @@ export function Nav() {
           >
             <img className="h-10 w-auto" src={horn} alt="Quirrel Logo" />
 
-            <EndpointModal />
+            {showEndpointModal && <EndpointModal />}
           </div>
           <div className="flex items-center">
             <div className="hidden md:block">

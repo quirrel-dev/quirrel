@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDom from "react-dom";
-import { QuirrelDevelopmentUI, Route } from "../src";
+import { QuirrelDevelopmentUI, Route, QuirrelDevelopmentUIProps } from "../src";
 
-export function initialize(config: null) {
+export function initialize(config: QuirrelDevelopmentUIProps["config"]) {
   function getCurrentRoute(): Route {
     const { pathname } = window.location;
     switch (pathname) {
@@ -20,6 +20,7 @@ export function initialize(config: null) {
 
   ReactDom.render(
     <QuirrelDevelopmentUI
+      config={config}
       router={{
         initial: getCurrentRoute(),
         onChange(newRoute) {

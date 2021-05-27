@@ -11,6 +11,7 @@ import { QuirrelClient, Job } from "quirrel/client";
 import _ from "lodash";
 import { produce } from "immer";
 import { getConnectionDetailsFromHash } from "../lib/encrypted-connection-details";
+import { ConfigContext } from "..";
 
 let alreadyAlerted = false;
 
@@ -201,10 +202,8 @@ function useJobsReducer() {
 }
 
 function useQuirrelClient() {
-  const [
-    instanceDetails,
-    setInstanceDetails,
-  ] = useState<QuirrelInstanceDetails>();
+  const [instanceDetails, setInstanceDetails] =
+    useState<QuirrelInstanceDetails>();
   const clientGetter = useRef<(endpoint: string) => QuirrelClient<unknown>>();
   const [isConnected, setIsConnected] = useState(false);
 
@@ -297,6 +296,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
   const [jobsState, { dump, onActivity }] = useJobsReducer();
   const quirrelClient = useQuirrelClient();
   const connectedSocket = useRef<WebSocket>();
+  const config = useContext(ConfigContext);
 
   const invoke = useCallback(
     async (job: Quirrel.JobDescriptor) => {
@@ -409,7 +409,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       intervalId = setInterval(async () => {
         const result = await connect(
           connDetails ?? {
-            baseUrl: "http://localhost:9181",
+            baseUrl: config.fixedEndpoint ?? "http://localhost:9181",
           }
         );
 

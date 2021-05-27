@@ -9,6 +9,11 @@ const index: FastifyPluginCallback = (fastify, opts, done) => {
     root: path.join(__dirname, "../../../../../ui"),
     wildcard: false,
     redirect: true,
+    setHeaders(res) {
+      const auth = fastify.adminBasedAuthEnabled;
+      const config = [auth];
+      res.setHeader("Set-Cookie", "Quirrel-UI-Config=" + config.join("-"));
+    },
   });
 
   alternativeEntries.forEach((entryPoint) => {

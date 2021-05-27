@@ -14,11 +14,17 @@ import Pending from "./pages/pending";
 
 export type Route = "cron" | "activity-log" | "pending";
 
-interface QuirrelDevelopmentUIProps {
+export interface QuirrelDevelopmentUIProps {
   router: {
     initial: Route;
     onChange(route: Route): void;
     listenToNavigationChanges(onChange: (newRoute: Route) => void): () => void;
+  };
+  config: {
+    fixedEndpoint?: string;
+    authentication: {
+      enabled: boolean;
+    };
   };
 }
 
@@ -37,6 +43,14 @@ export const RouterContext = createContext<Router>({
   current: "activity-log",
   navigate() {},
 });
+
+export const ConfigContext = createContext<QuirrelDevelopmentUIProps["config"]>(
+  {
+    authentication: {
+      enabled: true,
+    },
+  }
+);
 
 export function QuirrelDevelopmentUI(props: QuirrelDevelopmentUIProps) {
   const { initial, onChange, listenToNavigationChanges } = props.router;
@@ -61,14 +75,16 @@ export function QuirrelDevelopmentUI(props: QuirrelDevelopmentUIProps) {
   let Page = pageMap[route];
 
   return (
-    <RouterContext.Provider value={router}>
-      <GlobalSearchProvider>
-        <QuirrelProvider>
-          <BaseLayout>
-            <Page />
-          </BaseLayout>
-        </QuirrelProvider>
-      </GlobalSearchProvider>
-    </RouterContext.Provider>
+    <ConfigContext.Provider value={props.config}>
+      <RouterContext.Provider value={router}>
+        <GlobalSearchProvider>
+          <QuirrelProvider>
+            <BaseLayout>
+              <Page />
+            </BaseLayout>
+          </QuirrelProvider>
+        </GlobalSearchProvider>
+      </RouterContext.Provider>
+    </ConfigContext.Provider>
   );
 }

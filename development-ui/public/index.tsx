@@ -1,3 +1,7 @@
 import { initialize } from "./template";
 
-initialize(null);
+initialize({
+  authentication: {
+    enabled: true
+  },
+});
