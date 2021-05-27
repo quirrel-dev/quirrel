@@ -2,7 +2,7 @@ import { FastifyPluginCallback } from "fastify";
 import fastifyStatic from "fastify-static";
 import * as path from "path";
 
-const alternativeEntries = ["/cron", "/pending", "/activity-log"];
+const alternativeEntries = ["/", "/cron", "/pending", "/activity-log"];
 
 const index: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.register(fastifyStatic, {
@@ -13,7 +13,7 @@ const index: FastifyPluginCallback = (fastify, opts, done) => {
 
   alternativeEntries.forEach((entryPoint) => {
     fastify.get(entryPoint, async (request, reply) => {
-      return reply.sendFile("index.html");
+      return reply.sendFile("fastify.html");
     });
   });
 
