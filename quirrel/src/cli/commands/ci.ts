@@ -12,27 +12,27 @@ interface Logger {
   finish(): void;
 }
 
-class HumanReadableLogger implements Logger {
+export function formatDetectedJobsAsTable(jobs: DetectedCronJob[]) {
+  return Table.print(
+    jobs.map((j) => ({
+      Route: j.route,
+      Schedule: j.isValid ? j.schedule : j.schedule + " (invalid, skipping)",
+    }))
+  );
+}
+
+export class HumanReadableLogger implements Logger {
   constructor(private readonly dryRun: boolean) {}
-  private printAsTable(jobs: DetectedCronJob[]) {
-    console.log(
-      Table.print(
-        jobs.map((j) => ({
-          Route: j.route,
-          Schedule: j.isValid
-            ? j.schedule
-            : j.schedule + " (invalid, skipping)",
-        }))
-      )
-    );
+  public static printJobs(jobs: DetectedCronJob[]) {
+    console.log(formatDetectedJobsAsTable(jobs));
   }
   detectedJobs(jobs: DetectedCronJob[]) {
     console.error("Detected the following Jobs:\n");
-    this.printAsTable(jobs);
+    HumanReadableLogger.printJobs(jobs);
   }
   obsoleteJobs(jobs: DetectedCronJob[]) {
     console.error("The following jobs are obsolete and will be removed:\n");
-    this.printAsTable(jobs);
+    HumanReadableLogger.printJobs(jobs);
   }
   finish() {
     if (this.dryRun) {
@@ -43,7 +43,7 @@ class HumanReadableLogger implements Logger {
   }
 }
 
-class JsonLogger implements Logger {
+export class JsonLogger implements Logger {
   constructor(private readonly dryRun: boolean) {}
   private detected?: DetectedCronJob[];
   detectedJobs(jobs: DetectedCronJob[]) {
@@ -53,20 +53,23 @@ class JsonLogger implements Logger {
   obsoleteJobs(jobs: DetectedCronJob[]) {
     this.obsolete = jobs;
   }
-  private printBeatifully(value: any) {
+  private static printBeatifully(value: any) {
     console.log(JSON.stringify(value, null, 4));
   }
-  private transformToRouteScheduleMap(
+  private static transformToRouteScheduleMap(
     jobs: DetectedCronJob[]
   ): Record<string, string> {
     return Object.fromEntries(
       jobs.filter((j) => j.isValid).map((j) => [j.route, j.schedule])
     );
   }
+  public static printJobs(jobs: DetectedCronJob[]) {
+    JsonLogger.printBeatifully(JsonLogger.transformToRouteScheduleMap(jobs));
+  }
   finish() {
-    this.printBeatifully({
-      detected: this.transformToRouteScheduleMap(this.detected ?? []),
-      obsolete: this.transformToRouteScheduleMap(this.obsolete ?? []),
+    JsonLogger.printBeatifully({
+      detected: JsonLogger.transformToRouteScheduleMap(this.detected ?? []),
+      obsolete: JsonLogger.transformToRouteScheduleMap(this.obsolete ?? []),
       dryRun: this.dryRun,
     });
   }
