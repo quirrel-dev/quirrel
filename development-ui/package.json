@@ -3,7 +3,7 @@
     "dev": "parcel public/index.html",
     "build": "parcel build public/index.html",
     "build:coverage": "NODE_ENV=test npm run build",
-    "start": "serve -l 1234 dist",
+    "start": "serve -l 1234 -s dist",
     "test": "jest --runInBand --forceExit",
     "test:ci": "npm run build:coverage && start-server-and-test start http://localhost:1234 test && npx nyc report --reporter=lcov"
   },
