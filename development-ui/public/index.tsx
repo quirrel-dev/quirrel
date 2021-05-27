@@ -5,6 +5,7 @@ import { QuirrelDevelopmentUI, Route } from "../src";
 function getCurrentRoute(): Route {
   const { pathname } = window.location;
   switch (pathname) {
+    case "/activity":
     case "/activity-log":
       return "activity-log";
     case "/pending":
