@@ -6,15 +6,70 @@ import type { JobDTO } from "../../client/job";
 import { CronDetector, DetectedCronJob } from "../cron-detector";
 import * as z from "zod";
 
-function printDetectedJobs(jobs: DetectedCronJob[]) {
-  console.log(
-    Table.print(
-      jobs.map((j) => ({
-        Route: j.route,
-        Schedule: j.isValid ? j.schedule : j.schedule + " (invalid, skipping)",
-      }))
-    )
-  );
+interface Logger {
+  detectedJobs(jobs: DetectedCronJob[]): void;
+  obsoleteJobs(jobs: DetectedCronJob[]): void;
+  finish(): void;
+}
+
+class HumanReadableLogger implements Logger {
+  constructor(private readonly dryRun: boolean) {}
+  private printAsTable(jobs: DetectedCronJob[]) {
+    console.log(
+      Table.print(
+        jobs.map((j) => ({
+          Route: j.route,
+          Schedule: j.isValid
+            ? j.schedule
+            : j.schedule + " (invalid, skipping)",
+        }))
+      )
+    );
+  }
+  detectedJobs(jobs: DetectedCronJob[]) {
+    console.error("Detected the following Jobs:\n");
+    this.printAsTable(jobs);
+  }
+  obsoleteJobs(jobs: DetectedCronJob[]) {
+    console.error("The following jobs are obsolete and will be removed:\n");
+    this.printAsTable(jobs);
+  }
+  finish() {
+    if (this.dryRun) {
+      console.log("Skipping registration.");
+    } else {
+      console.log("Successfully updated.");
+    }
+  }
+}
+
+class JsonLogger implements Logger {
+  constructor(private readonly dryRun: boolean) {}
+  private detected?: DetectedCronJob[];
+  detectedJobs(jobs: DetectedCronJob[]) {
+    this.detected = jobs;
+  }
+  private obsolete?: DetectedCronJob[];
+  obsoleteJobs(jobs: DetectedCronJob[]) {
+    this.obsolete = jobs;
+  }
+  private printBeatifully(value: any) {
+    console.log(JSON.stringify(value, null, 4));
+  }
+  private transformToRouteScheduleMap(
+    jobs: DetectedCronJob[]
+  ): Record<string, string> {
+    return Object.fromEntries(
+      jobs.filter((j) => j.isValid).map((j) => [j.route, j.schedule])
+    );
+  }
+  finish() {
+    this.printBeatifully({
+      detected: this.transformToRouteScheduleMap(this.detected ?? []),
+      obsolete: this.transformToRouteScheduleMap(this.obsolete ?? []),
+      dryRun: this.dryRun,
+    });
+  }
 }
 
 async function getOldJobs() {
@@ -68,7 +123,8 @@ function computeObsoleteJobs(oldJobs: JobDTO[], newJobs: DetectedCronJob[]) {
 async function dealWithObsoleteJobs(
   oldJobs: JobDTO[],
   newJobs: DetectedCronJob[],
-  dryRun: boolean
+  dryRun: boolean,
+  logger: Logger
 ) {
   const obsoleteJobs = computeObsoleteJobs(oldJobs, newJobs);
 
@@ -76,8 +132,7 @@ async function dealWithObsoleteJobs(
     return;
   }
 
-  console.log("The following jobs are obsolete and will be removed:\n");
-  printDetectedJobs(obsoleteJobs);
+  logger.obsoleteJobs(obsoleteJobs);
 
   if (!dryRun) {
     await Promise.all(
@@ -98,15 +153,28 @@ export default async function registerCI(program: Command) {
     .command("ci [cwd]")
     .description("Detects & registers cron jobs.")
     .option("-d, --dry-run", "Only detect, don't register.", false)
+    .option(
+      "--json",
+      "Output as JSON instead of a human-readable table.",
+      false
+    )
     .option("-p, --production", "Use production config.", false)
     .action(
       async (
         cwd = process.cwd(),
-        { dryRun, production }: { dryRun: boolean; production: boolean }
+        {
+          dryRun,
+          production,
+          json,
+        }: { dryRun: boolean; production: boolean; json: boolean }
       ) => {
         if (production) {
           process.env.NODE_ENV = "production";
         }
+
+        const logger: Logger = json
+          ? new JsonLogger(dryRun)
+          : new HumanReadableLogger(dryRun);
 
         const oldJobs = await getOldJobs();
 
@@ -117,16 +185,11 @@ export default async function registerCI(program: Command) {
 
         await detector.close();
 
-        console.log("Detected the following Jobs:\n");
-        printDetectedJobs(jobs);
+        logger.detectedJobs(jobs);
 
-        await dealWithObsoleteJobs(oldJobs, jobs, dryRun);
+        await dealWithObsoleteJobs(oldJobs, jobs, dryRun, logger);
 
-        if (dryRun) {
-          console.log("Skipping registration.");
-        } else {
-          console.log("Successfully updated.");
-        }
+        logger.finish();
       }
     );
 }
