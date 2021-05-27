@@ -77,7 +77,7 @@ export function Nav() {
           <div className="flex items-center">
             <div className="hidden md:block">
               <div className="flex items-baseline space-x-4">
-                <PillButton to="activity">Activity</PillButton>
+                <PillButton to="activity-log">Activity</PillButton>
                 <PillButton to="pending">Pending</PillButton>
                 <PillButton to="cron">Cron</PillButton>
               </div>
@@ -135,7 +135,7 @@ export function Nav() {
 
       <div className={clsx(isMenuOpen ? "block" : "hidden", "md:hidden")}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <MenuButton to="activity">Activity</MenuButton>
+          <MenuButton to="activity-log">Activity</MenuButton>
           <MenuButton to="pending">Pending</MenuButton>
           <MenuButton to="cron">Cron</MenuButton>
 

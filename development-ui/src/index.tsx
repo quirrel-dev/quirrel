@@ -12,7 +12,7 @@ import Activity from "./pages/activity";
 import Cron from "./pages/cron";
 import Pending from "./pages/pending";
 
-export type Route = "cron" | "activity" | "pending";
+export type Route = "cron" | "activity-log" | "pending";
 
 interface QuirrelDevelopmentUIProps {
   router: {
@@ -23,7 +23,7 @@ interface QuirrelDevelopmentUIProps {
 }
 
 const pageMap: Record<Route, React.FunctionComponent> = {
-  activity: Activity,
+  "activity-log": Activity,
   cron: Cron,
   pending: Pending,
 };
@@ -34,7 +34,7 @@ interface Router {
 }
 
 export const RouterContext = createContext<Router>({
-  current: "activity",
+  current: "activity-log",
   navigate() {},
 });
 

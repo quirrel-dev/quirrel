@@ -164,10 +164,11 @@ export async function createServer({
     }
   }
 
-  app.register(indexRoute);
   app.register(health, { prefix: "/health" });
   app.register(queues, { prefix: "/queues" });
   app.register(activityPlugin, { prefix: "/activity" });
+
+  app.register(indexRoute);
 
   app.ready(async () => {
     const debug = false;
