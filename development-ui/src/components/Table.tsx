@@ -20,17 +20,11 @@ function defaultShouldBeHidden(row: any, searchTerm: string) {
 }
 
 export function Table<T>(props: TableProps<T>) {
-  const {
-    items,
-    columns,
-    endOfRow,
-    extractKey,
-    shouldBeHidden = defaultShouldBeHidden,
-  } = props;
+  const { items, columns, endOfRow, extractKey, shouldBeHidden } = props;
   const [searchTerm] = useGlobalSearch();
 
   const itemsToRender = items.filter(
-    (item) => !shouldBeHidden(item, searchTerm)
+    (item) => !(shouldBeHidden ?? defaultShouldBeHidden)(item, searchTerm)
   );
 
   return (
