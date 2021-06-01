@@ -27,7 +27,7 @@ export function initialize(config: QuirrelDevelopmentUIProps["config"]) {
           window.history.pushState(null, newRoute, "/" + newRoute);
         },
         listenToNavigationChanges(onChange) {
-          function listener(event: any) {
+          function listener() {
             onChange(getCurrentRoute());
           }
           window.addEventListener("popstate", listener);
