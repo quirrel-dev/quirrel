@@ -9,8 +9,8 @@ declare module "fastify" {
   }
 }
 
-const owlPlugin: FastifyPluginCallback = (fastify, {}, done) => {
-  const owl = createOwl(() => fastify.redisFactory());
+const owlPlugin: FastifyPluginCallback = async (fastify, {}, done) => {
+  const owl = await createOwl(() => fastify.redisFactory());
 
   fastify.decorate("owl", owl);
 

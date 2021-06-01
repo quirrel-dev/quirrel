@@ -20,14 +20,14 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "secure-e2ee": "^0.4.0",
-    "tailwindcss": "^2.0.4"
+    "tailwindcss": "^2.1.2"
   },
   "devDependencies": {
     "@types/chai": "^4.2.16",
     "@types/ioredis": "^4.26.0",
     "@types/jest": "^26.0.22",
     "@types/lodash": "^4.14.168",
-    "@types/node": "^14.14.37",
+    "@types/node": "^15.0.0",
     "@types/react": "^17.0.3",
     "babel-plugin-istanbul": "^6.0.0",
     "chai": "^4.3.4",

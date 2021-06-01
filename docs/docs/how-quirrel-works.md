@@ -20,7 +20,7 @@ On a schematic level, Quirrel works the following way:
 Requests from your application to the Quirrel server are authenticated using a random token that's obtained from the server.
 
 What's more interesting is how request in the other direction are authenticated:
-How does the application make sure that requests are indeed coming from the Quirrel server and not from some (potentially malicous) impostor?
+How does the application make sure that requests are indeed coming from the Quirrel server and not from some (potentially malicious) impostor?
 To solve that problem, Quirrel uses the afore-mentioned token to sign its requests.
 How this works can be seen in the [secure-webhooks](https://github.com/quirrel-dev/secure-webhooks) package, which was written for usage in Quirrel, but surely can be applied elsewhere.
 

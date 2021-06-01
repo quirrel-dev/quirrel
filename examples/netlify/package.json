@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@netlify/functions": "^0.7.2",
+    "quirrel": "file:../../quirrel"
+  }
+}
