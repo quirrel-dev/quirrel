@@ -56,9 +56,11 @@ function computeObsoleteJobs(
 ): RouteScheduleManifest {
   const applicationBaseUrl = getApplicationBaseUrl();
 
-  const oldJobsAsDetected = oldJobs.map((j): RouteScheduleManifest[0] => ({
+  const oldJobsAsDetected = oldJobs.map((j) => ({
     route: j.endpoint.slice(applicationBaseUrl.length + 1),
-    schedule: j.repeat!.cron!,
+    schedule:
+      j.repeat?.cron ??
+      "No cron schedule found. This was most likely updated manually.",
   }));
 
   return oldJobsAsDetected.filter(
