@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "parcel public/index.pug",
     "build": "parcel build public/index.pug",
-    "build:analyze": "PARCEL_BUNDLE_ANALYZER=true npm run build --reporter @parcel/reporter-bundle-analyzer",
+    "build:analyze": "PARCEL_BUNDLE_ANALYZER=true npm run build -- --reporter @parcel/reporter-bundle-analyzer",
     "build:coverage": "NODE_ENV=test npm run build",
     "start": "serve -l 1234 -s dist",
     "test": "jest --runInBand --forceExit",
