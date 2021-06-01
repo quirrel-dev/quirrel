@@ -10,7 +10,7 @@ export default function Pending() {
   return (
     <Table
       items={_.sortBy(pending, (job) => job.runAt)}
-      extractKey={(item) => item.endpoint + ";" + item.id}
+      extractKey={({ endpoint, id }) => `${endpoint};${id}`}
       columns={[
         {
           title: "Endpoint",
