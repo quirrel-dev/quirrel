@@ -27,6 +27,9 @@ const RouterAnchor: FC<RouterAnchorProps> = ({ to, getClassName, ...rest }) => {
   );
 };
 
+const buttonBaseClassName =
+  "px-3 py-2 rounded-md font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer";
+
 const PillButton: FC<Omit<RouterAnchorProps, "getClassName">> = (props) => (
   <RouterAnchor
     {...props}
@@ -35,7 +38,8 @@ const PillButton: FC<Omit<RouterAnchorProps, "getClassName">> = (props) => (
         selected
           ? "text-white bg-orange-500"
           : "text-gray-800 hover:text-white hover:bg-orange-300",
-        "px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
+        "text-sm",
+        buttonBaseClassName
       )
     }
   />
@@ -49,7 +53,8 @@ const MenuButton: FC<Omit<RouterAnchorProps, "getClassName">> = (props) => (
         selected
           ? "text-white bg-orange-500"
           : "text-gray-800 hover:text-white hover:bg-orange-300",
-        "block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
+        "block text-base",
+        buttonBaseClassName
       )
     }
   />
