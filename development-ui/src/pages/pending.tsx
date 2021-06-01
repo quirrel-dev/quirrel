@@ -1,7 +1,7 @@
 import { InvokeButton } from "../components/InvokeButton";
 import { Table } from "../components/Table";
 import { useQuirrel } from "../hooks/useQuirrel";
-import _ from "lodash";
+import sortBy from "lodash/sortBy";
 import { DeleteButton } from "../components/DeleteButton";
 import { truncateUrl } from "../lib/truncate-url";
 
@@ -9,7 +9,7 @@ export default function Pending() {
   const { pending, invoke, delete: deleteJob } = useQuirrel();
   return (
     <Table
-      items={_.sortBy(pending, (job) => job.runAt)}
+      items={sortBy(pending, (job) => job.runAt)}
       extractKey={({ endpoint, id }) => `${endpoint};${id}`}
       columns={[
         {

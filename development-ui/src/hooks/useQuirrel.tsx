@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import { BaseLayout } from "../layouts/BaseLayout";
 import { QuirrelClient, Job } from "quirrel/client";
-import _ from "lodash";
 import { produce } from "immer";
 import { getConnectionDetailsFromHash } from "../lib/encrypted-connection-details";
 import { ConfigContext } from "..";
