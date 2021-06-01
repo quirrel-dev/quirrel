@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { FC, useContext, useState } from "react";
 import clsx from "clsx";
 import React from "react";
 import { EndpointModal } from "./EndpointModal";
@@ -6,12 +6,12 @@ import { SearchBar } from "./SearchBar";
 import { RouterContext, Route, ConfigContext } from "../index";
 import horn from "url:../img/horn_transparent.png";
 
-type RouterAnchorProps = React.HTMLProps<HTMLAnchorElement> & {
+interface RouterAnchorProps extends React.HTMLProps<HTMLAnchorElement> {
   to: Route;
   getClassName(selected: boolean): string;
-};
+}
 
-function RouterAnchor({ to, getClassName, ...rest }: RouterAnchorProps) {
+const RouterAnchor: FC<RouterAnchorProps> = ({ to, getClassName, ...rest }) => {
   const router = useContext(RouterContext);
   const selected = router.current === to;
   return (
@@ -25,39 +25,35 @@ function RouterAnchor({ to, getClassName, ...rest }: RouterAnchorProps) {
       className={getClassName(selected)}
     />
   );
-}
+};
 
-function PillButton(props: Omit<RouterAnchorProps, "getClassName">) {
-  return (
-    <RouterAnchor
-      {...props}
-      getClassName={(selected) =>
-        clsx(
-          selected
-            ? "text-white bg-orange-500"
-            : "text-gray-800 hover:text-white hover:bg-orange-300",
-          "px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
-        )
-      }
-    />
-  );
-}
+const PillButton: FC<Omit<RouterAnchorProps, "getClassName">> = (props) => (
+  <RouterAnchor
+    {...props}
+    getClassName={(selected) =>
+      clsx(
+        selected
+          ? "text-white bg-orange-500"
+          : "text-gray-800 hover:text-white hover:bg-orange-300",
+        "px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
+      )
+    }
+  />
+);
 
-function MenuButton(props: Omit<RouterAnchorProps, "getClassName">) {
-  return (
-    <RouterAnchor
-      {...props}
-      getClassName={(selected) =>
-        clsx(
-          selected
-            ? "text-white bg-orange-500"
-            : "text-gray-800 hover:text-white hover:bg-orange-300",
-          "block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
-        )
-      }
-    />
-  );
-}
+const MenuButton: FC<Omit<RouterAnchorProps, "getClassName">> = (props) => (
+  <RouterAnchor
+    {...props}
+    getClassName={(selected) =>
+      clsx(
+        selected
+          ? "text-white bg-orange-500"
+          : "text-gray-800 hover:text-white hover:bg-orange-300",
+        "block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:text-white focus:bg-orange-300 cursor-pointer"
+      )
+    }
+  />
+);
 
 export function Nav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
