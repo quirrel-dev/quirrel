@@ -47,7 +47,7 @@ test("retry", async () => {
   await $tries("4");
   const lastTry = Date.now();
   expect(tries).toBe(4);
-  expectToBeInRange(lastTry - enqueueDate, [195, 250]);
+  expectToBeInRange(lastTry - enqueueDate, [195, 600]);
 
   const jobAfterAllRetries = await quirrel.getById("retry");
   expect(jobAfterAllRetries).toBeNull();
