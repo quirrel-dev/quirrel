@@ -1,3 +1,4 @@
+require("../shared/tracer")("quirrel-worker");
 import { createWorker } from ".";
 import { cliWithConfig } from "../../shared/cliWithConfig";
 import { createRedisFactory } from "../shared/create-redis";
