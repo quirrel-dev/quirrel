@@ -98,7 +98,7 @@ describeAcrossBackends("Activity", (backend) => {
 
       await waitUntil(
         () => log.filter((entry) => entry[0] === "completed").length === 2,
-        400
+        500
       );
     });
 
