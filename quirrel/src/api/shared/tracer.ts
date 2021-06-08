@@ -1,8 +1,13 @@
-import tracer from "dd-trace";
+import ddTrace from "dd-trace";
+import opentracing from "opentracing";
 
 module.exports = (serviceName: string = "quirrel") => {
-  return tracer.init({
+  const tracer = ddTrace.init({
     enabled: process.env.DD_TRACE_ENABLED === "true",
     service: serviceName,
   });
+
+  opentracing.initGlobalTracer(tracer);
+
+  return tracer;
 };
