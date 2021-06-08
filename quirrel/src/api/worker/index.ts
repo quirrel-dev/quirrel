@@ -2,7 +2,7 @@ import { decodeQueueDescriptor } from "../shared/queue-descriptor";
 import { UsageMeter } from "../shared/usage-meter";
 import fetch from "cross-fetch";
 import { TokenRepo } from "../shared/token-repo";
-import { asymmetric, sign, symmetric } from "secure-webhooks";
+import { asymmetric, symmetric } from "secure-webhooks";
 import { Redis } from "ioredis";
 import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
@@ -65,7 +65,7 @@ export async function createWorker({
 
   const owl = await createOwl(redisFactory, incidentReceiver, telemetrist);
 
-  const worker = await owl.createWorker(async (job, ack) => {
+  const worker = await owl.createWorker(async (job, ack, span) => {
     let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
     const body = job.payload;
 
@@ -120,7 +120,7 @@ export async function createWorker({
 
       telemetrist?.dispatch("dispatch_job");
 
-      await worker.acknowledger.acknowledge(ack);
+      await worker.acknowledger.acknowledge(ack, undefined, span);
     } else {
       const responseBody = await response.text();
 
