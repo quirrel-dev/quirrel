@@ -1,5 +1,5 @@
 import ddTrace from "dd-trace";
-import opentracing from "opentracing";
+import * as opentracing from "opentracing";
 
 module.exports = (serviceName: string = "quirrel") => {
   const tracer = ddTrace.init({
