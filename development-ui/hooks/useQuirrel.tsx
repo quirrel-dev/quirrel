@@ -201,10 +201,8 @@ function useJobsReducer() {
 }
 
 function useQuirrelClient() {
-  const [
-    instanceDetails,
-    setInstanceDetails,
-  ] = useState<QuirrelInstanceDetails>();
+  const [instanceDetails, setInstanceDetails] =
+    useState<QuirrelInstanceDetails>();
   const clientGetter = useRef<(endpoint: string) => QuirrelClient<unknown>>();
   const [isConnected, setIsConnected] = useState(false);
 
@@ -295,6 +293,7 @@ async function isHealthy(
     }
 
     if (!connectsToLocalhost) {
+      console.log(error);
       window.alert("Connection failed, server is unreachable.");
       return { isHealthy: false, stopPolling: true };
     } else {
@@ -306,7 +305,12 @@ async function isHealthy(
 async function getAllEndpoints(client: QuirrelClient<any>) {
   const endpointsRes = await client.makeRequest("/queues");
 
-  return (await endpointsRes.json()) as string[];
+  if (endpointsRes.status !== 200) {
+    return [[], "unauthorized"] as const;
+  }
+
+  const endpoints: string[] = await endpointsRes.json();
+  return [endpoints] as const;
 }
 
 export function QuirrelProvider(props: PropsWithChildren<{}>) {
@@ -332,9 +336,14 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
   const loadInitialJobs = useCallback(
     async (getClient: ReturnType<typeof quirrelClient.useInstance>) => {
-      for (const endpoint of await getAllEndpoints(
+      const [endpoints, error] = await getAllEndpoints(
         getClient("https://this.is.not.read/")
-      )) {
+      );
+      if (error) {
+        return error;
+      }
+
+      for (const endpoint of endpoints) {
         const client = getClient(endpoint);
 
         for await (const jobs of client.get()) {
@@ -346,6 +355,8 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
           );
         }
       }
+
+      return "success";
     },
     [dump]
   );
@@ -407,7 +418,13 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
       const getClient = quirrelClient.useInstance(instanceDetails);
 
-      await loadInitialJobs(getClient);
+      const result = await loadInitialJobs(getClient);
+      if (result === "unauthorized") {
+        window.alert(
+          "Connection couldn't be established, you're unauthorized. Please check the token."
+        );
+        return "stopPolling";
+      }
       connectActivityStream(instanceDetails);
       return "success";
     },
