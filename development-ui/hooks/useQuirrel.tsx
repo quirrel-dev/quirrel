@@ -272,9 +272,20 @@ function useQuirrelClient() {
 async function isHealthy(
   baseUrl: string
 ): Promise<{ isHealthy: boolean; stopPolling?: boolean }> {
+  const connectsToLocalhost = baseUrl.includes("localhost");
   try {
     const res = await fetch(baseUrl + "/health");
-    return { isHealthy: res.status === 200 };
+    const isHealthy = res.status === 200;
+    if (connectsToLocalhost) {
+      return { isHealthy, stopPolling: false };
+    } else {
+      if (isHealthy) {
+        return { isHealthy: true };
+      } else {
+        window.alert("Connection failed, server is unhealthy.");
+        return { isHealthy: false, stopPolling: true };
+      }
+    }
   } catch (error) {
     if (error.message === "Not allowed to request resource") {
       window.alert(
@@ -283,7 +294,12 @@ async function isHealthy(
       return { isHealthy: false, stopPolling: true };
     }
 
-    return { isHealthy: false };
+    if (!connectsToLocalhost) {
+      window.alert("Connection failed, server is unreachable.");
+      return { isHealthy: false, stopPolling: true };
+    } else {
+      return { isHealthy: false, stopPolling: false };
+    }
   }
 }
 
