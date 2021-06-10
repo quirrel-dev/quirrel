@@ -16,16 +16,12 @@ export interface ExecutionError {
   responseStatus: number;
 }
 
-export function replaceLocalhostWithDockerHost(url: string): string {
-  if (url.startsWith("http://localhost")) {
-    return url.replace("http://localhost", "http://host.docker.internal");
+export function replaceLocalhostWithDockerHost(_url: string): string {
+  const url = new URL(_url);
+  if (url.hostname === "localhost") {
+    url.hostname = "host.docker.internal";
   }
-
-  if (url.startsWith("https://localhost")) {
-    return url.replace("https://localhost", "https://host.docker.internal");
-  }
-
-  return url;
+  return url.toString();
 }
 
 export interface QuirrelWorkerConfig {
