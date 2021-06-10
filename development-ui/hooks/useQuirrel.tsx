@@ -12,6 +12,13 @@ import _ from "lodash";
 import { produce } from "immer";
 import { getConnectionDetailsFromHash } from "../lib/encrypted-connection-details";
 
+function ensureEndsWithSlash(v: string) {
+  if (v.endsWith("/")) {
+    return v;
+  }
+  return v + "/";
+}
+
 let alreadyAlerted = false;
 
 type JobDTO = Omit<Job<any>, "invoke" | "delete" | "runAt"> & {
@@ -209,24 +216,19 @@ function useQuirrelClient() {
   const useInstance = useCallback(
     (instanceDetails: QuirrelInstanceDetails) => {
       let { baseUrl, token } = instanceDetails;
-      if (!(baseUrl.startsWith("https://") || baseUrl.startsWith("http://"))) {
-        baseUrl = "https://" + baseUrl;
-      }
 
       function getClient(endpoint: string) {
-        const result = /((?:https?:\/\/)?.*?(?::\d+)?)\/(.*)/.exec(endpoint);
-        if (!result) {
+        const url = new URL(endpoint);
+        if (!["http:", "https:"].includes(url.protocol)) {
           alert("Not a valid endpoint: " + endpoint);
           throw new Error("Not a valid endpoint: " + endpoint);
         }
 
-        const [, applicationBaseUrl, route] = result;
-
         return new QuirrelClient({
           async handler() {},
-          route,
+          route: url.pathname,
           config: {
-            applicationBaseUrl,
+            applicationBaseUrl: url.origin,
             encryptionSecret: instanceDetails.encryptionSecret,
             quirrelBaseUrl: baseUrl,
             token,
@@ -365,14 +367,14 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
     (instanceDetails: QuirrelInstanceDetails) => {
       function connect() {
         const { baseUrl, token } = instanceDetails;
-        const isSecure = baseUrl.startsWith("https://");
-        const baseUrlWithoutProtocol = baseUrl.slice(
-          isSecure ? "https://".length : "http://".length
-        );
-        const socket = new WebSocket(
-          `${isSecure ? "wss" : "ws"}://${baseUrlWithoutProtocol}/activity`,
-          token || "ignored"
-        );
+        function activityUrl(baseUrl: string) {
+          const url = new URL(baseUrl);
+          url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+          url.pathname = ensureEndsWithSlash(url.pathname);
+          return url.toString() + "activity";
+        }
+
+        const socket = new WebSocket(activityUrl(baseUrl), token || "ignored");
 
         socket.onopen = () => {
           connectedSocket.current?.close();

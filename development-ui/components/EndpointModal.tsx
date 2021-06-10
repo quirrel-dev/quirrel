@@ -3,25 +3,17 @@ import { useQuirrel } from "../hooks/useQuirrel";
 import { connectionDetailsToHash } from "../lib/encrypted-connection-details";
 import { Modal } from "./Modal";
 
-const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-function isUrl(s: string) {
-  return urlRegex.test(s);
+export function isHttpOrHttpsURL(s: string) {
+  try {
+    const url = new URL(s);
+    return ["http:", "https:"].includes(url.protocol);
+  } catch (error) {
+    return false;
+  }
 }
 
-function formatBaseUrl(url: string) {
-  if (url === "http://localhost:9181") {
-    return "localhost";
-  }
-
-  if (url.startsWith("http://")) {
-    return url.substring("http://".length);
-  }
-
-  if (url.startsWith("https://")) {
-    return url.substring("https://".length);
-  }
-
-  return url;
+function formatBaseUrl(urlString: string) {
+  return new URL(urlString).hostname;
 }
 
 export function EndpointModal() {
