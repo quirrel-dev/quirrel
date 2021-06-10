@@ -3,7 +3,7 @@ import { useQuirrel } from "../hooks/useQuirrel";
 import { connectionDetailsToHash } from "../lib/encrypted-connection-details";
 import { Modal } from "./Modal";
 
-export function isHttpOrHttpsURL(s: string) {
+function isHttpOrHttpsURL(s: string) {
   try {
     const url = new URL(s);
     return ["http:", "https:"].includes(url.protocol);
@@ -220,7 +220,7 @@ export function EndpointModal() {
           <span className="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
             <button
               type="submit"
-              disabled={!isUrl(endpoint)}
+              disabled={!isHttpOrHttpsURL(endpoint)}
               className="inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-orange-500 text-base disabled:opacity-50 leading-6 font-medium text-white shadow-sm hover:bg-orange-400 focus:outline-none focus:border-red-700 focus:shadow-outline-red transition ease-in-out duration-150 sm:text-sm sm:leading-5"
               onClick={(evt) => {
                 evt.preventDefault();
