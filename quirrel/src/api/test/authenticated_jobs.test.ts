@@ -26,7 +26,7 @@ describeAcrossBackends("Authenticated Jobs", (backend) => {
 
     await res.redis.flushall();
 
-    const server = fastify();
+    server = fastify();
     server.post("/", (request, reply) => {
       lastBody = request.body;
       lastSignature = request.headers["x-quirrel-signature"];

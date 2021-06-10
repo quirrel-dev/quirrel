@@ -1,5 +1,5 @@
 import { cron, QuirrelClient } from "../client/index";
-import { promises as fs } from "fs";
+import fs from "fs";
 import type { FastifyInstance } from "fastify";
 import { makeFetchMockConnectedTo } from "./fetch-mock";
 import * as chokidar from "chokidar";
@@ -137,7 +137,7 @@ export class CronDetector {
         return;
       }
 
-      const contents = await fs.readFile(filePath, "utf-8");
+      const contents = fs.readFileSync(filePath, "utf-8");
       const newJob = detectQuirrelCronJob(contents);
 
       if (!newJob) {

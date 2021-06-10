@@ -233,11 +233,6 @@ export function EndpointModal() {
               onClick={(evt) => {
                 evt.preventDefault();
 
-                if (endpoint.includes("api.quirrel.dev")) {
-                  window.alert("Connecting to Prod is disabled for the moment.")
-                  return
-                }
-
                 connectTo({
                   baseUrl: endpoint,
                   token,
