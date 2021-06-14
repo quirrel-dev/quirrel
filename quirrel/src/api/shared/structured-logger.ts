@@ -4,7 +4,11 @@ import pino, { Logger as PinoLogger } from "pino";
 import { JobDTO } from "../../client/job";
 
 export class StructuredLogger implements Logger {
-  constructor(public readonly log: PinoLogger = pino()) {}
+  constructor(
+    public readonly log: PinoLogger = pino({
+      level: process.env.LOG_LEVEL || "trace",
+    })
+  ) {}
 
   started(address: string, telemetryEnabled: boolean) {
     this.log.info(`Listening on ${address}`);
