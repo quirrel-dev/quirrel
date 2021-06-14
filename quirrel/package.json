@@ -88,7 +88,7 @@
     "fastify-plugin": "3.0.0",
     "fastify-swagger": "^4.5.0",
     "fastify-websocket": "3.2.0",
-    "ioredis": "4.27.5",
+    "ioredis": "4.27.6",
     "ioredis-mock": "^5.5.6",
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
