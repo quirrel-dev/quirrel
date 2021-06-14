@@ -63,7 +63,7 @@ export async function createWorker({
     usageMeter = new UsageMeter(redisClient);
   }
 
-  const owl = await createOwl(redisFactory, incidentReceiver, telemetrist);
+  const owl = await createOwl(redisFactory, logger, incidentReceiver, telemetrist);
 
   const worker = await owl.createWorker(async (job, ack, span) => {
     let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);

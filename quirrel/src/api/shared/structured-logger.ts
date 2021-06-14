@@ -1,16 +1,16 @@
 import { Logger } from "./logger";
 import * as uuid from "uuid";
-import pino from "pino";
+import pino, { Logger as PinoLogger } from "pino";
 import { JobDTO } from "../../client/job";
 
 export class StructuredLogger implements Logger {
-  public readonly pino = pino();
+  constructor(public readonly log: PinoLogger = pino()) {}
 
   started(address: string, telemetryEnabled: boolean) {
-    this.pino.info(`Listening on ${address}`);
+    this.log.info(`Listening on ${address}`);
 
     if (telemetryEnabled) {
-      this.pino.info(`
+      this.log.info(`
       Quirrel collects completely anonymous telemetry data about general usage,
       opt-out by setting the DISABLE_TELEMETRY environment variable.`);
     }
@@ -20,17 +20,17 @@ export class StructuredLogger implements Logger {
     job: { tokenId: string; id: string; endpoint: string; body: string },
     error: string
   ): void {
-    this.pino.error({ error, job }, "Caught error during execution");
+    this.log.error({ error, job }, "Caught error during execution");
   }
   jobCreated(
     job: JobDTO & {
       tokenId: string;
     }
   ): void {
-    this.pino.info({ job }, "Created job.");
+    this.log.info({ job }, "Created job.");
   }
   jobDeleted(job: { endpoint: string; id: string; tokenId: string }): void {
-    this.pino.info({ job }, "Deleted job.");
+    this.log.info({ job }, "Deleted job.");
   }
   startingExecution(job: {
     id: string;
@@ -38,7 +38,7 @@ export class StructuredLogger implements Logger {
     endpoint: string;
     body: string;
   }): () => void {
-    const child = this.pino.child({ correlationId: uuid.v4() });
+    const child = this.log.child({ correlationId: uuid.v4() });
 
     child.info({ job }, "Started execution of job.");
     return () => {

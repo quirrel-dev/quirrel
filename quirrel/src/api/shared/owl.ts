@@ -5,6 +5,7 @@ import { IncidentForwarder } from "./incident-forwarder";
 import { decodeQueueDescriptor } from "./queue-descriptor";
 import { ExecutionError } from "../worker";
 import { Telemetrist } from "./telemetrist";
+import { Logger } from "./logger";
 
 export function cron(lastDate: Date, cronExpression: string): Date {
   const expr = cronParser.parseExpression(cronExpression, {
@@ -23,6 +24,7 @@ export function every(lastDate: Date, scheduleMeta: string): Date {
 
 export async function createOwl(
   redisFactory: () => Redis,
+  logger?: Logger,
   incidentReceiver?: { endpoint: string; passphrase: string },
   telemetrist?: Telemetrist
 ) {
@@ -39,6 +41,7 @@ export async function createOwl(
       every,
       cron,
     },
+    logger: logger?.log?.child({ module: "owl" }),
     async onError(ack, job, error: ExecutionError) {
       let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
 
