@@ -110,36 +110,70 @@ function testAgainst(backend: "Redis" | "Mock") {
     });
 
     describe("on a repeated job", () => {
-      it("ends that repeated job", async () => {
-        const {
-          teardown,
-          quirrel,
-          endpoint,
-          incidentReceiverBodies,
-        } = await setup();
+      describe("when seeing a 404", () => {
+        it("ends that job", async () => {
+          const {
+            teardown,
+            quirrel,
+            endpoint,
+            incidentReceiverBodies,
+          } = await setup();
 
-        const runAt = new Date().toISOString();
+          const runAt = new Date().toISOString();
 
-        await request(quirrel)
-          .post("/queues/" + endpoint)
-          .send({
-            body: JSON.stringify({ status: 404 }),
-            id: "a",
-            runAt,
-            repeat: {
-              every: 1 * 1000,
-              times: 3,
-            },
-          })
-          .expect(201);
+          await request(quirrel)
+            .post("/queues/" + endpoint)
+            .send({
+              body: JSON.stringify({ status: 404 }),
+              id: "a",
+              runAt,
+              repeat: {
+                every: 1 * 1000,
+                times: 3,
+              },
+            })
+            .expect(201);
 
-        await delay(100);
+          await delay(100);
 
-        expect(incidentReceiverBodies).toHaveLength(1);
+          expect(incidentReceiverBodies).toHaveLength(1);
 
-        await request(quirrel).get(`/queues/${endpoint}/a`).expect(404);
+          await request(quirrel).get(`/queues/${endpoint}/a`).expect(404);
 
-        await teardown();
+          await teardown();
+        });
+      });
+
+      describe("when seeing non-404", () => {
+        it("schedules next execution", async () => {
+          const {
+            teardown,
+            quirrel,
+            endpoint,
+            incidentReceiverBodies,
+          } = await setup();
+
+          const runAt = new Date().toISOString();
+
+          await request(quirrel)
+            .post("/queues/" + endpoint)
+            .send({
+              body: JSON.stringify({ status: 502 }),
+              id: "a",
+              runAt,
+              repeat: {
+                every: 50,
+                times: 3,
+              },
+            })
+            .expect(201);
+
+          await delay(200);
+
+          expect(incidentReceiverBodies).toHaveLength(3);
+
+          await teardown();
+        });
       });
     });
 
@@ -158,7 +192,7 @@ function testAgainst(backend: "Redis" | "Mock") {
         await request(quirrel)
           .post("/queues/" + endpoint)
           .send({
-            body: JSON.stringify({ status: 404 }),
+            body: JSON.stringify({ status: 502 }),
             id: "a",
             runAt,
             retry: [100, 200],
