@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import fs from "fs/promises";
+import { promises as fs } from "fs";
 import { QuirrelClient } from "../../client";
 import { JobDTO } from "../../client/job";
 import * as z from "zod";
