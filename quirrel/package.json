@@ -64,7 +64,7 @@
     "websocket": "^1.0.33"
   },
   "dependencies": {
-    "@quirrel/owl": "^0.13.2",
+    "@quirrel/owl": "^0.13.3",
     "@sentry/node": "6.7.0",
     "@sentry/tracing": "6.6.0",
     "basic-auth": "2.0.1",
