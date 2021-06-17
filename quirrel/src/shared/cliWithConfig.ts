@@ -1,7 +1,7 @@
 import { program } from "commander";
 import pack from "../../package.json";
 import yaml from "js-yaml";
-import fs from "fs/promises";
+import { promises as fs } from "fs";
 
 async function readYaml(filename: string): Promise<NodeJS.Dict<string>> {
   const contents = await fs.readFile(filename, { encoding: "utf-8" });
