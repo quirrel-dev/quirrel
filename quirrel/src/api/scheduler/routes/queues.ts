@@ -11,7 +11,7 @@ import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 
 import { JobsRepo } from "../jobs-repo";
 import { QueueRepo } from "../queue-repo";
-import { isValidRegex } from "../../../shared/is-valid-regex";
+import { isValidCronExpression } from "../../../shared/is-valid-cron";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = new JobsRepo(fastify.owl);
@@ -21,7 +21,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
   function hasValidCronExpression(body: EnqueueJob): boolean {
     if (body.repeat?.cron) {
-      return isValidRegex(body.repeat.cron);
+      return isValidCronExpression(body.repeat.cron);
     }
 
     return true;

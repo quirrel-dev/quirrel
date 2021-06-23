@@ -9,7 +9,7 @@ import fetch from "cross-fetch";
 import type { IncomingHttpHeaders } from "http";
 import pack from "../../package.json";
 import * as EnhancedJSON from "./enhanced-json";
-import { isValidRegex } from "../shared/is-valid-regex";
+import { isValidCronExpression } from "../shared/is-valid-cron";
 import { isValidTimezone } from "../shared/repeat";
 
 export { Job };
@@ -90,7 +90,7 @@ const timeDuration = (fieldName = "duration") =>
 export const cronExpression = z
   .string()
   .refine(
-    isValidRegex,
+    isValidCronExpression,
     "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference"
   );
 
