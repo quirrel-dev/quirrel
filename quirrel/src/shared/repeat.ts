@@ -14,14 +14,21 @@ export function isValidTimezone(tz: string) {
 
 export function embedTimezone(cronExpression: string, tz: string) {
   if (!isValidTimezone(tz)) {
-    throw new Error("Invalid timezone " + tz)
+    throw new Error("Invalid timezone " + tz);
   }
 
-  return cronExpression + ";" + tz
+  return cronExpression + ";" + tz;
+}
+
+export function parseTimezone(
+  cronExpression: string
+): [cron: string, tz: string] {
+  const [cron, tz = "Etc/UTC"] = cronExpression.split(";");
+  return [cron, tz];
 }
 
 export function cron(lastDate: Date, cronExpression: string): Date {
-  const [cron, tz = "Etc/UTC"] = cronExpression.split(";");
+  const [cron, tz] = parseTimezone(cronExpression);
   const expr = cronParser.parseExpression(cron, {
     currentDate: lastDate,
     tz,

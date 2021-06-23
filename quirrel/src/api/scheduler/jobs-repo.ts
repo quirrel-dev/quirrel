@@ -4,7 +4,7 @@ import {
   decodeQueueDescriptor,
 } from "../shared/queue-descriptor";
 import * as uuid from "uuid";
-import { cron, embedTimezone } from "../../shared/repeat";
+import { cron, embedTimezone, parseTimezone } from "../../shared/repeat";
 import Owl, { Closable, Job } from "@quirrel/owl";
 
 interface PaginationOpts {
@@ -39,6 +39,12 @@ export class JobsRepo implements Closable {
   private static toJobDTO(job: Job<"every" | "cron">): JobDTO {
     const { endpoint } = decodeQueueDescriptor(job.queue);
 
+    let cron: { cron?: string; cronTimezone?: string } = {};
+    if (job.schedule?.type === "cron") {
+      const [cronExpression, cronTimezone] = parseTimezone(job.schedule.meta);
+      cron = { cron: cronExpression, cronTimezone };
+    }
+
     return {
       id: job.id,
       endpoint,
@@ -49,8 +55,8 @@ export class JobsRepo implements Closable {
       count: job.count,
       repeat: job.schedule
         ? {
+            ...cron,
             count: job.count,
-            cron: job.schedule?.type === "cron" ? job.schedule.meta : undefined,
             every:
               job.schedule?.type === "every" ? +job.schedule.meta : undefined,
             times: job.schedule?.times,
