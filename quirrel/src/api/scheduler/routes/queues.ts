@@ -12,6 +12,7 @@ import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 import { JobsRepo } from "../jobs-repo";
 import { QueueRepo } from "../queue-repo";
 import { isValidCronExpression } from "../../../shared/is-valid-cron";
+import { isValidTimezone } from "../../../shared/repeat";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = new JobsRepo(fastify.owl);
@@ -22,6 +23,14 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   function hasValidCronExpression(body: EnqueueJob): boolean {
     if (body.repeat?.cron) {
       return isValidCronExpression(body.repeat.cron);
+    }
+
+    return true;
+  }
+
+  function hasValidCronTimezone(body: EnqueueJob): boolean {
+    if (body.repeat?.cronTimezone) {
+      return isValidTimezone(body.repeat.cronTimezone);
     }
 
     return true;
@@ -46,6 +55,13 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       "body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference.",
   };
 
+  const INVALID_TIMEZONE_ERROR = {
+    statusCode: 400,
+    error: "Bad Request",
+    message:
+      "body.repeat.cronTimezone is invalid, please provide a valid IANA timezone.",
+  };
+
   fastify.post<{ Body: EnqueueJob; Params: QueuesEndpointParams }>(
     "/:endpoint",
     {
@@ -64,6 +80,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       if (!hasValidCronExpression(body)) {
         return reply.status(400).send(INVALID_CRON_EXPRESSION_ERROR);
+      }
+
+      if (!hasValidCronTimezone(body)) {
+        return reply.status(400).send(INVALID_TIMEZONE_ERROR);
       }
 
       if (request.body.exclusive) {
@@ -112,6 +132,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       if (!body.every(hasValidCronExpression)) {
         return reply.status(400).send(INVALID_CRON_EXPRESSION_ERROR);
+      }
+
+      if (!body.every(hasValidCronTimezone)) {
+        return reply.status(400).send(INVALID_TIMEZONE_ERROR);
       }
 
       const jobs = await Promise.all(

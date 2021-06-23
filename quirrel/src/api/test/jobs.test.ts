@@ -108,11 +108,11 @@ describeAcrossBackends("Jobs", (backend) => {
       })
       .expect(
         400,
-        '{"statusCode":400,"error":"Bad Request","message":"body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference."}'
+        '{"statusCode":400,"error":"Bad Request","message":"body.repeat.cronTimezone is invalid, please provide a valid IANA timezone."}'
       );
   });
 
-  test("enqueueing a job with an invalid timezone", async () => {
+  test.only("enqueueing a job with an invalid timezone", async () => {
     await request(quirrel)
       .post("/queues/" + endpoint)
       .send({
@@ -121,7 +121,7 @@ describeAcrossBackends("Jobs", (backend) => {
       })
       .expect(
         400,
-        '{"statusCode":400,"error":"Bad Request","message":"body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference."}'
+        '{"statusCode":400,"error":"Bad Request","message":"body.repeat.cronTimezone is invalid, please provide a valid IANA timezone."}'
       );
   });
 
