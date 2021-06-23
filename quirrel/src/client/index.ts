@@ -94,6 +94,8 @@ export const cron = z
     "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference"
   );
 
+export const timezone = z.string().refine(isValidTimezone);
+
 const EnqueueJobOptionsSchema = z.object({
   id: z.string().optional(),
   exclusive: z.boolean().optional(),
@@ -111,7 +113,7 @@ const EnqueueJobOptionsSchema = z.object({
       every: timeDuration("every").optional(),
       times: z.number().nonnegative().optional(),
       cron: cron.optional(),
-      cronTimezone: z.string().refine(isValidTimezone).optional(),
+      cronTimezone: timezone.optional(),
     })
     .optional(),
 });

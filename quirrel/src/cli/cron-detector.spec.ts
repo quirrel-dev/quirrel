@@ -16,7 +16,41 @@ export default CronJob(
       framework: "blitz",
       isValid: true,
       route: "api/hourlyCron",
-      schedule: "@hourly",
+      schedule: ["@hourly", undefined],
+    },
+  },
+  timezone: {
+    input: `
+import { CronJob } from "quirrel/blitz"
+export default CronJob(
+  "api/bigBen",
+  ["*/30 * * * *", "Europe/London"],
+  async () => {
+    console.log("Ding don, I'm Big Ben")
+  }
+)
+    `,
+    output: {
+      framework: "blitz",
+      isValid: true,
+      route: "api/bigBen",
+      schedule: ["*/30 * * * *", "Europe/London"],
+    },
+  },
+  nonExistantTimezone: {
+    input: `
+import { CronJob } from "quirrel/blitz"
+export default CronJob(
+  "api/hourlyCron",
+  ["@hourly", "Europe/NonExistant"],
+  async () => {}
+)
+    `,
+    output: {
+      framework: "blitz",
+      isValid: false,
+      route: "api/hourlyCron",
+      schedule: ["@hourly", "Europe/NonExistant"],
     },
   },
   "with comments": {
@@ -34,7 +68,7 @@ export default CronJob(
       framework: "blitz",
       isValid: true,
       route: "api/hourlyCron",
-      schedule: "@hourly",
+      schedule: ["@hourly", undefined],
     },
   },
   "with block comments": {
@@ -52,7 +86,7 @@ export default CronJob(
       framework: "blitz",
       isValid: true,
       route: "api/hourlyCron",
-      schedule: "@hourly",
+      schedule: ["@hourly", undefined],
     },
   },
   "repro tarshan": {
@@ -65,7 +99,7 @@ export const handler = CronJob('admin-report-email-task-daily', '0 15 * * *', as
       framework: "redwood",
       isValid: true,
       route: "admin-report-email-task-daily",
-      schedule: "0 15 * * *",
+      schedule: ["0 15 * * *", undefined],
     },
   },
 };
