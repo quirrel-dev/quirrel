@@ -31,7 +31,7 @@ describeAcrossBackends("Jobs", (backend) => {
 
     await result.redis.flushall();
 
-    const server = fastify();
+    server = fastify();
     server.post("/", (request, reply) => {
       lastBody = request.body;
       bodies.push(lastBody);

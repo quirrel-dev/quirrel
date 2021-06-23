@@ -66,6 +66,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         return reply.status(400).send(INVALID_CRON_EXPRESSION_ERROR);
       }
 
+      if (request.body.exclusive) {
+        fastify.telemetrist?.dispatch("exclusive");
+      }
+
       const job = await jobsRepo.enqueue(tokenId, endpoint, body);
 
       fastify.logger?.jobCreated({ ...job, tokenId });

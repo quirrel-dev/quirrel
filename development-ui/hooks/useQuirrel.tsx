@@ -201,10 +201,8 @@ function useJobsReducer() {
 }
 
 function useQuirrelClient() {
-  const [
-    instanceDetails,
-    setInstanceDetails,
-  ] = useState<QuirrelInstanceDetails>();
+  const [instanceDetails, setInstanceDetails] =
+    useState<QuirrelInstanceDetails>();
   const clientGetter = useRef<(endpoint: string) => QuirrelClient<unknown>>();
   const [isConnected, setIsConnected] = useState(false);
 
@@ -272,9 +270,20 @@ function useQuirrelClient() {
 async function isHealthy(
   baseUrl: string
 ): Promise<{ isHealthy: boolean; stopPolling?: boolean }> {
+  const connectsToLocalhost = baseUrl.includes("localhost");
   try {
     const res = await fetch(baseUrl + "/health");
-    return { isHealthy: res.status === 200 };
+    const isHealthy = res.status === 200;
+    if (connectsToLocalhost) {
+      return { isHealthy, stopPolling: false };
+    } else {
+      if (isHealthy) {
+        return { isHealthy: true };
+      } else {
+        window.alert("Connection failed, server is unhealthy.");
+        return { isHealthy: false, stopPolling: true };
+      }
+    }
   } catch (error) {
     if (error.message === "Not allowed to request resource") {
       window.alert(
@@ -283,14 +292,25 @@ async function isHealthy(
       return { isHealthy: false, stopPolling: true };
     }
 
-    return { isHealthy: false };
+    if (!connectsToLocalhost) {
+      console.log(error);
+      window.alert("Connection failed, server is unreachable.");
+      return { isHealthy: false, stopPolling: true };
+    } else {
+      return { isHealthy: false, stopPolling: false };
+    }
   }
 }
 
 async function getAllEndpoints(client: QuirrelClient<any>) {
   const endpointsRes = await client.makeRequest("/queues");
 
-  return (await endpointsRes.json()) as string[];
+  if (endpointsRes.status !== 200) {
+    return [[], "unauthorized"] as const;
+  }
+
+  const endpoints: string[] = await endpointsRes.json();
+  return [endpoints] as const;
 }
 
 export function QuirrelProvider(props: PropsWithChildren<{}>) {
@@ -316,9 +336,14 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
   const loadInitialJobs = useCallback(
     async (getClient: ReturnType<typeof quirrelClient.useInstance>) => {
-      for (const endpoint of await getAllEndpoints(
+      const [endpoints, error] = await getAllEndpoints(
         getClient("https://this.is.not.read/")
-      )) {
+      );
+      if (error) {
+        return error;
+      }
+
+      for (const endpoint of endpoints) {
         const client = getClient(endpoint);
 
         for await (const jobs of client.get()) {
@@ -330,6 +355,8 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
           );
         }
       }
+
+      return "success";
     },
     [dump]
   );
@@ -347,8 +374,10 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
           token || "ignored"
         );
 
+        const VOLUNTARILY_CLOSED = "voluntarily_closed";
+
         socket.onopen = () => {
-          connectedSocket.current?.close();
+          connectedSocket.current?.close(1000, VOLUNTARILY_CLOSED);
           connectedSocket.current = socket;
 
           console.log("Connected successfully.");
@@ -356,6 +385,10 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
         socket.onclose = (ev) => {
           console.log(`Socket to ${baseUrl} was closed.`);
+          
+          if (ev.reason === VOLUNTARILY_CLOSED) {
+            return;
+          }
 
           const isAbnormal = ev.code === 1006;
           if (isAbnormal) {
@@ -391,7 +424,13 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
       const getClient = quirrelClient.useInstance(instanceDetails);
 
-      await loadInitialJobs(getClient);
+      const result = await loadInitialJobs(getClient);
+      if (result === "unauthorized") {
+        window.alert(
+          "Connection couldn't be established, you're unauthorized. Please check the token."
+        );
+        return "stopPolling";
+      }
       connectActivityStream(instanceDetails);
       return "success";
     },

@@ -1,21 +1,17 @@
 import { JobDTO } from "../../client/job";
 import { DxLogger } from "./dx-logger";
 import { StructuredLogger } from "./structured-logger";
+import pino, { Logger as PinoLogger } from "pino";
 
 export interface Logger {
+  log?: PinoLogger;
   started(address: string, telemetryEnabled: boolean): void;
   jobCreated(
     job: JobDTO & {
       tokenId: string;
     }
   ): void;
-  jobDeleted(
-    job: {
-      endpoint: string;
-      id: string;
-      tokenId: string;
-    }
-  ): void;
+  jobDeleted(job: { endpoint: string; id: string; tokenId: string }): void;
   /**
    * @returns function to call when execution is done
    */
@@ -40,13 +36,16 @@ export interface Logger {
 
 export type LoggerType = "dx" | "structured" | "none";
 
-export function getLogger(type: LoggerType): Logger | undefined {
+export function getLogger(
+  type: LoggerType,
+  logger: PinoLogger = pino({ level: process.env.LOG_LEVEL || "trace" })
+): Logger | undefined {
   switch (type) {
     case "none":
       return undefined;
     case "dx":
       return new DxLogger();
     case "structured":
-      return new StructuredLogger();
+      return new StructuredLogger(logger);
   }
 }
