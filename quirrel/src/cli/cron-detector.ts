@@ -165,8 +165,7 @@ export class CronDetector {
       id: "@cron",
       override: true,
       repeat: {
-        cron: cronExpression,
-        cronTimezone,
+        cron: cronTimezone ? [cronExpression, cronTimezone] : cronExpression,
       },
     });
   }

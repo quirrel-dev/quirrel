@@ -112,8 +112,7 @@ const EnqueueJobOptionsSchema = z.object({
     .object({
       every: timeDuration("every").optional(),
       times: z.number().nonnegative().optional(),
-      cron: cron.optional(),
-      cronTimezone: timezone.optional(),
+      cron: z.union([cron, z.tuple([cron, timezone])]).optional(),
     })
     .optional(),
 });
@@ -188,14 +187,11 @@ export interface EnqueueJobOptions {
      * Schedules the job according to the Cron expression.
      * @see https://github.com/harrisiirak/cron-parser for supported syntax
      * If `delay` isn't set, the first repetition will be executed immediately.
+     *
+     * To specify the timezone, pass a tuple with the IANA timezone in second place.
+     * Defaults to Etc/UTC.
      */
-    cron?: string;
-
-    /**
-     * IANA timezone.
-     * @defaults to Etc/UTC.
-     */
-    cronTimezone?: string;
+    cron?: string | [string, string];
   };
 }
 
