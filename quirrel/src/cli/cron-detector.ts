@@ -1,4 +1,4 @@
-import { cron, QuirrelClient, timezone } from "../client/index";
+import { cronExpression, QuirrelClient, timezone } from "../client/index";
 import fs from "fs";
 import type { FastifyInstance } from "fastify";
 import { makeFetchMockConnectedTo } from "./fetch-mock";
@@ -13,7 +13,7 @@ function requireFrameworkClientForDevelopmentDefaults(framework: string) {
 
 export interface DetectedCronJob {
   route: string;
-  schedule: [string, string | undefined];
+  schedule: string | [string, string];
   framework: string;
   isValid: boolean;
 }
@@ -78,10 +78,10 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 
   return {
     route: jobName,
-    schedule: [cronSchedule, cronTimezone],
+    schedule: cronTimezone ? [cronSchedule, cronTimezone] : cronSchedule,
     framework: clientFramework,
     isValid:
-      cron.safeParse(cronSchedule).success &&
+      cronExpression.safeParse(cronSchedule).success &&
       timezone.optional().safeParse(cronTimezone).success,
   };
 }

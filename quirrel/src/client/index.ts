@@ -87,7 +87,7 @@ const timeDuration = (fieldName = "duration") =>
     vercelMs,
   ]);
 
-export const cron = z
+export const cronExpression = z
   .string()
   .refine(
     isValidRegex,
@@ -95,6 +95,11 @@ export const cron = z
   );
 
 export const timezone = z.string().refine(isValidTimezone);
+
+export const cron = z.union([
+  cronExpression,
+  z.tuple([cronExpression, timezone]),
+]);
 
 const EnqueueJobOptionsSchema = z.object({
   id: z.string().optional(),
@@ -112,7 +117,7 @@ const EnqueueJobOptionsSchema = z.object({
     .object({
       every: timeDuration("every").optional(),
       times: z.number().nonnegative().optional(),
-      cron: z.union([cron, z.tuple([cron, timezone])]).optional(),
+      cron: cron.optional(),
     })
     .optional(),
 });
@@ -318,12 +323,29 @@ export class QuirrelClient<T> {
       stringifiedBody = await this.encryptor.encrypt(stringifiedBody);
     }
 
+    let cron = {};
+    if (options.repeat?.cron) {
+      if (typeof options.repeat.cron === "string") {
+        cron = { cron: options.repeat.cron };
+      } else {
+        cron = {
+          cron: options.repeat.cron[0],
+          cronTimezone: options.repeat.cron[1],
+        };
+      }
+    }
+
     return {
       ...this.defaultJobOptions,
       body: stringifiedBody,
       delay,
       id: options.id,
-      repeat: options.repeat,
+      repeat: options.repeat
+        ? {
+            ...options.repeat,
+            ...cron,
+          }
+        : undefined,
       retry: options.retry?.map(parseDuration),
       override: options.override,
     };
