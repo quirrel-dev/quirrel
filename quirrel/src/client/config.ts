@@ -6,6 +6,17 @@ function isProduction() {
   return process.env.NODE_ENV === "production";
 }
 
+function resolveEnvReference(name: string) {
+  const env = process.env[name];
+
+  if (env?.startsWith("@")) {
+    const referencedVar = process.env[env.slice(1)];
+    return referencedVar;
+  }
+
+  return env;
+}
+
 export function withoutTrailingSlash(url: string): string {
   if (url.endsWith("/")) {
     return url.slice(0, url.length - 1);
@@ -55,7 +66,8 @@ export function getOldEncryptionSecrets(): string[] | null {
 let developmentApplicationBaseUrl: string | undefined;
 
 export function getApplicationBaseUrl(): string {
-  const baseUrl = process.env.QUIRREL_BASE_URL || developmentApplicationBaseUrl;
+  const baseUrl =
+    resolveEnvReference("QUIRREL_BASE_URL") || developmentApplicationBaseUrl;
 
   if (!baseUrl) {
     throw new Error("Please specify QUIRREL_BASE_URL.");
