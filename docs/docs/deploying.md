@@ -30,6 +30,7 @@ Only do this for preview environments, _not for production_!
 `QUIRREL_BASE_URL` is used to determine the deployment that your jobs should be executed on.
 If you set it to `VERCEL_URL`, that means all jobs will be executed on the exact deployment that they were
 created on, excluding them from future bugfixes.
+To connect `QUIRREL_BASE_URL` to `VERCEL_URL`, set its value to `@VERCEL_URL` ([notice the @](https://github.com/quirrel-dev/quirrel/blob/d268f0555211afb202c3c3b12b460d14f0f0fb86/quirrel/src/client/config.ts#L12)).
 :::
 
 ## Hosted vs On-Prem
