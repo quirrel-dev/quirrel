@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: development-ui
+        working-directory: quirrel/development-ui
     steps:
     - uses: actions/checkout@v2
     - uses: microsoft/playwright-github-action@v1
