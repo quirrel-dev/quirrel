@@ -6,7 +6,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY development-ui/package*.json ./development-ui/
-RUN cd development-ui && npm ci
+RUN cd development-ui && npm ci --production
 
 COPY . .
 
