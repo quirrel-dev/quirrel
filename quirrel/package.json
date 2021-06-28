@@ -29,7 +29,7 @@
     "test": "DISABLE_TELEMETRY=true jest --forceExit --runInBand",
     "build": "run-s build:schemas build:**",
     "build:schemas": "json2ts -i src/api/scheduler/schemas/ -o src/api/scheduler/types/",
-    "build:ui": "cd ../development-ui && npm install && npx parcel build public/fastify.pug --dist-dir ../quirrel/dist/ui",
+    "build:ui": "cd development-ui && npm install && npx parcel build public/fastify.pug --dist-dir ../dist/ui",
     "build:tsc:esm": "tsc --module es2015 --outDir dist/esm",
     "build:tsc:cjs": "tsc",
     "build:proxies": "./generate-proxies.sh",
