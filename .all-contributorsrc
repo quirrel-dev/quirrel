@@ -78,6 +78,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "zyulyaev",
+      "name": "Nikita Zyulyaev",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9340671?v=4",
+      "profile": "https://github.com/zyulyaev",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
