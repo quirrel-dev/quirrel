@@ -26,7 +26,7 @@ If you're using [CronJobs()](/api/cronjob), make sure to run `quirrel ci` during
 
 :::note VERCEL_URL
 If you're on Vercel, you can connect `QUIRREL_BASE_URL` to your `VERCEL_URL`.
-Only do this for preview environments, \_not for production*!
+Only do this for preview environments, _not for production_!
 `QUIRREL_BASE_URL` is used to determine the deployment that your jobs should be executed on.
 If you set it to `VERCEL_URL`, that means all jobs will be executed on the exact deployment that they were
 created on, excluding them from future bugfixes.
