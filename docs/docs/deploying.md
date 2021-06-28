@@ -51,7 +51,7 @@ Both of them require that our connections are secured through a secured token.
 
 #### Using the Docker Image
 
-Find Quirrel's docker image here: https://github.com/orgs/quirrel-dev/packages/container/package/quirrel
+Quirrel's Docker Image can be found here: https://github.com/orgs/quirrel-dev/packages/container/package/quirrel
 
 To use Quirrel's Docker Image, we need to set the connection string at
 `REDIS_URL`. **Make sure your Redis instance is persistent**.
