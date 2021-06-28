@@ -51,6 +51,7 @@ export async function createServer({
 }: QuirrelServerConfig) {
   const app = fastify({
     logger: logger instanceof StructuredLogger ? logger.log : undefined,
+    maxParamLength: 500
   });
 
   if (!disableTelemetry) {
