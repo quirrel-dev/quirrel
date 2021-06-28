@@ -41,7 +41,7 @@ For most people, the [hosted version](https://quirrel.dev) of Quirrel is the eas
 If you still want to host Quirrel yourself, there are currently two ways to host our own quirrel server:
 
 1. [By using the Docker Image](#using-the-docker-image).
-2. [By launching our own instance](#launching-our-own-instance).
+2. [By using the CLI](#launching-our-own-instance).
 
 Both of them require that our connections are secured through a secured token.
 
