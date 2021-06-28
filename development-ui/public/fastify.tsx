@@ -9,4 +9,5 @@ initialize({
     enabled: authEnabled === "true",
   },
   fixedEndpoint: window.location.origin,
+  linkToAPIDocs: "/documentation",
 });

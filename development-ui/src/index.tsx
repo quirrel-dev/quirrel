@@ -25,6 +25,7 @@ export interface QuirrelDevelopmentUIProps {
     authentication: {
       enabled: boolean;
     };
+    linkToAPIDocs?: string;
   };
 }
 

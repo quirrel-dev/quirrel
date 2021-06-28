@@ -71,16 +71,36 @@ export function Nav() {
     <nav className="bg-orange-200">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div
-            className="flex-shrink-0 flex items-center justify-start space-x-8"
-            style={{ width: "300px" }}
-          >
+          <div className="flex-shrink-0 flex items-center justify-start space-x-8">
             <img className="h-10 w-auto" src={horn} alt="Quirrel Logo" />
 
             {showEndpointModal && <EndpointModal />}
+            {config.linkToAPIDocs && (
+              <a
+                href={config.linkToAPIDocs}
+                target="_blank"
+                className="text-gray-600 hover:text-gray-700"
+              >
+                OpenAPI Docs
+                <svg
+                  className="w-5 h-5 inline ml-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+              </a>
+            )}
           </div>
           <div className="flex items-center">
-            <div className="hidden md:block">
+            <div className="md:block">
               <div className="flex items-baseline space-x-4">
                 <PillButton to="activity-log">Activity</PillButton>
                 <PillButton to="pending">Pending</PillButton>
@@ -89,10 +109,7 @@ export function Nav() {
             </div>
           </div>
 
-          <div
-            className="-mr-2 hidden md:flex justify-end space-x-8 items-center"
-            style={{ width: "300px" }}
-          >
+          <div className="-mr-2 md:flex justify-end space-x-8 items-center">
             <SearchBar />
             <a
               href="https://github.com/quirrel-dev/quirrel/issues/new/choose"
@@ -151,6 +168,30 @@ export function Nav() {
           >
             Feedback
           </a>
+
+          {config.linkToAPIDocs && (
+            <a
+              href={config.linkToAPIDocs}
+              target="_blank"
+              className="text-gray-600 hover:text-gray-400 px-3 mt-2 block text-base font-medium cursor-pointer"
+            >
+              OpenAPI Docs
+              <svg
+                className="w-5 h-5 inline mr-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+            </a>
+          )}
         </div>
       </div>
     </nav>
