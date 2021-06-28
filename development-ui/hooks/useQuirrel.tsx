@@ -228,8 +228,9 @@ function useQuirrelClient() {
       function getClient(endpoint: string) {
         const url = new URL(endpoint);
         if (!["http:", "https:"].includes(url.protocol)) {
-          alert("Not a valid endpoint: " + endpoint);
-          throw new Error("Not a valid endpoint: " + endpoint);
+          const error = new Error("Not a valid endpoint: " + endpoint);
+          alert(error);
+          throw error;
         }
 
         return new QuirrelClient({
@@ -395,7 +396,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
         socket.onclose = (ev) => {
           console.log(`Socket to ${baseUrl} was closed.`);
-          
+
           if (ev.reason === VOLUNTARILY_CLOSED) {
             return;
           }
