@@ -64,8 +64,8 @@ jobs:
       with:
         flag-name: development-ui
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        base-path: development-ui
-        path-to-lcov: development-ui/coverage/lcov.info
+        base-path: quirrel/development-ui
+        path-to-lcov: quirrel/development-ui/coverage/lcov.info
         parallel: true
 
   finish-coveralls:
