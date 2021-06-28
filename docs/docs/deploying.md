@@ -47,7 +47,7 @@ Both of them require that our connections are secured through a secured token.
 
 ### Deploying the server
 
-**Please note that the deployment should be secured using HTTPS.**
+🐉 Here be dragons: Running your own infrastructure isn't the easiest thing in the world, and you should know what you're doing.
 
 #### Using the Docker Image
 
