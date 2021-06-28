@@ -86,7 +86,7 @@ Lastly, we should configure our client to use the newly generated **token** as w
 # example ./.env file in the client's root directory
 
 # Client's base url
-QUIRREL_API_URL=http://localhost:3000
+QUIRREL_API_URL=http://your-quirrel-api-address:9181
 # Token generated in the previous step
 QUIRREL_TOKEN=01234567-aaaa-aaaa-aaaa-012345678901
 ```
