@@ -375,8 +375,10 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
           token || "ignored"
         );
 
+        const VOLUNTARILY_CLOSED = "voluntarily_closed";
+
         socket.onopen = () => {
-          connectedSocket.current?.close();
+          connectedSocket.current?.close(1000, VOLUNTARILY_CLOSED);
           connectedSocket.current = socket;
 
           console.log("Connected successfully.");
@@ -384,6 +386,10 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
 
         socket.onclose = (ev) => {
           console.log(`Socket to ${baseUrl} was closed.`);
+          
+          if (ev.reason === VOLUNTARILY_CLOSED) {
+            return;
+          }
 
           const isAbnormal = ev.code === 1006;
           if (isAbnormal) {

@@ -50,7 +50,8 @@ export async function createServer({
   jwtPublicKey,
 }: QuirrelServerConfig) {
   const app = fastify({
-    logger: logger instanceof StructuredLogger ? logger.pino : undefined,
+    logger: logger instanceof StructuredLogger ? logger.log : undefined,
+    maxParamLength: 500
   });
 
   if (!disableTelemetry) {
