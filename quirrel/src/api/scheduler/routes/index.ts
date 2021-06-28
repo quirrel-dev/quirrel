@@ -9,6 +9,7 @@ const index: FastifyPluginCallback = (fastify, opts, done) => {
     root: path.join(__dirname, "../../../../../ui"),
     wildcard: false,
     redirect: true,
+    schemaHide: true,
     setHeaders(res) {
       const auth = fastify.adminBasedAuthEnabled;
       const config = [auth];
@@ -17,9 +18,13 @@ const index: FastifyPluginCallback = (fastify, opts, done) => {
   });
 
   alternativeEntries.forEach((entryPoint) => {
-    fastify.get(entryPoint, async (request, reply) => {
-      return reply.sendFile("fastify.html");
-    });
+    fastify.get(
+      entryPoint,
+      { schema: { hide: true } },
+      async (request, reply) => {
+        return reply.sendFile("fastify.html");
+      }
+    );
   });
 
   done();
