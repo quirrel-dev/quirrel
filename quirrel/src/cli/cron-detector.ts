@@ -4,6 +4,8 @@ import type { FastifyInstance } from "fastify";
 import { makeFetchMockConnectedTo } from "./fetch-mock";
 import * as chokidar from "chokidar";
 import { parseChokidarRulesFromGitignore } from "./parse-gitignore";
+import * as babel from "@babel/parser";
+import traverse from "@babel/traverse";
 
 function requireFrameworkClientForDevelopmentDefaults(framework: string) {
   require(`../${framework}`);
@@ -24,15 +26,39 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 
   const clientFramework = quirrelImport[1];
 
-  const jobNameResult = /CronJob\(\s*(?:\/[\/\*].*)?\s*['"](.*)["'],\s*(?:\/[\/\*].*)?\s*["'](.*)["']/.exec(
-    file
-  );
-  if (!jobNameResult) {
+  let jobName: string | undefined;
+  let cronSchedule: string | undefined;
+
+  const ast = babel.parse(file, { sourceType: "unambiguous" });
+  traverse(ast, {
+    CallExpression(path) {
+      const { callee } = path.node;
+      if (callee.type !== "Identifier" || callee.name !== "CronJob") {
+        return;
+      }
+
+      if (path.node.arguments.length < 3) {
+        return;
+      }
+
+      const [jobNameNode, cronScheduleNode] = path.node.arguments;
+      if (
+        jobNameNode.type !== "StringLiteral" ||
+        cronScheduleNode.type !== "StringLiteral"
+      ) {
+        return;
+      }
+
+      jobName = jobNameNode.value;
+      cronSchedule = cronScheduleNode.value;
+
+      path.stop();
+    },
+  });
+
+  if (!cronSchedule || !jobName) {
     return null;
   }
-
-  let jobName = jobNameResult[1];
-  const cronSchedule = jobNameResult[2];
 
   return {
     route: jobName,

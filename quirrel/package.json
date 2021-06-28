@@ -64,6 +64,8 @@
     "websocket": "^1.0.33"
   },
   "dependencies": {
+    "@babel/parser": "^7.14.7",
+    "@babel/traverse": "^7.14.7",
     "@quirrel/owl": "^0.13.3",
     "@sentry/node": "6.7.2",
     "@sentry/tracing": "6.7.2",
