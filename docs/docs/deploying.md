@@ -88,5 +88,5 @@ Lastly, we should configure our client to use the newly generated **token** as w
 # Client's base url
 QUIRREL_API_URL=http://your-quirrel-api-address:9181
 # Token generated in the previous step
-QUIRREL_TOKEN=01234567-aaaa-aaaa-aaaa-012345678901
+QUIRREL_TOKEN=<token-generated-in-previous-step>
 ```
