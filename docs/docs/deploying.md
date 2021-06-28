@@ -83,7 +83,6 @@ This petition will return a token. Save it for the next and last step.
 Lastly, we should configure our client to use the newly generated **token** as well as provide quirrel with our own client's base url. To do so, add the following environment variables to your client:
 
 ```
-# example ./.env file in the client's root directory
 
 QUIRREL_API_URL=http://your-quirrel-api-address:9181
 QUIRREL_TOKEN=<token-generated-in-previous-step>
