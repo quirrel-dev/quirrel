@@ -5,13 +5,11 @@ export function makeFetchMockConnectedTo(
   fastify: FastifyInstance
 ): typeof crossFetch {
   return async (url, conf) => {
-    const [, , , , path] = /(http:\/\/)(.*?)(:\d+)?(\/.*)/.exec(url as string)!;
-
     const response = await fastify.inject({
       method: conf?.method as any,
       headers: conf?.headers as any,
       payload: conf?.body as any,
-      path,
+      path: new URL(url as string).pathname,
     });
 
     return {
