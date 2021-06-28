@@ -121,6 +121,22 @@ describeAcrossBackends("Jobs", (backend) => {
     });
   });
 
+  describe("enqueueing a job with an endpoint > 86 characters (repro #514)", () => {
+    it("works", async () => {
+      const endpoint = encodeURIComponent(
+        "https://some-very-long-subdomain.example.org/very/long/queue/endpoint/url/with/a/lot/of/characters"
+      );
+      const job = await request(quirrel)
+        .post("/queues/" + endpoint)
+        .send({ body: JSON.stringify({ foo: "bar" }), delay: 1000 })
+        .expect(201);
+
+      await request(quirrel)
+        .delete("/queues/" + endpoint + "/" + job.body.id)
+        .expect(204);
+    });
+  });
+
   test("queue list", async () => {
     async function sendTo(endpoint: string) {
       await request(quirrel)
