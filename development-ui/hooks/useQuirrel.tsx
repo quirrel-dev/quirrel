@@ -19,6 +19,14 @@ function ensureEndsWithSlash(v: string) {
   return v + "/";
 }
 
+function withoutTrailingSlash(url: string): string {
+  if (url.endsWith("/")) {
+    return url.slice(0, url.length - 1);
+  }
+
+  return url;
+}
+
 let alreadyAlerted = false;
 
 type JobDTO = Omit<Job<any>, "invoke" | "delete" | "runAt"> & {
@@ -226,7 +234,7 @@ function useQuirrelClient() {
 
         return new QuirrelClient({
           async handler() {},
-          route: url.pathname,
+          route: withoutTrailingSlash(url.pathname),
           config: {
             applicationBaseUrl: url.origin,
             encryptionSecret: instanceDetails.encryptionSecret,
