@@ -33,19 +33,17 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: npm ci
-      working-directory: quirrel
+    - run: npm ci
+      working-directory: development-ui
     - run: npm run build
-      working-directory: quirrel
     - run: npm test -- --coverage
-      working-directory: quirrel
     - name: Coveralls
       uses: coverallsapp/github-action@master
       if: ${{ matrix.node-version == 14 }}
       with:
         flag-name: quirrel
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        base-path: quirrel
-        path-to-lcov: quirrel/coverage/lcov.info
+        path-to-lcov: coverage/lcov.info
         parallel: true
 
   dev-ui-test:
@@ -90,7 +88,6 @@ jobs:
       - name: Push to GitHub Container Registry
         uses: docker/build-push-action@v1
         with:
-          path: quirrel
           username: skn0tt
           password: ${{ secrets.GHCR_PAT }}
           registry: ghcr.io

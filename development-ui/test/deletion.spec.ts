@@ -22,7 +22,7 @@ test("jobs can be deleted", async () => {
     id: "to-be-deleted",
   });
 
-  await page.goto("http://localhost:3000/pending");
+  await page.goto("http://localhost:1234/pending");
 
   await page.click(`//tr[1]/td[5]/span/button[2]`);
 
@@ -33,7 +33,7 @@ test("jobs disappear after being deleted", async () => {
   const quirrel = await runQuirrel();
   cleanup.push(quirrel.cleanup);
 
-  await page.goto("http://localhost:3000/pending");
+  await page.goto("http://localhost:1234/pending");
 
   await delay(500);
 

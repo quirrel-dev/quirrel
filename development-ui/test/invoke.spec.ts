@@ -34,7 +34,7 @@ it("allows invoking jobs", async () => {
   const quirrel = await runQuirrel();
   cleanup.push(quirrel.cleanup);
 
-  await page.goto("http://localhost:3000/pending");
+  await page.goto("http://localhost:1234/pending");
 
   await delay(500);
 

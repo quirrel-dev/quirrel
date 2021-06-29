@@ -8,8 +8,8 @@ There are three main environment variables you need to specify in your deploymen
 
 | Variable                    | Meaning                                                                 | Where to get                                                                                                                                                                     |
 | --------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `QUIRREL_TOKEN`             | access token for the Quirrel server.                                    | Create a new Project + Client in the [Dashboard](https://quirrel.dev/dashboard).                                                                                                 |
-| `QUIRREL_BASE_URL`          | The base URL of your deployment.                                        | You probably know this. Something like `my-application.com`.                                                                                                                     |
+| `QUIRREL_TOKEN`             | access token for the Quirrel server.                                    | **Hosted:** Create a new Project + Client in the [Dashboard](https://quirrel.dev/dashboard). **Self-Hosted:** Check [How to deploy our own server](#how-to-deploy-your-own-server) .         |
+| `QUIRREL_BASE_URL`          | The base URL of your application's deployment.                               | You probably know this. Something like `my-application.com`.                                                                                                                     |
 | `QUIRREL_ENCRYPTION_SECRET` | A 32-character-long secret used for end-to-end encryption of your jobs. | Can be generated using `openssl rand -hex 16` or [random.org](https://www.random.org/strings/?num=2&len=16&digits=on&upperalpha=on&loweralpha=on&unique=on&format=html&rnd=new). |
 
 After setting these variables, you can deploy your application and Quirrel should be working.
@@ -30,20 +30,38 @@ Only do this for preview environments, _not for production_!
 `QUIRREL_BASE_URL` is used to determine the deployment that your jobs should be executed on.
 If you set it to `VERCEL_URL`, that means all jobs will be executed on the exact deployment that they were
 created on, excluding them from future bugfixes.
+To connect `QUIRREL_BASE_URL` to `VERCEL_URL`, set its value to `@VERCEL_URL` ([notice the @](https://github.com/quirrel-dev/quirrel/blob/d268f0555211afb202c3c3b12b460d14f0f0fb86/quirrel/src/client/config.ts#L12)).
 :::
 
-## Hosted vs On-Prem
+## Hosted version
 
 For most people, the [hosted version](https://quirrel.dev) of Quirrel is the easiest, and probably also cheapest way of using Quirrel (there's a free tier if your project is just starting out, and OSS and side projects can apply for discounts).
 
-If you still want to host Quirrel yourself, you can do so using the [Docker Image](https://github.com/orgs/quirrel-dev/packages/container/package/quirrel). `REDIS_URL` should be set to a Redis connection string. Make sure your Redis instance is persistent. For production deployments, `PASSPHRASES` should be set to a `:`-separated list of passphrases used for securing the token endpoints. Additionally, the deployment should be secured using HTTPS.
+## How to deploy your own server
 
-Here's a rough guideline on how to acquire tokens:
+🐉 Here be dragons: Running your own infrastructure isn't the easiest thing in the world, and you should know what you're doing.
 
-1. Think of a good password and supply it via the `PASSPHRASES` env var.
-2. Start up your instance and run `curl --user ignored:put_password_here -X PUT localhost:9181/tokens/local`
-3. Use the obtained token for setting your application's `QUIRREL_TOKEN` env var.
+### Deploy the Image
 
-Using self-hosted Quirrel requires you to set the `QUIRREL_API_URL` variable to the location of your deployment (it defaults to `https://api.quirrel.dev`).
-The `QUIRREL_TOKEN` can be obtained using the server's [REST API](https://api.quirrel.dev/documentation/index.html#/default/put_tokens__id_). If a passphrase was set, it must be passed in using basic authentication.
+It's recommended to deploy Quirrel using the Docker Image: https://github.com/orgs/quirrel-dev/packages/container/package/quirrel
 
+Set the `REDIS_URL` environment variable to a connection string for your Redis instance. **Make sure your Redis instance is persistent**.
+
+Set the `PASSPHRASE` environment variable to some secret passphrase. You can also specify multiple by `:`-separating them.
+
+### Acquire a token
+
+Once our server is ready, we'll need to [get an auth token](https://api.quirrel.dev/documentation/static/index.html#/Admin/put_tokens__id_):
+
+`curl --user ignored:{PASSPHRASE} -X PUT {QUIRREL_SERVER_URL}/tokens/{NAME_OF_TOKEN}`
+
+Save the returned token for the next step.
+
+### Connect your application to the Quirrel deployment
+
+Configure your application to connect to your Quirrel deployment by specifying the following two environment variables:
+
+```
+QUIRREL_API_URL=http://your-quirrel-api-address:9181
+QUIRREL_TOKEN=<token-generated-in-previous-step>
+```

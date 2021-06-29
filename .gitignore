@@ -1,0 +1,12 @@
+node_modules
+coverage
+src/api/scheduler/types
+dist/
+
+/*.js
+!jest.config.js
+/*.cjs
+/*.mjs
+/*.d.ts
+
+*.tgz

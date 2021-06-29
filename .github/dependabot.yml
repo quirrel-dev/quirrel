@@ -1,7 +1,7 @@
 version: 2
 updates:
 - package-ecosystem: npm
-  directory: "/quirrel"
+  directory: "/"
   schedule:
     interval: daily
     time: "04:00"
