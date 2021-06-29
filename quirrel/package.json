@@ -67,7 +67,7 @@
     "@babel/parser": "^7.14.7",
     "@babel/traverse": "^7.14.7",
     "@quirrel/owl": "^0.13.3",
-    "@sentry/node": "6.7.2",
+    "@sentry/node": "6.8.0",
     "@sentry/tracing": "6.8.0",
     "basic-auth": "2.0.1",
     "body-parser": "1.19.0",
