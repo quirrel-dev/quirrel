@@ -1,10 +1,12 @@
-FROM node:12
+FROM node:15
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-
 RUN npm ci
+
+COPY development-ui/package*.json ./development-ui/
+RUN cd development-ui && npm ci --production
 
 COPY . .
 

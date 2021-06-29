@@ -1,0 +1,53 @@
+{
+  "scripts": {
+    "dev": "parcel public/index.pug",
+    "build": "parcel build public/index.pug",
+    "build:fastify": "parcel build public/fastify.pug --dist-dir ../dist/ui",
+    "build:analyze": "PARCEL_BUNDLE_ANALYZER=true npm run build -- --reporter @parcel/reporter-bundle-analyzer",
+    "build:coverage": "NODE_ENV=test npm run build",
+    "start": "serve -l 1234 -s dist",
+    "test": "jest --runInBand --forceExit",
+    "test:ci": "npm run build:coverage && start-server-and-test start http://localhost:1234 test && npx nyc report --reporter=lcov"
+  },
+  "dependencies": {
+    "@tailwindui/react": "^0.1.1",
+    "autoprefixer": "^10.2.5",
+    "clsx": "^1.1.1",
+    "delay": "^5.0.0",
+    "immer": "^9.0.1",
+    "js-cookie": "^2.2.1",
+    "lodash": "^4.17.21",
+    "postcss": "^8.2.8",
+    "quirrel": "^1.4.2",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "secure-e2ee": "^0.4.0",
+    "tailwindcss": "^2.1.2",
+    "parcel": "^2.0.0-beta.3.1",
+    "@parcel/transformer-image": "^2.0.0-beta.3.1",
+    "@parcel/transformer-pug": "^2.0.0-beta.3.1",
+    "@types/js-cookie": "^2.2.6",
+    "@types/lodash": "^4.14.168",
+    "@types/node": "^15.0.0",
+    "@types/react": "^17.0.3",
+    "@types/react-dom": "^17.0.5",
+    "@babel/preset-react": "^7.13.13",
+    "typescript": "^4.2.3"
+  },
+  "devDependencies": {
+    "@parcel/reporter-bundle-analyzer": "^2.0.0-nightly.1694",
+    "@types/chai": "^4.2.16",
+    "@types/ioredis": "^4.26.0",
+    "@types/jest": "^26.0.22",
+    "babel-plugin-istanbul": "^6.0.0",
+    "chai": "^4.3.4",
+    "ioredis-mock": "^5.4.1",
+    "jest": "^27.0.4",
+    "jest-playwright-preset": "^1.6.0",
+    "nyc": "^15.1.0",
+    "playwright": "^1.10.0",
+    "serve": "^11.3.2",
+    "start-server-and-test": "^1.12.1",
+    "ts-jest": "^27.0.3"
+  }
+}

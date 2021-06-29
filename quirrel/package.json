@@ -27,8 +27,9 @@
   "scripts": {
     "start": "node dist/cjs/src/cli/index.js",
     "test": "DISABLE_TELEMETRY=true jest --forceExit --runInBand",
-    "build": "run-s build:schemas build:proxies build:tsc:* ",
+    "build": "run-s build:schemas build:**",
     "build:schemas": "json2ts -i src/api/scheduler/schemas/ -o src/api/scheduler/types/",
+    "build:ui": "cd development-ui && npm run build:fastify",
     "build:tsc:esm": "tsc --module es2015 --outDir dist/esm",
     "build:tsc:cjs": "tsc",
     "build:proxies": "./generate-proxies.sh",
@@ -88,6 +89,7 @@
     "fastify-blipp": "3.1.0",
     "fastify-cors": "6.0.1",
     "fastify-plugin": "3.0.0",
+    "fastify-static": "^4.2.2",
     "fastify-swagger": "^4.5.0",
     "fastify-websocket": "3.2.0",
     "ioredis": "4.27.6",
