@@ -4,6 +4,6 @@
   "private": true,
   "dependencies": {
     "@redwoodjs/api": "^0.24.0",
-    "quirrel": "../../quirrel"
+    "quirrel": "../.."
   }
 }

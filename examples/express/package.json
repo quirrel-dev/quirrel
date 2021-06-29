@@ -6,7 +6,7 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "quirrel": "file:../../quirrel"
+    "quirrel": "file:../.."
   },
   "devDependencies": {
     "@types/express": "^4.17.9"
