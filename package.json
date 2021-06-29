@@ -33,8 +33,7 @@
     "build:tsc:esm": "tsc --module es2015 --outDir dist/esm",
     "build:tsc:cjs": "tsc",
     "build:proxies": "./generate-proxies.sh",
-    "prepack:readme": "cp ../README.md README.md",
-    "prepack": "run-s prepack:readme build"
+    "prepack": "run-s build"
   },
   "devDependencies": {
     "@types/basic-auth": "^1.1.3",
