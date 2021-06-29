@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "next": "10.0.3",
-    "quirrel": "file:../../quirrel",
+    "quirrel": "file:../../",
     "react": "17.0.1",
     "react-dom": "17.0.1"
   },

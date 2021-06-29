@@ -12600,7 +12600,7 @@ quick-format-unescaped@^4.0.1:
   resolved "https://registry.yarnpkg.com/quick-format-unescaped/-/quick-format-unescaped-4.0.1.tgz#437a5ea1a0b61deb7605f8ab6a8fd3858dbeb701"
   integrity sha512-RyYpQ6Q5/drsJyOhrWHYMWTedvjTIat+FTwv0K4yoUxzvekw2aRHMQJLlnvt8UantkZg2++bEzD9EdxXqkWf4A==
 
-quirrel@../../quirrel:
+quirrel@../..:
   version "0.10.1"
   dependencies:
     "@quirrel/owl" "^0.3.1"
