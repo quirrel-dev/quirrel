@@ -35,6 +35,8 @@ jobs:
     - run: npm ci
     - run: npm ci
       working-directory: development-ui
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
     - run: npm run build
     - run: npm test -- --coverage
     - name: Coveralls
