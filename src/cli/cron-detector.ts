@@ -6,6 +6,7 @@ import * as chokidar from "chokidar";
 import { parseChokidarRulesFromGitignore } from "./parse-gitignore";
 import * as babel from "@babel/parser";
 import traverse from "@babel/traverse";
+import path from "path";
 
 function requireFrameworkClientForDevelopmentDefaults(framework: string) {
   require(`../${framework}`);
@@ -166,7 +167,7 @@ export class CronDetector {
         return;
       }
 
-      const contents = fs.readFileSync(filePath, "utf-8");
+      const contents = fs.readFileSync(path.join(this.cwd, filePath), "utf-8");
       const newJob = detectQuirrelCronJob(contents);
 
       if (!newJob) {

@@ -8,14 +8,14 @@ export default function registerCI(program: Command) {
     .description("Detects & registers cron jobs.")
     .option("-d, --dry-run", "Only detect, don't update.", false)
     .option("-p, --production", "Use production config.", false)
-    .action(
-      async (
-        cwd = process.cwd(),
-        { dryRun, production }: { dryRun: boolean; production: boolean }
-      ) => {
-        const detectedJobs = await detectCron(cwd);
+    .action(quirrelCI);
+}
 
-        await updateCron(detectedJobs, dryRun, production);
-      }
-    );
+export async function quirrelCI(
+  cwd = process.cwd(),
+  { dryRun, production }: { dryRun: boolean; production: boolean }
+) {
+  const detectedJobs = await detectCron(cwd);
+
+  await updateCron(detectedJobs, dryRun, production);
 }
