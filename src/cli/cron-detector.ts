@@ -29,7 +29,10 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
   let jobName: string | undefined;
   let cronSchedule: string | undefined;
 
-  const ast = babel.parse(file, { sourceType: "unambiguous" });
+  const ast = babel.parse(file, {
+    sourceType: "unambiguous",
+    plugins: ["typescript"],
+  });
   traverse(ast, {
     CallExpression(path) {
       const { callee } = path.node;
@@ -79,7 +82,7 @@ export class CronDetector {
   ) {
     const rules = parseChokidarRulesFromGitignore(cwd);
     this.watcher = chokidar.watch(["**/*.[jt]s", "**/*.[jt]sx"], {
-      ignored: ["**/node_modules", ...rules.ignoredPaths],
+      ignored: ["node_moduules", "**/node_modules", ...rules.ignoredPaths],
       cwd,
     });
 
