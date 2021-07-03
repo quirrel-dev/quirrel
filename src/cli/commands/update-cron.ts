@@ -122,7 +122,7 @@ export async function updateCron(
   }
 }
 
-export default async function registerUpdateCron(program: Command) {
+export default function registerUpdateCron(program: Command) {
   program
     .command("update-cron [filename]")
     .description(

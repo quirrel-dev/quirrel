@@ -2,7 +2,7 @@ import { Command } from "commander";
 import { detectCron } from "./detect-cron";
 import { updateCron } from "./update-cron";
 
-export default async function registerCI(program: Command) {
+export default function registerCI(program: Command) {
   program
     .command("ci [cwd]")
     .description("Detects & registers cron jobs.")

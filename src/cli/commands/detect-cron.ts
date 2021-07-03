@@ -40,7 +40,7 @@ function detectedJobsToRouteScheduleMap(
     .map((j) => ({ route: j.route, schedule: j.schedule }));
 }
 
-export default async function registerDetectCron(program: Command) {
+export default function registerDetectCron(program: Command) {
   program
     .command("detect-cron [cwd]")
     .description("Detects cron jobs.")
