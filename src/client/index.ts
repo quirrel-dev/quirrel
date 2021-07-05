@@ -196,7 +196,7 @@ export interface EnqueueJobOptions {
      * To specify the timezone, pass a tuple with the IANA timezone in second place.
      * Defaults to Etc/UTC.
      */
-    cron?: string | [string, string];
+    cron?: string | [expression: string, timezone: string];
   };
 }
 
