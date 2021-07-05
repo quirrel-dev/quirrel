@@ -68,6 +68,13 @@ function computeObsoleteJobs(
   );
 }
 
+function getClient(route: string) {
+  return new QuirrelClient({
+    async handler() {},
+    route,
+  });
+}
+
 async function dealWithObsoleteJobs(
   oldJobs: JobDTO[],
   newJobs: RouteScheduleManifest,
@@ -89,15 +96,21 @@ async function dealWithObsoleteJobs(
   if (!dryRun) {
     await Promise.all(
       obsoleteJobs.map(async (job) => {
-        const client = new QuirrelClient({
-          async handler() {},
-          route: job.route,
-        });
-
-        await client.delete("@cron");
+        await getClient(job.route).delete("@cron");
       })
     );
   }
+}
+
+async function createJobs(jobs: RouteScheduleManifest) {
+  await Promise.all(
+    jobs.map(async (job) => {
+      await getClient(job.route).enqueue(null, {
+        id: "@cron",
+        repeat: { cron: job.schedule },
+      });
+    })
+  );
 }
 
 export async function updateCron(
@@ -118,11 +131,12 @@ export async function updateCron(
   if (dryRun) {
     console.error(`This was a --dry-run, so nothing was applied.\n`);
   } else {
+    await createJobs(scheduleMap);
     console.error("Successfully updated jobs.");
   }
 }
 
-export default async function registerUpdateCron(program: Command) {
+export default function registerUpdateCron(program: Command) {
   program
     .command("update-cron [filename]")
     .description(

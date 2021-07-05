@@ -6,6 +6,7 @@ import * as chokidar from "chokidar";
 import { parseChokidarRulesFromGitignore } from "./parse-gitignore";
 import * as babel from "@babel/parser";
 import traverse from "@babel/traverse";
+import path from "path";
 
 function requireFrameworkClientForDevelopmentDefaults(framework: string) {
   require(`../${framework}`);
@@ -30,7 +31,10 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
   let cronSchedule: string | undefined;
   let cronTimezone: string | undefined;
 
-  const ast = babel.parse(file, { sourceType: "unambiguous" });
+  const ast = babel.parse(file, {
+    sourceType: "unambiguous",
+    plugins: ["typescript"],
+  });
   traverse(ast, {
     CallExpression(path) {
       const { callee } = path.node;
@@ -97,7 +101,7 @@ export class CronDetector {
   ) {
     const rules = parseChokidarRulesFromGitignore(cwd);
     this.watcher = chokidar.watch(["**/*.[jt]s", "**/*.[jt]sx"], {
-      ignored: ["**/node_modules", ...rules.ignoredPaths],
+      ignored: ["node_moduules", "**/node_modules", ...rules.ignoredPaths],
       cwd,
     });
 
@@ -182,7 +186,7 @@ export class CronDetector {
         return;
       }
 
-      const contents = fs.readFileSync(filePath, "utf-8");
+      const contents = fs.readFileSync(path.join(this.cwd, filePath), "utf-8");
       const newJob = detectQuirrelCronJob(contents);
 
       if (!newJob) {
