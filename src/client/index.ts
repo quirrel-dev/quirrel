@@ -94,7 +94,9 @@ export const cronExpression = z
     "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference"
   );
 
-export const timezone = z.string().refine(isValidTimezone);
+export const timezone = z
+  .string()
+  .refine(isValidTimezone, "Please provide a valid IANA timezone.");
 
 export const cron = z.union([
   cronExpression,
