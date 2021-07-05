@@ -18,7 +18,16 @@ export default function Cron() {
         },
         {
           title: "Schedule",
-          render: (job) => job.repeat?.cron ?? "",
+          render: (job) => {
+            const cron = job.repeat?.cron!;
+            const timezone = job.repeat?.cronTimezone;
+            
+            if (!timezone || timezone === "Etc/UTC") {
+              return cron;
+            }
+
+            return `${cron} (${timezone})`;
+          },
         },
         {
           title: "ID",
