@@ -164,12 +164,12 @@ export class CronDetector {
     this.pathToCronJob[filePath] = job;
 
     const client = this.getQuirrelClient(job);
-    const [cronExpression, cronTimezone] = job.schedule;
+
     await client?.enqueue(null, {
       id: "@cron",
       override: true,
       repeat: {
-        cron: cronTimezone ? [cronExpression, cronTimezone] : cronExpression,
+        cron: job.schedule
       },
     });
   }
