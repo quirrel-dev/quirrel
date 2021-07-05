@@ -25,7 +25,7 @@ interface JobDTO {
     times?: number;
     count: number;
     cron?: string;
-    cron_tz?: string;
+    cronTimezone?: string;
   };
 }
 
@@ -39,7 +39,7 @@ export class JobsRepo implements Closable {
   private static toJobDTO(job: Job<"every" | "cron">): JobDTO {
     const { endpoint } = decodeQueueDescriptor(job.queue);
 
-    let cron: { cron?: string; cronTimezone?: string } = {};
+    let cron: Pick<NonNullable<JobDTO["repeat"]>, "cron" | "cronTimezone"> = {};
     if (job.schedule?.type === "cron") {
       const [cronExpression, cronTimezone] = parseTimezone(job.schedule.meta);
       cron = { cron: cronExpression, cronTimezone };
