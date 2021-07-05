@@ -16,7 +16,7 @@
     "@tailwindui/react": "^0.1.1",
     "@types/js-cookie": "^2.2.6",
     "@types/lodash": "^4.14.168",
-    "@types/node": "^15.0.0",
+    "@types/node": "^16.0.0",
     "@types/react": "^17.0.3",
     "@types/react-dom": "^17.0.5",
     "autoprefixer": "^10.2.5",
