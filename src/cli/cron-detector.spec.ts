@@ -102,6 +102,19 @@ export const handler = CronJob('admin-report-email-task-daily', '0 15 * * *', as
       schedule: "0 15 * * *",
     },
   },
+  "arguments": {
+    input: `
+import { CronJob } from 'quirrel/redwood'
+
+export const handler = CronJob('admin-report-email-task-daily', '0 15 * * *', async (name: string) => {})
+    `,
+    output: {
+      framework: "redwood",
+      isValid: true,
+      route: "admin-report-email-task-daily",
+      schedule: "0 15 * * *",
+    },
+  },
 };
 
 describe("detectQuirrelCronJob", () => {

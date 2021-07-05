@@ -17,7 +17,7 @@
   ],
   "main": "dist/cjs/src/index.js",
   "module": "dist/esm/src/index.js",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "engines": {
     "node": "12 || 14 || 15"
   },
@@ -83,7 +83,7 @@
     "easy-table": "1.1.1",
     "expand-tilde": "2.0.2",
     "fast-glob": "3.2.6",
-    "fastify": "3.18.0",
+    "fastify": "3.18.1",
     "fastify-basic-auth": "2.0.0",
     "fastify-blipp": "3.1.0",
     "fastify-cors": "6.0.1",

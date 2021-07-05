@@ -14,7 +14,7 @@ function getChromeName() {
   }
 }
 
-export default async function registerUI(program: Command) {
+export default function registerUI(program: Command) {
   program
     .command("ui")
     .description("Opens the Quirrel UI")
