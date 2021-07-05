@@ -27,6 +27,14 @@ function withoutTrailingSlash(url: string): string {
   return url;
 }
 
+function withoutBeginningSlash(url: string): string {
+  if (url.startsWith("/")) {
+    return url.slice(1);
+  }
+
+  return url;
+}
+
 let alreadyAlerted = false;
 
 type JobDTO = Omit<Job<any>, "invoke" | "delete" | "runAt"> & {
@@ -216,8 +224,10 @@ function useJobsReducer() {
 }
 
 function useQuirrelClient() {
-  const [instanceDetails, setInstanceDetails] =
-    useState<QuirrelInstanceDetails>();
+  const [
+    instanceDetails,
+    setInstanceDetails,
+  ] = useState<QuirrelInstanceDetails>();
   const clientGetter = useRef<(endpoint: string) => QuirrelClient<unknown>>();
   const [isConnected, setIsConnected] = useState(false);
 
@@ -235,7 +245,7 @@ function useQuirrelClient() {
 
         return new QuirrelClient({
           async handler() {},
-          route: withoutTrailingSlash(url.pathname),
+          route: withoutBeginningSlash(withoutTrailingSlash(url.pathname)),
           config: {
             applicationBaseUrl: url.origin,
             encryptionSecret: instanceDetails.encryptionSecret,
