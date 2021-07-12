@@ -9,7 +9,13 @@ import {
 } from "./client";
 import bodyParser from "body-parser";
 
-export { DefaultJobOptions, QuirrelJobHandler, EnqueueJobOpts, EnqueueJobOptions, Job };
+export {
+  DefaultJobOptions,
+  QuirrelJobHandler,
+  EnqueueJobOpts,
+  EnqueueJobOptions,
+  Job,
+};
 
 export type Queue<Payload> = connect.Server &
   Omit<QuirrelClient<Payload>, "respondTo" | "makeRequest">;
@@ -64,7 +70,7 @@ export function Queue<Payload>(
 
 export function CronJob(
   route: string,
-  cronSchedule: string,
+  cronSchedule: NonNullable<NonNullable<EnqueueJobOptions["repeat"]>["cron"]>,
   handler: () => Promise<void>
 ) {
   return Queue(route, handler) as unknown;

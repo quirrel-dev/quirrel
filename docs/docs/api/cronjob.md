@@ -9,7 +9,7 @@ import { CronJob } from "quirrel/next";
 
 export default CronJob(
   "api/someCronJob", // the route that it's reachable on
-  "0 2 * * *", // every day at 2AM
+  ["0 2 * * *", "Europe/Berlin"], // every day at 2AM, in Berlin time
   async (job) => {
     // do something
   }

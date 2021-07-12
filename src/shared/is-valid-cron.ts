@@ -1,8 +1,8 @@
 import CronParser from "cron-parser";
 
-export function isValidRegex(regex: string) {
+export function isValidCronExpression(cron: string) {
   try {
-    CronParser.parseExpression(regex);
+    CronParser.parseExpression(cron);
     return true;
   } catch (error) {
     return false;

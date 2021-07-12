@@ -1,4 +1,4 @@
-import { cron, QuirrelClient } from "../client/index";
+import { cronExpression, QuirrelClient, timezone } from "../client/index";
 import fs from "fs";
 import type { FastifyInstance } from "fastify";
 import { makeFetchMockConnectedTo } from "./fetch-mock";
@@ -14,7 +14,7 @@ function requireFrameworkClientForDevelopmentDefaults(framework: string) {
 
 export interface DetectedCronJob {
   route: string;
-  schedule: string;
+  schedule: string | [string, string];
   framework: string;
   isValid: boolean;
 }
@@ -29,6 +29,7 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 
   let jobName: string | undefined;
   let cronSchedule: string | undefined;
+  let cronTimezone: string | undefined;
 
   const ast = babel.parse(file, {
     sourceType: "unambiguous",
@@ -46,17 +47,32 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
       }
 
       const [jobNameNode, cronScheduleNode] = path.node.arguments;
-      if (
-        jobNameNode.type !== "StringLiteral" ||
-        cronScheduleNode.type !== "StringLiteral"
-      ) {
+      if (jobNameNode.type !== "StringLiteral") {
         return;
       }
 
       jobName = jobNameNode.value;
-      cronSchedule = cronScheduleNode.value;
 
-      path.stop();
+      if (cronScheduleNode.type === "StringLiteral") {
+        cronSchedule = cronScheduleNode.value;
+      } else if (cronScheduleNode.type === "ArrayExpression") {
+        if (cronScheduleNode.elements.length > 2) {
+          return;
+        }
+
+        const [scheduleNode, timezoneNode] = cronScheduleNode.elements;
+        if (scheduleNode?.type !== "StringLiteral") {
+          return;
+        }
+
+        cronSchedule = scheduleNode.value;
+
+        if (timezoneNode?.type !== "StringLiteral") {
+          return;
+        }
+
+        cronTimezone = timezoneNode.value;
+      }
     },
   });
 
@@ -66,9 +82,11 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 
   return {
     route: jobName,
-    schedule: cronSchedule,
+    schedule: cronTimezone ? [cronSchedule, cronTimezone] : cronSchedule,
     framework: clientFramework,
-    isValid: cron.safeParse(cronSchedule).success,
+    isValid:
+      cronExpression.safeParse(cronSchedule).success &&
+      timezone.optional().safeParse(cronTimezone).success,
   };
 }
 
@@ -146,11 +164,12 @@ export class CronDetector {
     this.pathToCronJob[filePath] = job;
 
     const client = this.getQuirrelClient(job);
+
     await client?.enqueue(null, {
       id: "@cron",
       override: true,
       repeat: {
-        cron: job.schedule,
+        cron: job.schedule
       },
     });
   }

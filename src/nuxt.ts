@@ -1,4 +1,4 @@
-import { QuirrelClient } from "./client";
+import { EnqueueJobOptions, QuirrelClient } from "./client";
 import { registerDevelopmentDefaults } from "./client/config";
 import * as connect from "./connect";
 
@@ -21,7 +21,7 @@ export function Queue<Payload>(
 
 export function CronJob(
   route: string,
-  cronSchedule: string,
+  cronSchedule: NonNullable<NonNullable<EnqueueJobOptions["repeat"]>["cron"]>,
   handler: () => Promise<void>
 ) {
   return Queue(route, handler) as unknown;

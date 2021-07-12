@@ -3,10 +3,9 @@ import {
   encodeQueueDescriptor,
   decodeQueueDescriptor,
 } from "../shared/queue-descriptor";
-
 import * as uuid from "uuid";
-import { cron } from "../shared/owl";
-import Owl, { Job, Closable } from "@quirrel/owl";
+import { cron, embedTimezone, parseTimezone } from "../../shared/repeat";
+import Owl, { Closable, Job } from "@quirrel/owl";
 
 interface PaginationOpts {
   cursor: number;
@@ -26,6 +25,7 @@ interface JobDTO {
     times?: number;
     count: number;
     cron?: string;
+    cronTimezone?: string;
   };
 }
 
@@ -39,6 +39,12 @@ export class JobsRepo implements Closable {
   private static toJobDTO(job: Job<"every" | "cron">): JobDTO {
     const { endpoint } = decodeQueueDescriptor(job.queue);
 
+    let cron: Pick<NonNullable<JobDTO["repeat"]>, "cron" | "cronTimezone"> = {};
+    if (job.schedule?.type === "cron") {
+      const [cronExpression, cronTimezone] = parseTimezone(job.schedule.meta);
+      cron = { cron: cronExpression, cronTimezone };
+    }
+
     return {
       id: job.id,
       endpoint,
@@ -49,8 +55,8 @@ export class JobsRepo implements Closable {
       count: job.count,
       repeat: job.schedule
         ? {
+            ...cron,
             count: job.count,
-            cron: job.schedule?.type === "cron" ? job.schedule.meta : undefined,
             every:
               job.schedule?.type === "every" ? +job.schedule.meta : undefined,
             times: job.schedule?.times,
@@ -182,7 +188,12 @@ export class JobsRepo implements Closable {
 
     if (repeat?.cron) {
       schedule_type = "cron";
-      schedule_meta = repeat.cron;
+
+      if (repeat?.cronTimezone) {
+        schedule_meta = embedTimezone(repeat.cron, repeat.cronTimezone);
+      } else {
+        schedule_meta = repeat.cron;
+      }
     }
 
     if (repeat?.every) {
