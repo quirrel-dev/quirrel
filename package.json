@@ -83,7 +83,7 @@
     "dd-trace": "^0.36.1",
     "easy-table": "1.1.1",
     "expand-tilde": "2.0.2",
-    "fast-glob": "3.2.6",
+    "fast-glob": "3.2.7",
     "fastify": "3.19.0",
     "fastify-basic-auth": "2.0.0",
     "fastify-blipp": "3.1.0",
