@@ -1,12 +1,13 @@
 import { decodeQueueDescriptor } from "../shared/queue-descriptor";
 import { UsageMeter } from "../shared/usage-meter";
-import fetch from "cross-fetch";
+import fetch from "node-fetch";
 import { TokenRepo } from "../shared/token-repo";
 import { asymmetric, symmetric } from "secure-webhooks";
 import { Redis } from "ioredis";
 import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
 import type { Logger } from "../shared/logger";
+import { ssrfFilter } from "./ssrf-filter";
 
 export interface ExecutionError {
   toString(): string;
@@ -33,6 +34,7 @@ export interface QuirrelWorkerConfig {
   logger?: Logger;
   incidentReceiver?: { endpoint: string; passphrase: string };
   webhookSigningPrivateKey?: string;
+  enableSSRFPrevention?: boolean;
 }
 
 export async function createWorker({
@@ -44,6 +46,7 @@ export async function createWorker({
   logger,
   incidentReceiver,
   webhookSigningPrivateKey,
+  enableSSRFPrevention,
 }: QuirrelWorkerConfig) {
   const redisClient = redisFactory();
   const telemetrist = disableTelemetry
@@ -107,6 +110,7 @@ export async function createWorker({
         method: "POST",
         body,
         headers,
+        agent: enableSSRFPrevention ? ssrfFilter : undefined,
       }),
       usageMeter?.record(tokenId),
     ]);
