@@ -25,3 +25,27 @@ test("getById", async () => {
 
   server.teardown();
 });
+
+test("uri-encoding", async () => {
+  const server = await run("Mock");
+
+  const quirrel = new QuirrelClient({
+    route: "",
+    async handler() {},
+    config: {
+      quirrelBaseUrl: getAddress(server.server),
+      encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
+      applicationBaseUrl: "http://localhost",
+    },
+  });
+
+  await quirrel.enqueue("hello world", {
+    delay: "10s",
+    id: "@something",
+  });
+
+  expect(await quirrel.getById("%40something")).toBeNull();
+  expect(await quirrel.getById("@something")).not.toBeNull();
+
+  server.teardown();
+});

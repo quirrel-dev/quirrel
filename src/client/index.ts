@@ -437,7 +437,7 @@ export class QuirrelClient<T> {
    * @returns null if no job was found.
    */
   async getById(id: string): Promise<Job<T> | null> {
-    const res = await this.fetch(this.baseUrl + "/" + id, {
+    const res = await this.fetch(this.baseUrl + "/" + encodeURIComponent(id), {
       headers: this.defaultHeaders,
     });
 
@@ -457,7 +457,7 @@ export class QuirrelClient<T> {
    * @returns false if job could not be found.
    */
   async invoke(id: string): Promise<boolean> {
-    const res = await this.fetch(this.baseUrl + "/" + id, {
+    const res = await this.fetch(this.baseUrl + "/" + encodeURIComponent(id), {
       method: "POST",
       headers: this.defaultHeaders,
     });
@@ -478,7 +478,7 @@ export class QuirrelClient<T> {
    * @returns false if job could not be found.
    */
   async delete(id: string): Promise<boolean> {
-    const res = await this.fetch(this.baseUrl + "/" + id, {
+    const res = await this.fetch(this.baseUrl + "/" + encodeURIComponent(id), {
       method: "DELETE",
       headers: this.defaultHeaders,
     });
