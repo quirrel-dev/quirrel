@@ -10,12 +10,11 @@ import { QueuesEndpointParams } from "../types/queues/endpoint-params";
 import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 
 import { JobsRepo } from "../jobs-repo";
-import { QueueRepo } from "../queue-repo";
 import { isValidRegex } from "../../../shared/is-valid-regex";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
-  const jobsRepo = new JobsRepo(fastify.owl);
-  const queueRepo = new QueueRepo(fastify.redis, jobsRepo);
+  const jobsRepo = new JobsRepo(fastify.owl, fastify.redis);
+  const queueRepo = jobsRepo.queueRepo;
 
   fastify.addHook("preValidation", fastify.tokenAuthPreValidation);
 

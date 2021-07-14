@@ -7,6 +7,9 @@ import {
 import * as uuid from "uuid";
 import { cron } from "../shared/owl";
 import Owl, { Job, Closable } from "@quirrel/owl";
+import { RouteScheduleManifest } from "../../cli/commands/detect-cron";
+import { QueueRepo } from "./queue-repo";
+import { Redis } from "ioredis";
 
 interface PaginationOpts {
   cursor: number;
@@ -31,9 +34,11 @@ interface JobDTO {
 
 export class JobsRepo implements Closable {
   protected producer;
+  public readonly queueRepo: QueueRepo;
 
-  constructor(protected readonly owl: Owl<"every" | "cron">) {
+  constructor(protected readonly owl: Owl<"every" | "cron">, redis: Redis) {
     this.producer = this.owl.createProducer();
+    this.queueRepo = new QueueRepo(redis, this);
   }
 
   private static toJobDTO(job: Job<"every" | "cron">): JobDTO {
@@ -209,6 +214,38 @@ export class JobsRepo implements Closable {
     });
 
     return JobsRepo.toJobDTO(createdJob);
+  }
+
+  public async updateCron(
+    tokenId: string,
+    baseUrl: string,
+    crons: RouteScheduleManifest
+  ) {
+    const queues = await this.queueRepo.get(tokenId);
+    const queuesOnSameDeployment = queues.filter((q) => q.startsWith(baseUrl));
+
+    await Promise.all(
+      crons.map(async ({ route, schedule }) => {
+        await this.enqueue(tokenId, baseUrl + route, {
+          id: "@cron",
+          override: true,
+          repeat: { cron: schedule },
+        });
+      })
+    );
+
+    const routesThatShouldPersist = crons.map((c) => c.route);
+    await Promise.all(
+      queuesOnSameDeployment.map(async (queue) => {
+        const route = queue.slice(baseUrl.length + 1);
+        const shouldPersist = routesThatShouldPersist.includes(route);
+        if (!shouldPersist) {
+          return;
+        }
+
+        await this.delete(tokenId, queue, "@cron");
+      })
+    );
   }
 
   public onEvent(
