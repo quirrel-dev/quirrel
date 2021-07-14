@@ -219,20 +219,25 @@ export class JobsRepo implements Closable {
   public async updateCron(
     tokenId: string,
     baseUrl: string,
-    crons: RouteScheduleManifest
+    crons: RouteScheduleManifest,
+    dryRun: boolean
   ) {
+    const deleted: string[] = [];
+
     const queues = await this.queueRepo.get(tokenId);
     const queuesOnSameDeployment = queues.filter((q) => q.startsWith(baseUrl));
 
-    await Promise.all(
-      crons.map(async ({ route, schedule }) => {
-        await this.enqueue(tokenId, baseUrl + route, {
-          id: "@cron",
-          override: true,
-          repeat: { cron: schedule },
-        });
-      })
-    );
+    if (!dryRun) {
+      await Promise.all(
+        crons.map(async ({ route, schedule }) => {
+          await this.enqueue(tokenId, baseUrl + route, {
+            id: "@cron",
+            override: true,
+            repeat: { cron: schedule },
+          });
+        })
+      );
+    }
 
     const routesThatShouldPersist = crons.map((c) => c.route);
     await Promise.all(
@@ -243,9 +248,21 @@ export class JobsRepo implements Closable {
           return;
         }
 
-        await this.delete(tokenId, queue, "@cron");
+        if (dryRun) {
+          const exists = await this.findById(tokenId, queue, "@cron");
+          if (exists) {
+            deleted.push(queue);
+          }
+        } else {
+          const result = await this.delete(tokenId, queue, "@cron");
+          if (result === "deleted") {
+            deleted.push(queue);
+          }
+        }
       })
     );
+
+    return { deleted };
   }
 
   public onEvent(

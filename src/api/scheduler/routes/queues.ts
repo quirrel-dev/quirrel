@@ -11,6 +11,8 @@ import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 
 import { JobsRepo } from "../jobs-repo";
 import { isValidRegex } from "../../../shared/is-valid-regex";
+import { RouteScheduleManifestSchema } from "../../../cli/commands/detect-cron";
+import z from "zod";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = new JobsRepo(fastify.owl, fastify.redis);
@@ -237,6 +239,42 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       }
     },
   });
+
+  fastify.put(
+    "/update-cron",
+    {
+      schema: {
+        ...baseSchema,
+        summary: "Update cron jobs",
+      },
+    },
+    async (request, reply) => {
+      fastify.telemetrist?.dispatch("update-cron");
+
+      const { tokenId, body } = request;
+
+      const manifest = z
+        .object({
+          baseUrl: z.string(),
+          crons: RouteScheduleManifestSchema,
+          dryRun: z.boolean().optional(),
+        })
+        .safeParse(body);
+      if (!manifest.success) {
+        return reply.status(400).send(manifest.error);
+      }
+
+      const { baseUrl, crons, dryRun } = manifest.data;
+      const response = await jobsRepo.updateCron(
+        tokenId,
+        baseUrl,
+        crons,
+        dryRun ?? false
+      );
+
+      reply.status(200).send(response);
+    }
+  );
 
   fastify.addHook("onClose", async () => {
     await jobsRepo.close();

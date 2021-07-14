@@ -122,6 +122,39 @@ export async function updateCron(
     process.env.NODE_ENV = "production";
   }
 
+  const quirrel = new QuirrelClient({
+    async handler() {},
+    route: "",
+  });
+
+  const endpointsResponse = await quirrel.makeRequest("/update-cron", {
+    method: "PUT",
+    body: JSON.stringify({
+      baseUrl: getApplicationBaseUrl(),
+      crons: scheduleMap,
+      dryRun,
+    }),
+  });
+
+  if (endpointsResponse.status !== 200) {
+    console.error("Something went wrong: " + (await endpointsResponse.text()));
+    return;
+  }
+
+  if (dryRun) {
+    console.error(`This was a --dry-run, so nothing was applied.`);
+  } else {
+    console.error(`Successfully updated jobs.`);
+  }
+
+  const { deleted } = (await endpointsResponse.json()) as { deleted: string[] };
+  if (deleted.length > 0) {
+    console.error(
+      `These jobs are obsolete, and ${dryRun ? "would be" : "were"} removed: `
+    );
+    deleted.forEach((route) => console.log(route));
+  }
+
   console.error(`These jobs ${dryRun ? "would" : "will"} be created:\n`);
   console.log(formatRouteScheduleMapAsTable(scheduleMap));
 
