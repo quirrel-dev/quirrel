@@ -5,7 +5,7 @@ import {
   RouteScheduleManifest,
   RouteScheduleManifestSchema,
 } from "./detect-cron";
-import { getApplicationBaseUrl } from "../../client/config";
+import * as config from "../../client/config";
 import Table from "easy-table";
 
 export function formatRouteScheduleMapAsTable(jobs: RouteScheduleManifest) {
@@ -30,13 +30,16 @@ export async function updateCron(
     route: "",
   });
 
-  const endpointsResponse = await quirrel.makeRequest("/update-cron", {
+  const endpointsResponse = await quirrel.makeRequest("/queues/update-cron", {
     method: "PUT",
     body: JSON.stringify({
-      baseUrl: getApplicationBaseUrl(),
+      baseUrl: config.withoutTrailingSlash(
+        config.prefixWithProtocol(config.getApplicationBaseUrl())
+      ),
       crons: scheduleMap,
       dryRun,
     }),
+    headers: { "content-type": "application/json" },
   });
 
   if (endpointsResponse.status !== 200) {

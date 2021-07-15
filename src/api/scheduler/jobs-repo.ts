@@ -212,6 +212,7 @@ export class JobsRepo implements Closable {
       override,
       retry,
     });
+    await this.queueRepo.add(endpoint, tokenId);
 
     return JobsRepo.toJobDTO(createdJob);
   }
@@ -230,8 +231,9 @@ export class JobsRepo implements Closable {
     if (!dryRun) {
       await Promise.all(
         crons.map(async ({ route, schedule }) => {
-          await this.enqueue(tokenId, baseUrl + route, {
+          await this.enqueue(tokenId, `${baseUrl}/${route}`, {
             id: "@cron",
+            body: "null",
             override: true,
             repeat: { cron: schedule },
           });
@@ -244,7 +246,7 @@ export class JobsRepo implements Closable {
       queuesOnSameDeployment.map(async (queue) => {
         const route = queue.slice(baseUrl.length + 1);
         const shouldPersist = routesThatShouldPersist.includes(route);
-        if (!shouldPersist) {
+        if (shouldPersist) {
           return;
         }
 

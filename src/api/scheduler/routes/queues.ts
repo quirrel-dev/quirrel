@@ -12,7 +12,7 @@ import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 import { JobsRepo } from "../jobs-repo";
 import { isValidRegex } from "../../../shared/is-valid-regex";
 import { RouteScheduleManifestSchema } from "../../../cli/commands/detect-cron";
-import z from "zod";
+import * as z from "zod";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = new JobsRepo(fastify.owl, fastify.redis);
@@ -75,8 +75,6 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       fastify.logger?.jobCreated({ ...job, tokenId });
 
-      await queueRepo.add(endpoint, tokenId);
-
       reply.status(201).send(job);
     }
   );
@@ -119,7 +117,6 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         body.map((b) => jobsRepo.enqueue(tokenId, endpoint, b))
       );
 
-      await queueRepo.add(endpoint, tokenId);
       jobs.forEach((job) => fastify.logger?.jobCreated({ ...job, tokenId }));
 
       reply.status(201).send(jobs);
