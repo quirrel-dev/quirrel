@@ -4,15 +4,15 @@ import EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
 import SCANQueryStringSchema from "../schemas/queues/scan-querystring.json";
 import EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
 import POSTQueuesEndpointBodySchema from "../schemas/queues/POST/body.json";
+import PUTUpdateCronBodySchema from "../schemas/queues/update-cron.json";
 import { EnqueueJob } from "../types/queues/POST/body";
 import { SCANQuerystringParams } from "../types/queues/scan-querystring";
 import { QueuesEndpointParams } from "../types/queues/endpoint-params";
 import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
+import { QueuesUpdateCronBody } from "../types/queues/update-cron";
 
 import { JobsRepo } from "../jobs-repo";
 import { isValidRegex } from "../../../shared/is-valid-regex";
-import { RouteScheduleManifestSchema } from "../../../cli/commands/detect-cron";
-import * as z from "zod";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = new JobsRepo(fastify.owl, fastify.redis);
@@ -237,11 +237,12 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     },
   });
 
-  fastify.put(
+  fastify.put<{ Body: QueuesUpdateCronBody }>(
     "/update-cron",
     {
       schema: {
         ...baseSchema,
+        body: PUTUpdateCronBodySchema,
         summary: "Update cron jobs",
       },
     },
@@ -250,24 +251,14 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const { tokenId, body } = request;
 
-      const manifest = z
-        .object({
-          baseUrl: z.string(),
-          crons: RouteScheduleManifestSchema,
-          dryRun: z.boolean().optional(),
-        })
-        .safeParse(body);
-      if (!manifest.success) {
-        return reply.status(400).send(manifest.error);
+      const cronsAreValid = body.crons.every((cron) =>
+        isValidRegex(cron.schedule)
+      );
+      if (!cronsAreValid) {
+        return reply.status(400).send("invalid cron expression");
       }
 
-      const { baseUrl, crons, dryRun } = manifest.data;
-      const response = await jobsRepo.updateCron(
-        tokenId,
-        baseUrl,
-        crons,
-        dryRun ?? false
-      );
+      const response = await jobsRepo.updateCron(tokenId, body);
 
       reply.status(200).send(response);
     }

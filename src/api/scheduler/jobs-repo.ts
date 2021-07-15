@@ -1,4 +1,5 @@
 import { EnqueueJob } from "./types/queues/POST/body";
+import { QueuesUpdateCronBody } from "./types/queues/update-cron";
 import {
   encodeQueueDescriptor,
   decodeQueueDescriptor,
@@ -7,7 +8,6 @@ import {
 import * as uuid from "uuid";
 import { cron } from "../shared/owl";
 import Owl, { Job, Closable } from "@quirrel/owl";
-import { RouteScheduleManifest } from "../../cli/commands/detect-cron";
 import { QueueRepo } from "./queue-repo";
 import { Redis } from "ioredis";
 
@@ -219,9 +219,7 @@ export class JobsRepo implements Closable {
 
   public async updateCron(
     tokenId: string,
-    baseUrl: string,
-    crons: RouteScheduleManifest,
-    dryRun: boolean
+    { baseUrl, crons, dryRun }: QueuesUpdateCronBody
   ) {
     const deleted: string[] = [];
 
