@@ -1,13 +1,11 @@
 import { Command } from "commander";
 import { promises as fs } from "fs";
 import { QuirrelClient } from "../../client";
-import { JobDTO } from "../../client/job";
-import * as z from "zod";
 import {
   RouteScheduleManifest,
   RouteScheduleManifestSchema,
 } from "./detect-cron";
-import { getApplicationBaseUrl } from "../../client/config";
+import * as config from "../../client/config";
 import Table from "easy-table";
 
 export function formatRouteScheduleMapAsTable(jobs: RouteScheduleManifest) {
@@ -18,101 +16,6 @@ export function formatRouteScheduleMapAsTable(jobs: RouteScheduleManifest) {
     }))
   );
 }
-
-async function getOldJobs() {
-  const quirrel = new QuirrelClient({
-    async handler() {},
-    route: "",
-  });
-
-  const endpointsResponse = await quirrel.makeRequest("/queues/");
-  const endpointsResult = z
-    .array(z.string())
-    .safeParse(await endpointsResponse.json());
-  const endpoints = endpointsResult.success ? endpointsResult.data : [];
-
-  const jobs: JobDTO[] = [];
-
-  await Promise.all(
-    endpoints.map(async (endpoint) => {
-      const jobRes = await quirrel.makeRequest(
-        `/queues/${encodeURIComponent(endpoint)}/${encodeURIComponent("@cron")}`
-      );
-
-      if (jobRes.status !== 200) {
-        return;
-      }
-
-      jobs.push(await jobRes.json());
-    })
-  );
-
-  return jobs;
-}
-
-function computeObsoleteJobs(
-  oldJobs: JobDTO[],
-  newJobs: RouteScheduleManifest
-): RouteScheduleManifest {
-  const applicationBaseUrl = getApplicationBaseUrl();
-
-  const oldJobsAsDetected = oldJobs.map((j) => ({
-    route: j.endpoint.slice(applicationBaseUrl.length + 1),
-    schedule:
-      j.repeat?.cron ??
-      "No cron schedule found. This was most likely updated manually.",
-  }));
-
-  return oldJobsAsDetected.filter(
-    (oldJob) => !newJobs.some((newJob) => newJob.route === oldJob.route)
-  );
-}
-
-function getClient(route: string) {
-  return new QuirrelClient({
-    async handler() {},
-    route,
-  });
-}
-
-async function dealWithObsoleteJobs(
-  oldJobs: JobDTO[],
-  newJobs: RouteScheduleManifest,
-  dryRun: boolean
-) {
-  const obsoleteJobs = computeObsoleteJobs(oldJobs, newJobs);
-
-  if (obsoleteJobs.length === 0) {
-    return;
-  }
-
-  console.error(
-    `The following jobs are obsolete and ${
-      dryRun ? "would" : "will"
-    } be removed:\n`
-  );
-  console.log(formatRouteScheduleMapAsTable(obsoleteJobs));
-
-  if (!dryRun) {
-    await Promise.all(
-      obsoleteJobs.map(async (job) => {
-        await getClient(job.route).delete("@cron");
-      })
-    );
-  }
-}
-
-async function createJobs(jobs: RouteScheduleManifest) {
-  await Promise.all(
-    jobs.map(async (job) => {
-      await getClient(job.route).enqueue(null, {
-        id: "@cron",
-        repeat: { cron: job.schedule },
-      });
-    })
-  );
-}
-
 export async function updateCron(
   scheduleMap: RouteScheduleManifest,
   dryRun: boolean,
@@ -122,17 +25,40 @@ export async function updateCron(
     process.env.NODE_ENV = "production";
   }
 
-  console.error(`These jobs ${dryRun ? "would" : "will"} be created:\n`);
-  console.log(formatRouteScheduleMapAsTable(scheduleMap));
+  const quirrel = new QuirrelClient({
+    async handler() {},
+    route: "",
+  });
 
-  const oldJobs = await getOldJobs();
-  await dealWithObsoleteJobs(oldJobs, scheduleMap, dryRun);
+  const endpointsResponse = await quirrel.makeRequest("/queues/update-cron", {
+    method: "PUT",
+    body: JSON.stringify({
+      baseUrl: config.withoutTrailingSlash(
+        config.prefixWithProtocol(config.getApplicationBaseUrl())
+      ),
+      crons: scheduleMap,
+      dryRun,
+    }),
+    headers: { "content-type": "application/json" },
+  });
+
+  if (endpointsResponse.status !== 200) {
+    console.error("Something went wrong: " + (await endpointsResponse.text()));
+    return;
+  }
 
   if (dryRun) {
-    console.error(`This was a --dry-run, so nothing was applied.\n`);
+    console.error(`This was a --dry-run, so nothing was applied.`);
   } else {
-    await createJobs(scheduleMap);
-    console.error("Successfully updated jobs.");
+    console.error(`Successfully updated jobs.`);
+  }
+
+  const { deleted } = (await endpointsResponse.json()) as { deleted: string[] };
+  if (deleted.length > 0) {
+    console.error(
+      `These jobs are obsolete, and ${dryRun ? "would be" : "were"} removed: `
+    );
+    deleted.forEach((route) => console.log(route));
   }
 }
 

@@ -13,7 +13,7 @@ function workAroundWebsocketAuth(req: FastifyRequest) {
 const activityPlugin: FastifyPluginCallback = (fastify, _opts, done) => {
   fastify.register(fastifyWebsocket);
 
-  const jobsRepo = new JobsRepo(fastify.owl);
+  const jobsRepo = new JobsRepo(fastify.owl, fastify.redis);
 
   fastify.get(
     "/",
