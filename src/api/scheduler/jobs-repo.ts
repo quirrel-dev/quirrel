@@ -69,7 +69,6 @@ export class JobsRepo implements Closable {
     { count, cursor }: PaginationOpts
   ) {
     const { newCursor, jobs } = await this.producer.scanQueue(
-      "",
       encodeQueueDescriptor(byTokenId, endpoint),
       cursor,
       count
@@ -83,7 +82,6 @@ export class JobsRepo implements Closable {
 
   public async findAll({ count, cursor }: PaginationOpts) {
     const { newCursor, jobs } = await this.producer.scanQueuePattern(
-      "",
       encodeQueueDescriptor("*", "*"),
       cursor,
       count
@@ -106,7 +104,6 @@ export class JobsRepo implements Closable {
     { count, cursor }: PaginationOpts
   ) {
     const { newCursor, jobs } = await this.producer.scanQueuePattern(
-      "",
       encodeQueueDescriptor(byTokenId, "*"),
       cursor,
       count
@@ -120,7 +117,6 @@ export class JobsRepo implements Closable {
 
   public async findById(tokenId: string, endpoint: string, id: string) {
     const job = await this.producer.findById(
-      "",
       encodeQueueDescriptor(tokenId, endpoint),
       id
     );
@@ -129,7 +125,6 @@ export class JobsRepo implements Closable {
 
   public async invoke(tokenId: string, endpoint: string, id: string) {
     return await this.producer.invoke(
-      "",
       encodeQueueDescriptor(tokenId, endpoint),
       id
     );
@@ -137,7 +132,6 @@ export class JobsRepo implements Closable {
 
   public async delete(tokenId: string, endpoint: string, id: string) {
     return await this.producer.delete(
-      "",
       encodeQueueDescriptor(tokenId, endpoint),
       id
     );
@@ -191,7 +185,6 @@ export class JobsRepo implements Closable {
     }
 
     const createdJob = await this.producer.enqueue({
-      tenant: "",
       queue: encodeQueueDescriptor(tokenId, endpoint),
       id,
       payload: body ?? "",
@@ -219,7 +212,6 @@ export class JobsRepo implements Closable {
     ) => void
   ) {
     const activity = this.owl.createActivity(
-      "",
       async (event) => {
         if (event.type === "scheduled") {
           cb(
