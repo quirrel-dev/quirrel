@@ -1,17 +1,11 @@
-import { cron, QuirrelClient } from "../client/index";
+import { cron } from "../client/index";
 import fs from "fs";
-import type { FastifyInstance } from "fastify";
-import { makeFetchMockConnectedTo } from "./fetch-mock";
 import * as chokidar from "chokidar";
 import { parseChokidarRulesFromGitignore } from "./parse-gitignore";
 import * as babel from "@babel/parser";
 import traverse from "@babel/traverse";
 import path from "path";
 import * as config from "../client/config";
-
-function requireFrameworkClientForDevelopmentDefaults(framework: string) {
-  require(`../${framework}`);
-}
 
 export interface DetectedCronJob {
   route: string;
@@ -79,8 +73,7 @@ export class CronDetector {
 
   constructor(
     private readonly cwd: string,
-    private readonly connectedTo?: FastifyInstance,
-    private readonly dryRun?: boolean
+    private readonly onChange?: (jobs: DetectedCronJob[]) => void
   ) {
     const rules = parseChokidarRulesFromGitignore(cwd);
     this.watcher = chokidar.watch(["**/*.[jt]s", "**/*.[jt]sx"], {
@@ -110,22 +103,6 @@ export class CronDetector {
     });
   }
 
-  private getQuirrelClient(job: DetectedCronJob) {
-    if (this.dryRun) {
-      return undefined;
-    }
-
-    requireFrameworkClientForDevelopmentDefaults(job.framework);
-
-    return new QuirrelClient({
-      async handler() {},
-      route: job.route,
-      fetch: this.connectedTo
-        ? makeFetchMockConnectedTo(this.connectedTo)
-        : undefined,
-    });
-  }
-
   private pathToCronJob: Record<string, DetectedCronJob> = {};
 
   public getDetectedJobs(): DetectedCronJob[] {
@@ -136,24 +113,20 @@ export class CronDetector {
     await this.onJobChanged(job, filePath);
   }
 
+  private emitChange() {
+    this.onChange?.(this.getDetectedJobs());
+  }
+
   private async onJobRemoved(job: DetectedCronJob, filePath: string) {
     delete this.pathToCronJob[filePath];
 
-    const client = this.getQuirrelClient(job);
-    await client?.delete("@cron");
+    this.emitChange();
   }
 
   private async onJobChanged(job: DetectedCronJob, filePath: string) {
     this.pathToCronJob[filePath] = job;
 
-    const client = this.getQuirrelClient(job);
-    await client?.enqueue(null, {
-      id: "@cron",
-      override: true,
-      repeat: {
-        cron: job.schedule,
-      },
-    });
+    this.emitChange();
   }
 
   private on(fileChangeType: "changed" | "deleted" | "added") {

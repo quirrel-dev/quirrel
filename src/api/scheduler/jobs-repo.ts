@@ -6,10 +6,12 @@ import {
 } from "../shared/queue-descriptor";
 
 import * as uuid from "uuid";
+import fp from "fastify-plugin";
 import { cron } from "../shared/owl";
 import Owl, { Job, Closable } from "@quirrel/owl";
 import { QueueRepo } from "./queue-repo";
 import { Redis } from "ioredis";
+import { FastifyPluginCallback } from "fastify";
 
 interface PaginationOpts {
   cursor: number;
@@ -315,3 +317,24 @@ export class JobsRepo implements Closable {
     return () => activity.close();
   }
 }
+
+declare module "fastify" {
+  interface FastifyInstance {
+    jobs: JobsRepo;
+  }
+}
+
+const _jobsRepoPlugin: FastifyPluginCallback = (fastify, opts, done) => {
+  const repo = new JobsRepo(fastify.owl, fastify.redis);
+  fastify.decorate("jobs", repo);
+
+  fastify.addHook("onClose", async () => {
+    await repo.close();
+  });
+
+  done();
+};
+
+export const jobsRepoPlugin = (fp as any)(
+  _jobsRepoPlugin
+) as FastifyPluginCallback;
