@@ -30,6 +30,12 @@ export async function updateCron(
     route: "",
   });
 
+  console.log("Jobs:\n");
+
+  console.log(formatRouteScheduleMapAsTable(scheduleMap));
+
+  console.log("Updating server ... ");
+
   const endpointsResponse = await quirrel.makeRequest("/queues/update-cron", {
     method: "PUT",
     body: JSON.stringify({
