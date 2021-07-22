@@ -265,10 +265,6 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     }
   );
 
-  fastify.addHook("onClose", async () => {
-    await jobsRepo.close();
-  });
-
   done();
 };
 
