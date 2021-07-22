@@ -12,6 +12,7 @@ import Owl, { Job, Closable } from "@quirrel/owl";
 import { QueueRepo } from "./queue-repo";
 import { Redis } from "ioredis";
 import { FastifyPluginCallback } from "fastify";
+import { fastifyDecoratorPlugin } from "./helper/fastify-decorator-plugin";
 
 interface PaginationOpts {
   cursor: number;
@@ -316,17 +317,7 @@ declare module "fastify" {
   }
 }
 
-const _jobsRepoPlugin: FastifyPluginCallback = (fastify, opts, done) => {
-  const repo = new JobsRepo(fastify.owl, fastify.redis);
-  fastify.decorate("jobs", repo);
-
-  fastify.addHook("onClose", async () => {
-    await repo.close();
-  });
-
-  done();
-};
-
-export const jobsRepoPlugin = (fp as any)(
-  _jobsRepoPlugin
-) as FastifyPluginCallback;
+export const jobsRepoPlugin = fastifyDecoratorPlugin(
+  "jobs",
+  (fastify) => new JobsRepo(fastify.owl, fastify.redis)
+);
