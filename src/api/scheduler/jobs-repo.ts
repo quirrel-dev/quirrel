@@ -1,4 +1,5 @@
 import { EnqueueJob } from "./types/queues/POST/body";
+import { QueuesUpdateCronBody } from "./types/queues/update-cron";
 import {
   encodeQueueDescriptor,
   decodeQueueDescriptor,
@@ -7,6 +8,8 @@ import {
 import * as uuid from "uuid";
 import { cron } from "../shared/owl";
 import Owl, { Job, Closable } from "@quirrel/owl";
+import { QueueRepo } from "./queue-repo";
+import { Redis } from "ioredis";
 
 interface PaginationOpts {
   cursor: number;
@@ -31,9 +34,11 @@ interface JobDTO {
 
 export class JobsRepo implements Closable {
   protected producer;
+  public readonly queueRepo: QueueRepo;
 
-  constructor(protected readonly owl: Owl<"every" | "cron">) {
+  constructor(protected readonly owl: Owl<"every" | "cron">, redis: Redis) {
     this.producer = this.owl.createProducer();
+    this.queueRepo = new QueueRepo(redis, this);
   }
 
   private static toJobDTO(job: Job<"every" | "cron">): JobDTO {
@@ -200,8 +205,57 @@ export class JobsRepo implements Closable {
       override,
       retry,
     });
+    await this.queueRepo.add(endpoint, tokenId);
 
     return JobsRepo.toJobDTO(createdJob);
+  }
+
+  public async updateCron(
+    tokenId: string,
+    { baseUrl, crons, dryRun }: QueuesUpdateCronBody
+  ) {
+    const deleted: string[] = [];
+
+    const queues = await this.queueRepo.get(tokenId);
+    const queuesOnSameDeployment = queues.filter((q) => q.startsWith(baseUrl));
+
+    if (!dryRun) {
+      await Promise.all(
+        crons.map(async ({ route, schedule }) => {
+          await this.enqueue(tokenId, `${baseUrl}/${route}`, {
+            id: "@cron",
+            body: "null",
+            override: true,
+            repeat: { cron: schedule },
+          });
+        })
+      );
+    }
+
+    const routesThatShouldPersist = crons.map((c) => c.route);
+    await Promise.all(
+      queuesOnSameDeployment.map(async (queue) => {
+        const route = queue.slice(baseUrl.length + 1);
+        const shouldPersist = routesThatShouldPersist.includes(route);
+        if (shouldPersist) {
+          return;
+        }
+
+        if (dryRun) {
+          const exists = await this.findById(tokenId, queue, "@cron");
+          if (exists) {
+            deleted.push(queue);
+          }
+        } else {
+          const result = await this.delete(tokenId, queue, "@cron");
+          if (result === "deleted") {
+            deleted.push(queue);
+          }
+        }
+      })
+    );
+
+    return { deleted };
   }
 
   public onEvent(

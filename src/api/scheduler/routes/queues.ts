@@ -4,18 +4,19 @@ import EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
 import SCANQueryStringSchema from "../schemas/queues/scan-querystring.json";
 import EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
 import POSTQueuesEndpointBodySchema from "../schemas/queues/POST/body.json";
+import PUTUpdateCronBodySchema from "../schemas/queues/update-cron.json";
 import { EnqueueJob } from "../types/queues/POST/body";
 import { SCANQuerystringParams } from "../types/queues/scan-querystring";
 import { QueuesEndpointParams } from "../types/queues/endpoint-params";
 import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
+import { QueuesUpdateCronBody } from "../types/queues/update-cron";
 
 import { JobsRepo } from "../jobs-repo";
-import { QueueRepo } from "../queue-repo";
 import { isValidRegex } from "../../../shared/is-valid-regex";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
-  const jobsRepo = new JobsRepo(fastify.owl);
-  const queueRepo = new QueueRepo(fastify.redis, jobsRepo);
+  const jobsRepo = new JobsRepo(fastify.owl, fastify.redis);
+  const queueRepo = jobsRepo.queueRepo;
 
   fastify.addHook("preValidation", fastify.tokenAuthPreValidation);
 
@@ -74,8 +75,6 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       fastify.logger?.jobCreated({ ...job, tokenId });
 
-      await queueRepo.add(endpoint, tokenId);
-
       reply.status(201).send(job);
     }
   );
@@ -118,7 +117,6 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         body.map((b) => jobsRepo.enqueue(tokenId, endpoint, b))
       );
 
-      await queueRepo.add(endpoint, tokenId);
       jobs.forEach((job) => fastify.logger?.jobCreated({ ...job, tokenId }));
 
       reply.status(201).send(jobs);
@@ -238,6 +236,35 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       }
     },
   });
+
+  fastify.put<{ Body: QueuesUpdateCronBody }>(
+    "/update-cron",
+    {
+      schema: {
+        ...baseSchema,
+        body: PUTUpdateCronBodySchema,
+        summary: "Update cron jobs",
+      },
+    },
+    async (request, reply) => {
+      fastify.telemetrist?.dispatch("update-cron");
+
+      const { tokenId, body } = request;
+
+      const cronsAreValid = body.crons.every((cron) =>
+        isValidRegex(cron.schedule)
+      );
+      if (!cronsAreValid) {
+        return reply.status(400).send("invalid cron expression");
+      }
+
+      const response = await jobsRepo.updateCron(tokenId, body);
+
+      fastify.logger?.cronUpdated(body, response.deleted);
+
+      reply.status(200).send(response);
+    }
+  );
 
   fastify.addHook("onClose", async () => {
     await jobsRepo.close();

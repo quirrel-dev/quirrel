@@ -7,6 +7,7 @@ import { parseChokidarRulesFromGitignore } from "./parse-gitignore";
 import * as babel from "@babel/parser";
 import traverse from "@babel/traverse";
 import path from "path";
+import * as config from "../client/config";
 
 function requireFrameworkClientForDevelopmentDefaults(framework: string) {
   require(`../${framework}`);
@@ -66,7 +67,7 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
     }
 
     return {
-      route: jobName,
+      route: config.withoutTrailingSlash(jobName),
       schedule: cronSchedule,
       framework: clientFramework,
       isValid: cron.safeParse(cronSchedule).success,
