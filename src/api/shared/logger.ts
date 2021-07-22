@@ -2,6 +2,7 @@ import { JobDTO } from "../../client/job";
 import { DxLogger } from "./dx-logger";
 import { StructuredLogger } from "./structured-logger";
 import pino, { Logger as PinoLogger } from "pino";
+import { QueuesUpdateCronBody } from "../scheduler/types/queues/update-cron";
 
 export interface Logger {
   log?: PinoLogger;
@@ -10,6 +11,10 @@ export interface Logger {
     job: JobDTO & {
       tokenId: string;
     }
+  ): void;
+  cronUpdated(
+    crons: QueuesUpdateCronBody,
+    deleted: string[]
   ): void;
   jobDeleted(job: { endpoint: string; id: string; tokenId: string }): void;
   /**
