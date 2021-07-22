@@ -31,46 +31,50 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
   let jobName: string | undefined;
   let cronSchedule: string | undefined;
 
-  const ast = babel.parse(file, {
-    sourceType: "unambiguous",
-    plugins: ["typescript"],
-  });
-  traverse(ast, {
-    CallExpression(path) {
-      const { callee } = path.node;
-      if (callee.type !== "Identifier" || callee.name !== "CronJob") {
-        return;
-      }
+  try {
+    const ast = babel.parse(file, {
+      sourceType: "unambiguous",
+      plugins: ["typescript"],
+    });
+    traverse(ast, {
+      CallExpression(path) {
+        const { callee } = path.node;
+        if (callee.type !== "Identifier" || callee.name !== "CronJob") {
+          return;
+        }
 
-      if (path.node.arguments.length < 3) {
-        return;
-      }
+        if (path.node.arguments.length < 3) {
+          return;
+        }
 
-      const [jobNameNode, cronScheduleNode] = path.node.arguments;
-      if (
-        jobNameNode.type !== "StringLiteral" ||
-        cronScheduleNode.type !== "StringLiteral"
-      ) {
-        return;
-      }
+        const [jobNameNode, cronScheduleNode] = path.node.arguments;
+        if (
+          jobNameNode.type !== "StringLiteral" ||
+          cronScheduleNode.type !== "StringLiteral"
+        ) {
+          return;
+        }
 
-      jobName = jobNameNode.value;
-      cronSchedule = cronScheduleNode.value;
+        jobName = jobNameNode.value;
+        cronSchedule = cronScheduleNode.value;
 
-      path.stop();
-    },
-  });
+        path.stop();
+      },
+    });
 
-  if (!cronSchedule || !jobName) {
+    if (!cronSchedule || !jobName) {
+      return null;
+    }
+
+    return {
+      route: config.withoutTrailingSlash(jobName),
+      schedule: cronSchedule,
+      framework: clientFramework,
+      isValid: cron.safeParse(cronSchedule).success,
+    };
+  } catch (error) {
     return null;
   }
-
-  return {
-    route: config.withoutTrailingSlash(jobName),
-    schedule: cronSchedule,
-    framework: clientFramework,
-    isValid: cron.safeParse(cronSchedule).success,
-  };
 }
 
 export class CronDetector {
