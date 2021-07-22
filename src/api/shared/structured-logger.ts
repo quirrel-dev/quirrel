@@ -2,6 +2,7 @@ import { Logger } from "./logger";
 import * as uuid from "uuid";
 import pino, { Logger as PinoLogger } from "pino";
 import { JobDTO } from "../../client/job";
+import { QueuesUpdateCronBody } from "../scheduler/types/queues/update-cron";
 
 export class StructuredLogger implements Logger {
   constructor(
@@ -35,6 +36,9 @@ export class StructuredLogger implements Logger {
   }
   jobDeleted(job: { endpoint: string; id: string; tokenId: string }): void {
     this.log.info({ job }, "Deleted job.");
+  }
+  cronUpdated(crons: QueuesUpdateCronBody, deleted: string[]): void {
+    this.log.info({ crons, deleted }, "updated crons");
   }
   startingExecution(job: {
     id: string;

@@ -16,7 +16,7 @@ async function runForDirectory(dir: string) {
 test("quirrel ci", async () => {
   const quirrel = await run("Mock");
   teardown = quirrel.teardown;
-  process.env.QUIRREL_BASE_URL = "https://test-url.app";
+  process.env.QUIRREL_BASE_URL = "https://test-url.app/";
   process.env.QUIRREL_URL =
     "http://localhost:" + (quirrel.server.address() as AddressInfo).port;
 

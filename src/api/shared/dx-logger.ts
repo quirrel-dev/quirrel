@@ -1,6 +1,7 @@
 import { Logger } from "./logger";
 import chalk from "chalk";
 import { JobDTO } from "../../client/job";
+import { QueuesUpdateCronBody } from "../scheduler/types/queues/update-cron";
 
 function getQueueName(endpoint: string) {
   return new URL(endpoint).pathname;
@@ -60,6 +61,25 @@ Listening on {yellow ${address}}.`.trim()
       {gray id:} {yellow ${job.id}}
     {gray body:} {yellow ${job.body}}`
     );
+  }
+
+  cronUpdated(crons: QueuesUpdateCronBody, deleted: string[]) {
+    if (crons.dryRun) {
+      return;
+    }
+
+    console.log("\n⏰Updated Cron jobs");
+    console.log(
+      crons.crons
+        .map((c) => chalk`  {yellow ${c.route}:} {green ${c.schedule}}`)
+        .join("\n")
+    );
+
+    if (deleted.length) {
+      console.log(
+        chalk`  {red obsolete:} {yellow ${deleted.join(", ")}}`
+      );
+    }
   }
 
   jobDeleted(
