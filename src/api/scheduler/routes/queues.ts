@@ -11,11 +11,10 @@ import { QueuesEndpointParams } from "../types/queues/endpoint-params";
 import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 import { QueuesUpdateCronBody } from "../types/queues/update-cron";
 
-import { JobsRepo } from "../jobs-repo";
 import { isValidRegex } from "../../../shared/is-valid-regex";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
-  const jobsRepo = new JobsRepo(fastify.owl, fastify.redis);
+  const jobsRepo = fastify.jobs;
   const queueRepo = jobsRepo.queueRepo;
 
   fastify.addHook("preValidation", fastify.tokenAuthPreValidation);
@@ -265,10 +264,6 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       reply.status(200).send(response);
     }
   );
-
-  fastify.addHook("onClose", async () => {
-    await jobsRepo.close();
-  });
 
   done();
 };

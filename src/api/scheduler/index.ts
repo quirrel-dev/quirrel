@@ -21,6 +21,7 @@ import loggerPlugin from "./logger";
 import indexRoute from "./routes/index";
 import { StructuredLogger } from "../shared/structured-logger";
 import { Logger } from "../shared/logger";
+import { jobsRepoPlugin } from "./jobs-repo";
 
 export interface QuirrelServerConfig {
   redisFactory: () => Redis;
@@ -51,7 +52,7 @@ export async function createServer({
 }: QuirrelServerConfig) {
   const app = fastify({
     logger: logger instanceof StructuredLogger ? logger.log : undefined,
-    maxParamLength: 500
+    maxParamLength: 500,
   });
 
   if (!disableTelemetry) {
@@ -150,6 +151,8 @@ export async function createServer({
     passphrases: passphrases ?? [],
     jwtPublicKey,
   });
+
+  app.register(jobsRepoPlugin);
 
   if (!disableTelemetry) {
     app.register(telemetry, { runningInDocker });

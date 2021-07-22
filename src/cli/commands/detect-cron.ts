@@ -15,7 +15,7 @@ export function formatDetectedJobsAsTable(jobs: DetectedCronJob[]) {
 }
 
 export async function detectCron(cwd: string) {
-  const detector = new CronDetector(cwd, undefined, true);
+  const detector = new CronDetector(cwd);
   await detector.awaitReady();
 
   const jobs = detector.getDetectedJobs();
