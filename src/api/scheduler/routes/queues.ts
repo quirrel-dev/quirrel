@@ -259,6 +259,8 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const response = await jobsRepo.updateCron(tokenId, body);
 
+      fastify.logger?.cronUpdated(body, response.deleted);
+
       reply.status(200).send(response);
     }
   );
