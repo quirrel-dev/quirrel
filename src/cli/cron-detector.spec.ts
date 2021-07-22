@@ -68,7 +68,7 @@ export const handler = CronJob('admin-report-email-task-daily', '0 15 * * *', as
       schedule: "0 15 * * *",
     },
   },
-  "arguments": {
+  arguments: {
     input: `
 import { CronJob } from 'quirrel/redwood'
 
@@ -80,6 +80,11 @@ export const handler = CronJob('admin-report-email-task-daily', '0 15 * * *', as
       route: "admin-report-email-task-daily",
       schedule: "0 15 * * *",
     },
+  },
+
+  "syntax errors": {
+    input: `import {} from "quirrel/next"; { ( } }`,
+    output: null,
   },
 };
 
