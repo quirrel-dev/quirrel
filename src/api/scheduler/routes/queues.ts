@@ -280,6 +280,13 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         return reply.status(400).send("invalid cron expression");
       }
 
+      const timezonesAreValid = body.crons.every(
+        (cron) => !cron.timezone || isValidTimezone(cron.timezone)
+      );
+      if (!timezonesAreValid) {
+        return reply.status(400).send("invalid timezone");
+      }
+
       const response = await jobsRepo.updateCron(tokenId, body);
 
       fastify.logger?.cronUpdated(body, response.deleted);

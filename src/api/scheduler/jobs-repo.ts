@@ -233,12 +233,12 @@ export class JobsRepo implements Closable {
 
     if (!dryRun) {
       await Promise.all(
-        crons.map(async ({ route, schedule }) => {
+        crons.map(async ({ route, schedule, timezone }) => {
           await this.enqueue(tokenId, `${baseUrl}/${route}`, {
             id: "@cron",
             body: "null",
             override: true,
-            repeat: { cron: schedule },
+            repeat: { cron: schedule, cronTimezone: timezone },
           });
         })
       );
