@@ -108,7 +108,7 @@ describeAcrossBackends("Jobs", (backend) => {
       })
       .expect(
         400,
-        '{"statusCode":400,"error":"Bad Request","message":"body.repeat.cronTimezone is invalid, please provide a valid IANA timezone."}'
+        '{"statusCode":400,"error":"Bad Request","message":"body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference."}'
       );
   });
 
