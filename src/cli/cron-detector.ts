@@ -10,7 +10,8 @@ import * as config from "../client/config";
 
 export interface DetectedCronJob {
   route: string;
-  schedule: string | [string, string];
+  schedule: string;
+  timezone?: string;
   framework: string;
   isValid: boolean;
 }
@@ -81,7 +82,8 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 
     return {
       route: config.withoutTrailingSlash(jobName),
-      schedule: cronTimezone ? [cronSchedule, cronTimezone] : cronSchedule,
+      schedule: cronSchedule,
+      timezone: cronTimezone,
       framework: clientFramework,
       isValid:
         cron.safeParse(cronSchedule).success &&
