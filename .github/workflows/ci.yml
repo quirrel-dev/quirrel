@@ -32,6 +32,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - run: npm i -g npm@7
     - run: npm ci
     - run: npm run build
     - run: npm test -- --coverage
