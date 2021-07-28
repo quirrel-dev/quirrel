@@ -54,6 +54,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: microsoft/playwright-github-action@v1
+    - run: npm i -g npm@7
     - run: npm ci
     - run: npm run test:ci
     - name: Coveralls
