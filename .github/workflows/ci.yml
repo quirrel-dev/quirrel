@@ -33,12 +33,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: npm ci
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        sudo: false
-    - run: npm ci
-      working-directory: development-ui
     - run: npm run build
     - run: npm test -- --coverage
     - name: Coveralls
