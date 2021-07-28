@@ -5,7 +5,7 @@ import {
   decodeQueueDescriptor,
 } from "../shared/queue-descriptor";
 import * as uuid from "uuid";
-import { cron, embedTimezone, parseTimezone } from "../../shared/repeat";
+import { cron, embedTimezone, parseTimezonedCron } from "../../shared/repeat";
 import Owl, { Closable, Job } from "@quirrel/owl";
 import { QueueRepo } from "./queue-repo";
 import { Redis } from "ioredis";
@@ -47,7 +47,7 @@ export class JobsRepo implements Closable {
 
     let cron: Pick<NonNullable<JobDTO["repeat"]>, "cron" | "cronTimezone"> = {};
     if (job.schedule?.type === "cron") {
-      const [cronExpression, cronTimezone] = parseTimezone(job.schedule.meta);
+      const [cronExpression, cronTimezone] = parseTimezonedCron(job.schedule.meta);
       cron = { cron: cronExpression, cronTimezone };
     }
 

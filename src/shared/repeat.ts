@@ -20,7 +20,7 @@ export function embedTimezone(cronExpression: string, tz: string) {
   return cronExpression + ";" + tz;
 }
 
-export function parseTimezone(
+export function parseTimezonedCron(
   cronExpression: string
 ): [cron: string, tz: string] {
   const [cron, tz = "Etc/UTC"] = cronExpression.split(";");
@@ -28,7 +28,7 @@ export function parseTimezone(
 }
 
 export function cron(lastDate: Date, cronExpression: string): Date {
-  const [cron, tz] = parseTimezone(cronExpression);
+  const [cron, tz] = parseTimezonedCron(cronExpression);
   const expr = cronParser.parseExpression(cron, {
     currentDate: lastDate,
     tz,
