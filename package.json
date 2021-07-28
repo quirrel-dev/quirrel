@@ -69,7 +69,7 @@
     "@babel/traverse": "^7.14.7",
     "@quirrel/ioredis-mock": "^5.6.1",
     "@quirrel/owl": "^0.14.0",
-    "@sentry/node": "6.9.0",
+    "@sentry/node": "6.10.0",
     "@sentry/tracing": "6.10.0",
     "basic-auth": "2.0.1",
     "body-parser": "1.19.0",
