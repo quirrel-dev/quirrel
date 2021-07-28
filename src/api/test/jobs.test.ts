@@ -112,7 +112,7 @@ describeAcrossBackends("Jobs", (backend) => {
       );
   });
 
-  test.only("enqueueing a job with an invalid timezone", async () => {
+  test("enqueueing a job with an invalid timezone", async () => {
     await request(quirrel)
       .post("/queues/" + endpoint)
       .send({
