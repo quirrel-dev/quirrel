@@ -264,8 +264,10 @@ export class QuirrelClient<T> {
 
     const quirrelBaseUrl =
       args.config?.quirrelBaseUrl ?? config.getQuirrelBaseUrl();
-    const applicationBaseUrl = config.prefixWithProtocol(
-      args.config?.applicationBaseUrl ?? config.getApplicationBaseUrl()!
+    const applicationBaseUrl = config.withoutTrailingSlash(
+      config.prefixWithProtocol(
+        args.config?.applicationBaseUrl ?? config.getApplicationBaseUrl()!
+      )
     );
     this.quirrelBaseUrl = quirrelBaseUrl;
     this.baseUrl =

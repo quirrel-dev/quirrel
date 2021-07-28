@@ -87,6 +87,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "davidsoderberg",
+      "name": "David Söderberg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2233092?v=4",
+      "profile": "https://github.com/davidsoderberg",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

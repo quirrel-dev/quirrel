@@ -12,5 +12,5 @@
     "module": "CommonJS",
     "moduleResolution": "node"
   },
-  "exclude": ["dist", "./*.d.ts", "development-ui", "examples"]
+  "include": ["src"],
 }
