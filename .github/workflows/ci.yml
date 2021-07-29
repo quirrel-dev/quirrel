@@ -36,8 +36,6 @@ jobs:
     - run: npm ci
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
-      with:
-        sudo: false
     - run: npm run build
     - run: npm test -- --coverage
     - name: Coveralls
@@ -62,8 +60,6 @@ jobs:
     - run: npm ci
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
-      with:
-        sudo: false
     - run: npm run test:ci
     - name: Coveralls
       uses: coverallsapp/github-action@master
