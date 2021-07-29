@@ -1,6 +1,9 @@
 import { detectQuirrelCronJob } from "./cron-detector";
 
-const cases = {
+const cases: Record<
+  string,
+  { input: string; output: ReturnType<typeof detectQuirrelCronJob> }
+> = {
   naive: {
     input: `
 import { CronJob } from "quirrel/blitz"
@@ -34,7 +37,8 @@ export default CronJob(
       framework: "blitz",
       isValid: true,
       route: "api/bigBen",
-      schedule: ["*/30 * * * *", "Europe/London"],
+      schedule: "*/30 * * * *",
+      timezone: "Europe/London",
     },
   },
   nonExistantTimezone: {
@@ -50,7 +54,8 @@ export default CronJob(
       framework: "blitz",
       isValid: false,
       route: "api/hourlyCron",
-      schedule: ["@hourly", "Europe/NonExistant"],
+      schedule: "@hourly",
+      timezone: "Europe/NonExistant",
     },
   },
   "with comments": {
