@@ -51,6 +51,9 @@ jobs:
         path-to-lcov: coverage/lcov.info
         parallel: true
     - if: ${{ matrix.node-version == 14 }}
+      run: npm ci
+      working-directory: development-ui
+    - if: ${{ matrix.node-version == 14 }}
       run: npm run test:ci
       working-directory: development-ui
     - if: ${{ matrix.node-version == 14 }}
