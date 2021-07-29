@@ -45,6 +45,9 @@
         },
         "cron": {
           "type": "string"
+        },
+        "cronTimezone": {
+          "type": "string"
         }
       },
       "additionalProperties": false

@@ -27,7 +27,7 @@
   "scripts": {
     "start": "node dist/cjs/src/cli/index.js",
     "test": "DISABLE_TELEMETRY=true jest --forceExit --runInBand",
-    "build": "run-s build:schemas build:**",
+    "build": "run-s build:schemas build:tsc:** build:proxies build:**",
     "build:schemas": "json2ts -i src/api/scheduler/schemas/ -o src/api/scheduler/types/",
     "build:ui": "cd development-ui && npm install --production && npm run build:fastify",
     "build:tsc:esm": "tsc --module es2015 --outDir dist/esm",

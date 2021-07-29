@@ -22,6 +22,9 @@
           },
           "schedule": {
             "type": "string"
+          },
+          "timezone": {
+            "type": "string"
           }
         },
         "required": ["route", "schedule"],

@@ -10,8 +10,8 @@ import { SCANQuerystringParams } from "../types/queues/scan-querystring";
 import { QueuesEndpointParams } from "../types/queues/endpoint-params";
 import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 import { QueuesUpdateCronBody } from "../types/queues/update-cron";
-
-import { isValidRegex } from "../../../shared/is-valid-regex";
+import { isValidCronExpression } from "../../../shared/is-valid-cron";
+import { isValidTimezone } from "../../../shared/repeat";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = fastify.jobs;
@@ -21,7 +21,15 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
   function hasValidCronExpression(body: EnqueueJob): boolean {
     if (body.repeat?.cron) {
-      return isValidRegex(body.repeat.cron);
+      return isValidCronExpression(body.repeat.cron);
+    }
+
+    return true;
+  }
+
+  function hasValidCronTimezone(body: EnqueueJob): boolean {
+    if (body.repeat?.cronTimezone) {
+      return isValidTimezone(body.repeat.cronTimezone);
     }
 
     return true;
@@ -46,6 +54,13 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       "body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference.",
   };
 
+  const INVALID_TIMEZONE_ERROR = {
+    statusCode: 400,
+    error: "Bad Request",
+    message:
+      "body.repeat.cronTimezone is invalid, please provide a valid IANA timezone.",
+  };
+
   fastify.post<{ Body: EnqueueJob; Params: QueuesEndpointParams }>(
     "/:endpoint",
     {
@@ -64,6 +79,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       if (!hasValidCronExpression(body)) {
         return reply.status(400).send(INVALID_CRON_EXPRESSION_ERROR);
+      }
+
+      if (!hasValidCronTimezone(body)) {
+        return reply.status(400).send(INVALID_TIMEZONE_ERROR);
       }
 
       if (request.body.exclusive) {
@@ -110,6 +129,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       if (!body.every(hasValidCronExpression)) {
         return reply.status(400).send(INVALID_CRON_EXPRESSION_ERROR);
+      }
+
+      if (!body.every(hasValidCronTimezone)) {
+        return reply.status(400).send(INVALID_TIMEZONE_ERROR);
       }
 
       const jobs = await Promise.all(
@@ -251,10 +274,17 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       const { tokenId, body } = request;
 
       const cronsAreValid = body.crons.every((cron) =>
-        isValidRegex(cron.schedule)
+        isValidCronExpression(cron.schedule)
       );
       if (!cronsAreValid) {
         return reply.status(400).send("invalid cron expression");
+      }
+
+      const timezonesAreValid = body.crons.every(
+        (cron) => !cron.timezone || isValidTimezone(cron.timezone)
+      );
+      if (!timezonesAreValid) {
+        return reply.status(400).send("invalid timezone");
       }
 
       const response = await jobsRepo.updateCron(tokenId, body);

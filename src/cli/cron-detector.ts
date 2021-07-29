@@ -1,3 +1,4 @@
+import { cronExpression, timezone } from "../client/index";
 import { cron } from "../client/index";
 import fs from "fs";
 import * as chokidar from "chokidar";
@@ -10,6 +11,7 @@ import * as config from "../client/config";
 export interface DetectedCronJob {
   route: string;
   schedule: string;
+  timezone?: string;
   framework: string;
   isValid: boolean;
 }
@@ -24,6 +26,7 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 
   let jobName: string | undefined;
   let cronSchedule: string | undefined;
+  let cronTimezone: string | undefined;
 
   try {
     const ast = babel.parse(file, {
@@ -42,15 +45,32 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
         }
 
         const [jobNameNode, cronScheduleNode] = path.node.arguments;
-        if (
-          jobNameNode.type !== "StringLiteral" ||
-          cronScheduleNode.type !== "StringLiteral"
-        ) {
+        if (jobNameNode.type !== "StringLiteral") {
           return;
         }
 
         jobName = jobNameNode.value;
-        cronSchedule = cronScheduleNode.value;
+
+        if (cronScheduleNode.type === "StringLiteral") {
+          cronSchedule = cronScheduleNode.value;
+        } else if (cronScheduleNode.type === "ArrayExpression") {
+          if (cronScheduleNode.elements.length > 2) {
+            return;
+          }
+
+          const [scheduleNode, timezoneNode] = cronScheduleNode.elements;
+          if (scheduleNode?.type !== "StringLiteral") {
+            return;
+          }
+
+          cronSchedule = scheduleNode.value;
+
+          if (timezoneNode?.type !== "StringLiteral") {
+            return;
+          }
+
+          cronTimezone = timezoneNode.value;
+        }
 
         path.stop();
       },
@@ -63,8 +83,11 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
     return {
       route: config.withoutTrailingSlash(jobName),
       schedule: cronSchedule,
+      timezone: cronTimezone,
       framework: clientFramework,
-      isValid: cron.safeParse(cronSchedule).success,
+      isValid:
+        cron.safeParse(cronSchedule).success &&
+        timezone.optional().safeParse(cronTimezone).success,
     };
   } catch (error) {
     return null;

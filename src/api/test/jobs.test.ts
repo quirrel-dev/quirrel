@@ -112,6 +112,19 @@ describeAcrossBackends("Jobs", (backend) => {
       );
   });
 
+  test("enqueueing a job with an invalid timezone", async () => {
+    await request(quirrel)
+      .post("/queues/" + endpoint)
+      .send({
+        body: JSON.stringify({ foo: "bar" }),
+        repeat: { cron: "* * * * *", cronTimezone: "Europe/NonExistant" },
+      })
+      .expect(
+        400,
+        '{"statusCode":400,"error":"Bad Request","message":"body.repeat.cronTimezone is invalid, please provide a valid IANA timezone."}'
+      );
+  });
+
   describe("enqueueing a job with delay > 32 bit", () => {
     it("does not print TimeoutOverflowWarning", async () => {
       await request(quirrel)

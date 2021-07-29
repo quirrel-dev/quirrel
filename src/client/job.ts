@@ -62,6 +62,11 @@ export interface JobDTO {
     readonly cron?: string;
 
     /**
+     * IANA timezone that's used to interpret `cron`.
+     */
+    readonly cronTimezone?: string;
+
+    /**
      * What repetition the next execution will be.
      * Starts at 1, increments with every execution.
      * @deprecated use top-level count instead.

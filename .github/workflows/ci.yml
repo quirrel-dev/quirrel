@@ -10,7 +10,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: node:${{ matrix.node-version }}
 
     strategy:
       matrix:
@@ -25,39 +24,40 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 6379:6379
     
     env:
-      REDIS_URL: redis://redis:6379
+      REDIS_URL: redis://localhost:6379
       DISABLE_TELEMETRY: true
 
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+    - if: ${{ matrix.node-version == 14 }}
+      uses: microsoft/playwright-github-action@v1
+    - run: npm i -g npm@7
     - run: npm ci
-    - run: npm ci
-      working-directory: development-ui
     - run: npm run build
     - run: npm test -- --coverage
-    - name: Coveralls
+    - if: ${{ matrix.node-version == 14 }}
+      name: Coveralls Quirrel
       uses: coverallsapp/github-action@master
-      if: ${{ matrix.node-version == 14 }}
       with:
         flag-name: quirrel
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: coverage/lcov.info
         parallel: true
-
-  dev-ui-test:
-    name: Development UI Tests
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: development-ui
-    steps:
-    - uses: actions/checkout@v2
-    - uses: microsoft/playwright-github-action@v1
-    - run: npm ci
-    - run: npm run test:ci
-    - name: Coveralls
+    - if: ${{ matrix.node-version == 14 }}
+      run: npm ci
+      working-directory: development-ui
+    - if: ${{ matrix.node-version == 14 }}
+      run: npm run test:ci
+      working-directory: development-ui
+    - if: ${{ matrix.node-version == 14 }}
+      name: Coveralls Dev UI
       uses: coverallsapp/github-action@master
       with:
         flag-name: development-ui
@@ -65,14 +65,8 @@ jobs:
         base-path: development-ui
         path-to-lcov: development-ui/coverage/lcov.info
         parallel: true
-
-  finish-coveralls:
-    needs:
-      - build
-      - dev-ui-test
-    runs-on: ubuntu-latest
-    steps:
-    - name: Coveralls Finished
+    - if: ${{ matrix.node-version == 14 }}
+      name: Coveralls Finished
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
