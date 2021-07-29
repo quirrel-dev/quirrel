@@ -1,7 +1,6 @@
 {
   "scripts": {
     "dev": "parcel public/index.pug",
-    "vercel-build": "cd .. && npm run build && cd development-ui && npm run build",
     "build": "parcel build public/index.pug",
     "build:fastify": "parcel build public/fastify.pug --dist-dir ../dist/ui",
     "build:analyze": "PARCEL_BUNDLE_ANALYZER=true npm run build -- --reporter @parcel/reporter-bundle-analyzer",
