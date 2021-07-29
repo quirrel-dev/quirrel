@@ -36,8 +36,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm i -g npm@7
     - run: npm ci
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
     - run: npm run build
     - run: npm test -- --coverage
     - name: Coveralls
@@ -63,8 +61,6 @@ jobs:
     - uses: microsoft/playwright-github-action@v1
     - run: npm i -g npm@7
     - run: npm ci
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
     - run: npm run test:ci
     - name: Coveralls
       uses: coverallsapp/github-action@master
