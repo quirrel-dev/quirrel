@@ -1,6 +1,11 @@
-import { cron, every } from "./owl";
+import { cron, every, isValidTimezone } from "./repeat";
 
 describe("owl config", () => {
+  test("isValidTimezone", () => {
+    expect(isValidTimezone("Etc/UTC")).toBe(true);
+    expect(isValidTimezone("Europe/Berlin")).toBe(true);
+    expect(isValidTimezone("Europe/NonExistantCity")).toBe(false);
+  });
   describe("cron", () => {
     describe("when passed a secondly job", () => {
       it("returns the next second", () => {
@@ -11,6 +16,15 @@ describe("owl config", () => {
           )
         ).toEqual(new Date(2020, 10, 10, 10, 10, 11, 0));
       });
+    });
+
+    it("respects timezones", () => {
+      expect(
+        cron(
+          new Date("2021-04-24T12:35:44.447Z"),
+          "@daily;Europe/Berlin" // every second
+        )
+      ).toEqual(new Date("2021-04-25T00:00:00.000+02:00"));
     });
 
     describe("when using L (last day)", () => {

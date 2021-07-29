@@ -47,7 +47,7 @@ It's recommended to deploy Quirrel using the Docker Image: https://github.com/or
 
 Set the `REDIS_URL` environment variable to a connection string for your Redis instance. **Make sure your Redis instance is persistent**.
 
-Set the `PASSPHRASE` environment variable to some secret passphrase. You can also specify multiple by `:`-separating them.
+Set the `PASSPHRASES` environment variable to some secret passphrase. You can also specify multiple by `:`-separating them.
 
 ### Acquire a token
 

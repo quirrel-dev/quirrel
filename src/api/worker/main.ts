@@ -13,6 +13,7 @@ cliWithConfig(async (config) => {
     DISABLE_TELEMETRY,
     INCIDENT_RECEIVER_ENDPOINT,
     INCIDENT_RECEIVER_PASSPHRASE,
+    ENABLE_SSRF_PREVENTION,
   } = config;
 
   const worker = await createWorker({
@@ -22,6 +23,7 @@ cliWithConfig(async (config) => {
     concurrency: Number.parseInt(CONCURRENCY ?? "") || 100,
     disableTelemetry: Boolean(DISABLE_TELEMETRY),
     logger: new StructuredLogger(),
+    enableSSRFPrevention: !!ENABLE_SSRF_PREVENTION,
     incidentReceiver: INCIDENT_RECEIVER_ENDPOINT
       ? {
           endpoint: INCIDENT_RECEIVER_ENDPOINT,

@@ -1,19 +1,17 @@
-import { cron, QuirrelClient } from "../client/index";
+import { cronExpression, timezone } from "../client/index";
+import { cron } from "../client/index";
 import fs from "fs";
-import type { FastifyInstance } from "fastify";
-import { makeFetchMockConnectedTo } from "./fetch-mock";
 import * as chokidar from "chokidar";
 import { parseChokidarRulesFromGitignore } from "./parse-gitignore";
 import * as babel from "@babel/parser";
 import traverse from "@babel/traverse";
-
-function requireFrameworkClientForDevelopmentDefaults(framework: string) {
-  require(`../${framework}`);
-}
+import path from "path";
+import * as config from "../client/config";
 
 export interface DetectedCronJob {
   route: string;
   schedule: string;
+  timezone?: string;
   framework: string;
   isValid: boolean;
 }
@@ -28,44 +26,72 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
 
   let jobName: string | undefined;
   let cronSchedule: string | undefined;
+  let cronTimezone: string | undefined;
 
-  const ast = babel.parse(file, { sourceType: "unambiguous" });
-  traverse(ast, {
-    CallExpression(path) {
-      const { callee } = path.node;
-      if (callee.type !== "Identifier" || callee.name !== "CronJob") {
-        return;
-      }
+  try {
+    const ast = babel.parse(file, {
+      sourceType: "unambiguous",
+      plugins: ["typescript"],
+    });
+    traverse(ast, {
+      CallExpression(path) {
+        const { callee } = path.node;
+        if (callee.type !== "Identifier" || callee.name !== "CronJob") {
+          return;
+        }
 
-      if (path.node.arguments.length < 3) {
-        return;
-      }
+        if (path.node.arguments.length < 3) {
+          return;
+        }
 
-      const [jobNameNode, cronScheduleNode] = path.node.arguments;
-      if (
-        jobNameNode.type !== "StringLiteral" ||
-        cronScheduleNode.type !== "StringLiteral"
-      ) {
-        return;
-      }
+        const [jobNameNode, cronScheduleNode] = path.node.arguments;
+        if (jobNameNode.type !== "StringLiteral") {
+          return;
+        }
 
-      jobName = jobNameNode.value;
-      cronSchedule = cronScheduleNode.value;
+        jobName = jobNameNode.value;
 
-      path.stop();
-    },
-  });
+        if (cronScheduleNode.type === "StringLiteral") {
+          cronSchedule = cronScheduleNode.value;
+        } else if (cronScheduleNode.type === "ArrayExpression") {
+          if (cronScheduleNode.elements.length > 2) {
+            return;
+          }
 
-  if (!cronSchedule || !jobName) {
+          const [scheduleNode, timezoneNode] = cronScheduleNode.elements;
+          if (scheduleNode?.type !== "StringLiteral") {
+            return;
+          }
+
+          cronSchedule = scheduleNode.value;
+
+          if (timezoneNode?.type !== "StringLiteral") {
+            return;
+          }
+
+          cronTimezone = timezoneNode.value;
+        }
+
+        path.stop();
+      },
+    });
+
+    if (!cronSchedule || !jobName) {
+      return null;
+    }
+
+    return {
+      route: config.withoutTrailingSlash(jobName),
+      schedule: cronSchedule,
+      timezone: cronTimezone,
+      framework: clientFramework,
+      isValid:
+        cron.safeParse(cronSchedule).success &&
+        timezone.optional().safeParse(cronTimezone).success,
+    };
+  } catch (error) {
     return null;
   }
-
-  return {
-    route: jobName,
-    schedule: cronSchedule,
-    framework: clientFramework,
-    isValid: cron.safeParse(cronSchedule).success,
-  };
 }
 
 export class CronDetector {
@@ -74,12 +100,11 @@ export class CronDetector {
 
   constructor(
     private readonly cwd: string,
-    private readonly connectedTo?: FastifyInstance,
-    private readonly dryRun?: boolean
+    private readonly onChange?: (jobs: DetectedCronJob[]) => void
   ) {
     const rules = parseChokidarRulesFromGitignore(cwd);
     this.watcher = chokidar.watch(["**/*.[jt]s", "**/*.[jt]sx"], {
-      ignored: ["**/node_modules", ...rules.ignoredPaths],
+      ignored: ["node_moduules", "**/node_modules", ...rules.ignoredPaths],
       cwd,
     });
 
@@ -105,22 +130,6 @@ export class CronDetector {
     });
   }
 
-  private getQuirrelClient(job: DetectedCronJob) {
-    if (this.dryRun) {
-      return undefined;
-    }
-
-    requireFrameworkClientForDevelopmentDefaults(job.framework);
-
-    return new QuirrelClient({
-      async handler() {},
-      route: job.route,
-      fetch: this.connectedTo
-        ? makeFetchMockConnectedTo(this.connectedTo)
-        : undefined,
-    });
-  }
-
   private pathToCronJob: Record<string, DetectedCronJob> = {};
 
   public getDetectedJobs(): DetectedCronJob[] {
@@ -131,24 +140,20 @@ export class CronDetector {
     await this.onJobChanged(job, filePath);
   }
 
+  private emitChange() {
+    this.onChange?.(this.getDetectedJobs());
+  }
+
   private async onJobRemoved(job: DetectedCronJob, filePath: string) {
     delete this.pathToCronJob[filePath];
 
-    const client = this.getQuirrelClient(job);
-    await client?.delete("@cron");
+    this.emitChange();
   }
 
   private async onJobChanged(job: DetectedCronJob, filePath: string) {
     this.pathToCronJob[filePath] = job;
 
-    const client = this.getQuirrelClient(job);
-    await client?.enqueue(null, {
-      id: "@cron",
-      override: true,
-      repeat: {
-        cron: job.schedule,
-      },
-    });
+    this.emitChange();
   }
 
   private on(fileChangeType: "changed" | "deleted" | "added") {
@@ -163,7 +168,7 @@ export class CronDetector {
         return;
       }
 
-      const contents = fs.readFileSync(filePath, "utf-8");
+      const contents = fs.readFileSync(path.join(this.cwd, filePath), "utf-8");
       const newJob = detectQuirrelCronJob(contents);
 
       if (!newJob) {

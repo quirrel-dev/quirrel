@@ -3,6 +3,11 @@ import IORedis from "ioredis";
 import { createRedisFactory } from "../../api/shared/create-redis";
 import { CronDetector } from "../cron-detector";
 import { Command } from "commander";
+import * as config from "../../client/config";
+
+function requireFrameworkClientForDevelopmentDefaults(framework: string) {
+  require(`../../${framework}`);
+}
 
 async function isRedisConnectionIntact(redisUrl: string) {
   try {
@@ -63,7 +68,17 @@ export default function registerRun(program: Command) {
         let cronDetector: CronDetector | undefined;
 
         if (cron) {
-          cronDetector = new CronDetector(process.cwd(), quirrel.server.app);
+          cronDetector = new CronDetector(process.cwd(), async (jobs) => {
+            const firstJob = jobs[0];
+            if (firstJob) {
+              requireFrameworkClientForDevelopmentDefaults(firstJob.framework);
+            }
+
+            await quirrel.server.app.jobs.updateCron("anonymous", {
+              baseUrl: config.getApplicationBaseUrl(),
+              crons: jobs,
+            });
+          });
           await cronDetector.awaitReady();
         }
 

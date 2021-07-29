@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "/queues/update-cron body",
+  "type": "object",
+  "properties": {
+    "baseUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "The baseUrl of the jobs to be created"
+    },
+    "dryRun": {
+      "type": "boolean",
+      "description": "enable to simulate applying this"
+    },
+    "crons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "route": {
+            "type": "string"
+          },
+          "schedule": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "required": ["route", "schedule"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["baseUrl", "crons"],
+  "additionalProperties": false
+}

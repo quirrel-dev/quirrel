@@ -22,7 +22,7 @@ async enqueue(
     repeat?: {
       every?: number | string;
       times?: number;
-      cron?: string;
+      cron?: string | [schedule: string, timezone: string];
     }
     retry?: (number | string)[];
 
@@ -76,13 +76,12 @@ billingQueue.enqueue(undefined, {
   id: "billing", // makes sure job isn't duplicated
   override: true, // if another job with that ID already exists, override it
   repeat: {
-    cron: "* * * * 1 *",
+    cron: ["* * * * 1 *", "Europe/Berlin"],
   },
 });
 ```
 
-CRON jobs are scheduled based on UTC.
-
+If no timezone is specified, it defaults to `Etc/UTC`.
 #### Order Queue
 
 ```ts

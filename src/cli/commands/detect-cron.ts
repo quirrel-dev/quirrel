@@ -15,7 +15,7 @@ export function formatDetectedJobsAsTable(jobs: DetectedCronJob[]) {
 }
 
 export async function detectCron(cwd: string) {
-  const detector = new CronDetector(cwd, undefined, true);
+  const detector = new CronDetector(cwd);
   await detector.awaitReady();
 
   const jobs = detector.getDetectedJobs();
@@ -40,7 +40,7 @@ function detectedJobsToRouteScheduleMap(
     .map((j) => ({ route: j.route, schedule: j.schedule }));
 }
 
-export default async function registerDetectCron(program: Command) {
+export default function registerDetectCron(program: Command) {
   program
     .command("detect-cron [cwd]")
     .description("Detects cron jobs.")

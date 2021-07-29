@@ -13,6 +13,7 @@ cliWithConfig(async (config) => {
     DISABLE_TELEMETRY,
     INCIDENT_RECEIVER_ENDPOINT,
     INCIDENT_RECEIVER_PASSPHRASE,
+    ENABLE_SSRF_PREVENTION,
     JWT_PUBLIC_KEY,
   } = config;
 
@@ -25,6 +26,7 @@ cliWithConfig(async (config) => {
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
     disableTelemetry: Boolean(DISABLE_TELEMETRY),
     logger: "structured",
+    enableSSRFPrevention: !!ENABLE_SSRF_PREVENTION,
     incidentReceiver: INCIDENT_RECEIVER_ENDPOINT
       ? {
           endpoint: INCIDENT_RECEIVER_ENDPOINT,

@@ -9,7 +9,8 @@ import fetch from "cross-fetch";
 import type { IncomingHttpHeaders } from "http";
 import pack from "../../package.json";
 import * as EnhancedJSON from "./enhanced-json";
-import { isValidRegex } from "../shared/is-valid-regex";
+import { isValidCronExpression } from "../shared/is-valid-cron";
+import { isValidTimezone } from "../shared/repeat";
 
 export { Job };
 
@@ -86,12 +87,21 @@ const timeDuration = (fieldName = "duration") =>
     vercelMs,
   ]);
 
-export const cron = z
+export const cronExpression = z
   .string()
   .refine(
-    isValidRegex,
+    isValidCronExpression,
     "Please provide a valid Cron expression. See https://github.com/harrisiirak/cron-parser for reference"
   );
+
+export const timezone = z
+  .string()
+  .refine(isValidTimezone, "Please provide a valid IANA timezone.");
+
+export const cron = z.union([
+  cronExpression,
+  z.tuple([cronExpression, timezone]),
+]);
 
 const EnqueueJobOptionsSchema = z.object({
   id: z.string().optional(),
@@ -184,8 +194,11 @@ export interface EnqueueJobOptions {
      * Schedules the job according to the Cron expression.
      * @see https://github.com/harrisiirak/cron-parser for supported syntax
      * If `delay` isn't set, the first repetition will be executed immediately.
+     *
+     * To specify the timezone, pass a tuple with the IANA timezone in second place.
+     * Defaults to Etc/UTC.
      */
-    cron?: string;
+    cron?: string | [expression: string, timezone: string];
   };
 }
 
@@ -251,8 +264,10 @@ export class QuirrelClient<T> {
 
     const quirrelBaseUrl =
       args.config?.quirrelBaseUrl ?? config.getQuirrelBaseUrl();
-    const applicationBaseUrl = config.prefixWithProtocol(
-      args.config?.applicationBaseUrl ?? config.getApplicationBaseUrl()!
+    const applicationBaseUrl = config.withoutTrailingSlash(
+      config.prefixWithProtocol(
+        args.config?.applicationBaseUrl ?? config.getApplicationBaseUrl()!
+      )
     );
     this.quirrelBaseUrl = quirrelBaseUrl;
     this.baseUrl =
@@ -312,12 +327,29 @@ export class QuirrelClient<T> {
       stringifiedBody = await this.encryptor.encrypt(stringifiedBody);
     }
 
+    let cron = {};
+    if (options.repeat?.cron) {
+      if (typeof options.repeat.cron === "string") {
+        cron = { cron: options.repeat.cron };
+      } else {
+        cron = {
+          cron: options.repeat.cron[0],
+          cronTimezone: options.repeat.cron[1],
+        };
+      }
+    }
+
     return {
       ...this.defaultJobOptions,
       body: stringifiedBody,
       delay,
       id: options.id,
-      repeat: options.repeat,
+      repeat: options.repeat
+        ? {
+            ...options.repeat,
+            ...cron,
+          }
+        : undefined,
       retry: options.retry?.map(parseDuration),
       override: options.override,
     };
