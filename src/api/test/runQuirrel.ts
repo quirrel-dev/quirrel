@@ -10,7 +10,7 @@ export async function run(
       ? process.env.REDIS_URL ?? "redis://localhost:6379"
       : undefined
   );
-  const { httpServer, close } = await runQuirrel({
+  const { httpServer, close, server } = await runQuirrel({
     port: 0,
     redisFactory,
     disableTelemetry: true,
@@ -23,6 +23,7 @@ export async function run(
   return {
     teardown: close,
     server: httpServer,
+    app: server,
     redis,
   };
 }
