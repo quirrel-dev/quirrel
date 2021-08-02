@@ -411,6 +411,9 @@ export class QuirrelClient<T> {
 
   private async decryptAndDecodeBody(body: string): Promise<T> {
     if (this.encryptor) {
+      if (body === "null") {
+        return null as any;
+      }
       if (this.catchDecryptionErrors) {
         try {
           body = await this.encryptor.decrypt(body);
