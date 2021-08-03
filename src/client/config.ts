@@ -25,6 +25,14 @@ export function withoutTrailingSlash(url: string): string {
   return url;
 }
 
+export function withoutLeadingSlash(url: string): string {
+  if (url.startsWith("/")) {
+    return url.slice(1);
+  }
+
+  return url;
+}
+
 export function prefixWithProtocol(string: string): string {
   if (string.startsWith("http://") || string.startsWith("https://")) {
     return string;

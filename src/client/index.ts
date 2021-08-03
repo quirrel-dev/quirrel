@@ -246,7 +246,7 @@ export class QuirrelClient<T> {
   private encryptor;
   private defaultHeaders: Record<string, string>;
   private quirrelBaseUrl;
-  private baseUrl;
+  private applicationBaseUrl;
   private token;
   private fetch;
   private catchDecryptionErrors;
@@ -264,18 +264,14 @@ export class QuirrelClient<T> {
 
     const quirrelBaseUrl =
       args.config?.quirrelBaseUrl ?? config.getQuirrelBaseUrl();
-    const applicationBaseUrl = config.withoutTrailingSlash(
+    this.applicationBaseUrl = config.withoutTrailingSlash(
       config.prefixWithProtocol(
         args.config?.applicationBaseUrl ?? config.getApplicationBaseUrl()!
       )
     );
     this.quirrelBaseUrl = quirrelBaseUrl;
-    this.baseUrl =
-      quirrelBaseUrl +
-      "/queues/" +
-      encodeURIComponent(applicationBaseUrl + "/" + args.route);
     this.token = args.config?.token ?? config.getQuirrelToken();
-    this.route = args.route;
+    this.route = config.withoutLeadingSlash(args.route);
     this.encryptor = getEncryptor(
       args.config?.encryptionSecret ?? config.getEncryptionSecret(),
       args.config?.oldSecrets ?? config.getOldEncryptionSecrets() ?? undefined
@@ -284,6 +280,14 @@ export class QuirrelClient<T> {
     this.fetch = args.fetch ?? fetch;
     this.signaturePublicKey =
       args.config?.signaturePublicKey ?? config.getSignaturePublicKey();
+  }
+
+  private get baseUrl() {
+    return (
+      this.quirrelBaseUrl +
+      "/queues/" +
+      encodeURIComponent(this.applicationBaseUrl + "/" + this.route)
+    );
   }
 
   async makeRequest(uri: string, init?: RequestInit) {
