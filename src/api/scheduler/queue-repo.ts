@@ -1,6 +1,23 @@
 import type { Redis } from "ioredis";
 import { JobsRepo } from "./jobs-repo";
 
+function idempotent<Args extends any[]>(
+  doIt: (...args: Args) => Promise<void>,
+  keyBy: (...args: Args) => string = (...args) => args.join(";")
+) {
+  const executedKeys = new Set<string>();
+
+  return async (...args: Args) => {
+    const key = keyBy(...args);
+    if (executedKeys.has(key)) {
+      return;
+    }
+
+    await doIt(...args);
+    executedKeys.add(key);
+  };
+}
+
 export class QueueRepo {
   constructor(
     private readonly redis: Redis,
@@ -9,9 +26,9 @@ export class QueueRepo {
 
   private isMigrated = process.env.SKIP_QUEUE_REPO_MIGRATION === "true";
 
-  public async add(endpoint: string, tokenId: string) {
+  public add = idempotent(async (endpoint: string, tokenId: string) => {
     await this.redis.sadd(`queues:by-token:${tokenId}`, endpoint);
-  }
+  });
 
   public async get(tokenId: string) {
     await this.ensureMigrated();
