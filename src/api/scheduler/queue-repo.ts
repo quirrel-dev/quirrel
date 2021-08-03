@@ -1,7 +1,7 @@
 import type { Redis } from "ioredis";
 import { JobsRepo } from "./jobs-repo";
 
-function idempotent<Args extends any[]>(
+export function idempotent<Args extends any[]>(
   doIt: (...args: Args) => Promise<void>,
   keyBy: (...args: Args) => string = (...args) => args.join(";")
 ) {
