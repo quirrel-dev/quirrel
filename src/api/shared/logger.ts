@@ -39,12 +39,20 @@ export interface Logger {
   // ...
 }
 
-export type LoggerType = "dx" | "structured" | "none";
+export type LoggerType = "dx" | "structured" | "none" | Logger;
 
 export function getLogger(
-  type: LoggerType,
+  type?: LoggerType,
   logger: PinoLogger = pino({ level: process.env.LOG_LEVEL || "trace" })
 ): Logger | undefined {
+  if (!type) {
+    return undefined;
+  }
+
+  if (typeof type !== "string") {
+    return type;
+  }
+
   switch (type) {
     case "none":
       return undefined;

@@ -6,7 +6,7 @@ import { Telemetrist } from "./shared/telemetrist";
 
 export type QuirrelConfig = Omit<QuirrelServerConfig, "logger"> &
   Omit<QuirrelWorkerConfig, "enableUsageMetering" | "logger"> & {
-    logger: LoggerType;
+    logger?: LoggerType;
   };
 
 export async function runQuirrel(config: QuirrelConfig) {
