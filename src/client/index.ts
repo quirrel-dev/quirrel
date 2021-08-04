@@ -430,6 +430,10 @@ export class QuirrelClient<T> {
       }
     }
 
+    if (body === "") {
+      return null as any;
+    }
+
     return EnhancedJSON.parse(body);
   }
 
