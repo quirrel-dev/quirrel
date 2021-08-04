@@ -81,7 +81,7 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
     }
 
     return {
-      route: config.withoutTrailingSlash(jobName),
+      route: config.withoutLeadingSlash(jobName),
       schedule: cronSchedule,
       timezone: cronTimezone,
       framework: clientFramework,

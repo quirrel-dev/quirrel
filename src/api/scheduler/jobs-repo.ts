@@ -10,6 +10,7 @@ import Owl, { Closable, Job } from "@quirrel/owl";
 import { QueueRepo } from "./queue-repo";
 import { Redis } from "ioredis";
 import { fastifyDecoratorPlugin } from "./helper/fastify-decorator-plugin";
+import * as config from "../../client/config";
 
 interface PaginationOpts {
   cursor: number;
@@ -47,7 +48,9 @@ export class JobsRepo implements Closable {
 
     let cron: Pick<NonNullable<JobDTO["repeat"]>, "cron" | "cronTimezone"> = {};
     if (job.schedule?.type === "cron") {
-      const [cronExpression, cronTimezone] = parseTimezonedCron(job.schedule.meta);
+      const [cronExpression, cronTimezone] = parseTimezonedCron(
+        job.schedule.meta
+      );
       cron = { cron: cronExpression, cronTimezone };
     }
 
@@ -234,12 +237,18 @@ export class JobsRepo implements Closable {
     if (!dryRun) {
       await Promise.all(
         crons.map(async ({ route, schedule, timezone }) => {
-          await this.enqueue(tokenId, `${baseUrl}/${route}`, {
-            id: "@cron",
-            body: "null",
-            override: true,
-            repeat: { cron: schedule, cronTimezone: timezone },
-          });
+          await this.enqueue(
+            tokenId,
+            `${config.withoutTrailingSlash(
+              baseUrl
+            )}/${config.withoutLeadingSlash(route)}`,
+            {
+              id: "@cron",
+              body: "null",
+              override: true,
+              repeat: { cron: schedule, cronTimezone: timezone },
+            }
+          );
         })
       );
     }
