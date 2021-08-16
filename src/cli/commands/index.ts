@@ -1,9 +1,9 @@
-import { runQuirrel } from "../../api";
+import { QuirrelConfig, runQuirrel } from "../../api";
 import IORedis from "ioredis";
 import { createRedisFactory } from "../../api/shared/create-redis";
 import { CronDetector } from "../cron-detector";
 import { Command } from "commander";
-import * as config from "../../client/config";
+import { getApplicationBaseUrl } from "../../client/config";
 
 function requireFrameworkClientForDevelopmentDefaults(framework: string) {
   require(`../../${framework}`);
@@ -21,6 +21,47 @@ async function isRedisConnectionIntact(redisUrl: string) {
 
 function collect(value: string, previous: string[] = []) {
   return previous.concat([value]);
+}
+
+export async function runQuirrelDev(
+  config: Omit<QuirrelConfig, "redisFactory"> & {
+    redisUrl?: string;
+    cronCwd?: string;
+  }
+) {
+  const { redisUrl, cronCwd } = config;
+  if (redisUrl) {
+    if (!(await isRedisConnectionIntact(redisUrl))) {
+      throw new Error("Couldn't connect to Redis.");
+    }
+  }
+
+  const quirrel = await runQuirrel({
+    ...config,
+    redisFactory: createRedisFactory(redisUrl),
+  });
+
+  let cronDetector: CronDetector | undefined;
+
+  if (cronCwd) {
+    cronDetector = new CronDetector(cronCwd, async (jobs) => {
+      const firstJob = jobs[0];
+      if (firstJob) {
+        requireFrameworkClientForDevelopmentDefaults(firstJob.framework);
+      }
+
+      await quirrel.server.app.jobs.updateCron("anonymous", {
+        baseUrl: getApplicationBaseUrl(),
+        crons: jobs,
+      });
+    });
+    await cronDetector.awaitReady();
+  }
+
+  return async () => {
+    await quirrel.close();
+    await cronDetector?.close();
+  };
 }
 
 export default function registerRun(program: Command) {
@@ -48,16 +89,9 @@ export default function registerRun(program: Command) {
         port: string;
         cron: boolean;
       }) => {
-        if (redisUrl) {
-          if (!(await isRedisConnectionIntact(redisUrl))) {
-            console.log("Couldn't connect to Redis.");
-            process.exit(1);
-          }
-        }
-
-        const quirrel = await runQuirrel({
-          redisFactory: createRedisFactory(redisUrl),
-          runningInDocker: false,
+        const exit = await runQuirrelDev({
+          redisUrl,
+          cronCwd: cron ? process.cwd() : undefined,
           passphrases: passphrase,
           host,
           port: Number(port),
@@ -65,26 +99,8 @@ export default function registerRun(program: Command) {
           logger: "dx",
         });
 
-        let cronDetector: CronDetector | undefined;
-
-        if (cron) {
-          cronDetector = new CronDetector(process.cwd(), async (jobs) => {
-            const firstJob = jobs[0];
-            if (firstJob) {
-              requireFrameworkClientForDevelopmentDefaults(firstJob.framework);
-            }
-
-            await quirrel.server.app.jobs.updateCron("anonymous", {
-              baseUrl: config.getApplicationBaseUrl(),
-              crons: jobs,
-            });
-          });
-          await cronDetector.awaitReady();
-        }
-
         process.on("SIGINT", async () => {
-          await quirrel.close();
-          await cronDetector?.close();
+          await exit();
           process.exit();
         });
       }
