@@ -35,19 +35,19 @@
     "typescript": "^4.2.3"
   },
   "devDependencies": {
-    "@parcel/reporter-bundle-analyzer": "^2.0.0-nightly.1694",
-    "@types/chai": "^4.2.16",
-    "@types/ioredis": "^4.26.0",
-    "@types/jest": "^27.0.1",
-    "babel-plugin-istanbul": "^6.0.0",
-    "chai": "^4.3.4",
-    "ioredis-mock": "^5.4.1",
+    "@parcel/reporter-bundle-analyzer": "2.0.0-nightly.1694",
+    "@types/chai": "4.2.21",
+    "@types/ioredis": "4.26.6",
+    "@types/jest": "27.0.1",
+    "babel-plugin-istanbul": "6.0.0",
+    "chai": "4.3.4",
+    "ioredis-mock": "5.6.0",
     "jest": "^27.0.4",
-    "jest-playwright-preset": "^1.6.0",
-    "nyc": "^15.1.0",
+    "jest-playwright-preset": "1.7.0",
+    "nyc": "15.1.0",
     "playwright": "^1.10.0",
-    "serve": "^12.0.0",
-    "start-server-and-test": "^1.12.1",
-    "ts-jest": "^27.0.3"
+    "serve": "12.0.0",
+    "start-server-and-test": "1.13.1",
+    "ts-jest": "27.0.4"
   }
 }
