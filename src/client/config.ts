@@ -45,11 +45,15 @@ export function prefixWithProtocol(string: string): string {
   }
 }
 
+function normalisedURL(string: string) {
+  return prefixWithProtocol(withoutTrailingSlash(string));
+}
+
 export function getQuirrelBaseUrl(): string | undefined {
   const fromEnvironment =
     process.env.QUIRREL_API_URL ?? process.env.QUIRREL_URL;
   if (fromEnvironment) {
-    return prefixWithProtocol(withoutTrailingSlash(fromEnvironment));
+    return normalisedURL(fromEnvironment);
   }
 
   return isProduction() ? "https://api.quirrel.dev" : "http://localhost:9181";
@@ -99,7 +103,7 @@ export function getApplicationBaseUrl(): string {
     throw new Error("Please specify QUIRREL_BASE_URL.");
   }
 
-  return prefixWithProtocol(baseUrl);
+  return normalisedURL(baseUrl);
 }
 
 export function registerDevelopmentDefaults({
