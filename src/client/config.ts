@@ -73,9 +73,27 @@ export function getOldEncryptionSecrets(): string[] | null {
 
 let developmentApplicationBaseUrl: string | undefined;
 
+function getNetlifyURL() {
+  const { SITE_ID, NETLIFY_DEV, DEPLOY_URL } = process.env;
+  if (SITE_ID) {
+    return SITE_ID + ".netlify.app";
+  } else {
+    if (NETLIFY_DEV) {
+      return DEPLOY_URL;
+    }
+  }
+}
+
+function getVercelURL() {
+  return process.env.VERCEL_URL;
+}
+
 export function getApplicationBaseUrl(): string {
   const baseUrl =
-    resolveEnvReference("QUIRREL_BASE_URL") || developmentApplicationBaseUrl;
+    resolveEnvReference("QUIRREL_BASE_URL") ||
+    getNetlifyURL() ||
+    getVercelURL() ||
+    developmentApplicationBaseUrl;
 
   if (!baseUrl) {
     throw new Error("Please specify QUIRREL_BASE_URL.");
