@@ -48,7 +48,13 @@ describeAcrossBackends("Activity", (backend) => {
         log.push("connect");
 
         connection.on("message", (message) => {
-          log.push(JSON.parse(message.utf8Data!));
+          log.push(
+            JSON.parse(
+              message.type === "utf8"
+                ? message.utf8Data
+                : message.binaryData.toString()
+            )
+          );
         });
 
         connection.on("close", () => {
