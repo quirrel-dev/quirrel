@@ -53,16 +53,10 @@ test("exclusive (repro #717)", async () => {
   }
 
   await waitUntil(() => log.length === 6, 1000);
-  expect(log).toEqual([
-    "started 2",
-    "finished 2",
-
-    "started 1",
-    "finished 1",
-
-    "started 0",
-    "finished 0",
-  ]);
+  const i = (s: string) => log.indexOf(s);
+  expect(i("finished 0") - i("started 0")).toBe(1);
+  expect(i("finished 1") - i("started 1")).toBe(1);
+  expect(i("finished 2") - i("started 2")).toBe(1);
 
   server.teardown();
   endpoint.close();
