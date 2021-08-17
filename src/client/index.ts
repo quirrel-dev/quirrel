@@ -356,6 +356,7 @@ export class QuirrelClient<T> {
         : undefined,
       retry: options.retry?.map(parseDuration),
       override: options.override,
+      exclusive: options.exclusive,
     };
   }
 
