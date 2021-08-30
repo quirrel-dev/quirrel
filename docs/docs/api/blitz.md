@@ -9,10 +9,10 @@ title: Blitz.js
 import { Queue } from "quirrel/blitz";
 
 export default Queue(
-    "api/someQueue",
-    async (job, meta) => {
-        // do something
-    }
+  "api/someQueue",
+  async (job, meta) => {
+      // do something
+  }
 );
 ```
 
@@ -23,9 +23,9 @@ Make sure to export it from an [API Route](https://blitzjs.com/docs/api-routes),
 
 ```ts
 function Queue<T>(
-    path: string,
-    worker: (job: T, meta: JobMeta): Promise<void>,
-    defaultJobOptions?: { exclusive?: boolean }
+  path: string,
+  worker: (job: T, meta: JobMeta): Promise<void>,
+  defaultJobOptions?: { exclusive?: boolean }
 ): QueueInstance<T>
 ```
 

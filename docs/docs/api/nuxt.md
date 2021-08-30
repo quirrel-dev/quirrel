@@ -29,9 +29,9 @@ Make sure to export it from a [Server Middleware](https://nuxtjs.org/docs/2.x/co
 
 ```ts
 function Queue<T>(
-    path: string,
-    worker: (job: T, meta: JobMeta): Promise<void>,
-    defaultJobOptions?: { exclusive?: boolean }
+  path: string,
+  worker: (job: T, meta: JobMeta): Promise<void>,
+  defaultJobOptions?: { exclusive?: boolean }
 ): QueueInstance<T>
 ```
 

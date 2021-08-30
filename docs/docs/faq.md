@@ -20,8 +20,8 @@ You can use something like [`concurrently`](https://github.com/kimmobrunfeldt/co
 
 ```json
 "scripts": {
-    "dev": "concurrently --raw \"quirrel\" \"next dev\"",
-    ...
+  "dev": "concurrently --raw \"quirrel\" \"next dev\"",
+  ...
 }
 ```
 

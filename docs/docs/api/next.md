@@ -6,10 +6,10 @@ title: Next.js
 import { Queue } from "quirrel/next";
 
 export default Queue(
-    "api/someQueue",
-    async (job, meta) => {
-        // do something
-    }
+"api/someQueue",
+  async (job, meta) => {
+    // do something
+  }
 );
 ```
 
@@ -20,9 +20,9 @@ Make sure to export it from an [API Route](https://nextjs.org/docs/api-routes/in
 
 ```ts
 function Queue<T>(
-    path: string,
-    worker: (job: T, meta: JobMeta): Promise<void>,
-    defaultJobOptions?: { exclusive?: boolean }
+  path: string,
+  worker: (job: T, meta: JobMeta): Promise<void>,
+  defaultJobOptions?: { exclusive?: boolean }
 ): QueueInstance<T>
 ```
 

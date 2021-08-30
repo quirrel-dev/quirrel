@@ -27,9 +27,9 @@ Since there's no convention for Express's default development port, you'll have 
 
 ```ts
 function Queue<T>(
-    path: string,
-    worker: (job: T, meta: JobMeta): Promise<void>,
-    defaultJobOptions?: { exclusive?: boolean }
+  path: string,
+  worker: (job: T, meta: JobMeta): Promise<void>,
+  defaultJobOptions?: { exclusive?: boolean }
 ): QueueInstance<T>
 ```
 

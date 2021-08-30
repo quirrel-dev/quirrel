@@ -22,9 +22,9 @@ Make sure to export it from a [Serverless Function](https://redwoodjs.com/docs/s
 
 ```ts
 function Queue<T>(
-    path: string,
-    worker: (job: T, meta: JobMeta): Promise<void>,
-    defaultJobOptions?: { exclusive?: boolean }
+  path: string,
+  worker: (job: T, meta: JobMeta): Promise<void>,
+  defaultJobOptions?: { exclusive?: boolean }
 ): QueueInstance<T>
 ```
 
