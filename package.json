@@ -42,7 +42,7 @@
     "@types/cross-spawn": "6.0.2",
     "@types/easy-table": "0.0.33",
     "@types/expand-tilde": "2.0.0",
-    "@types/ioredis": "4.26.7",
+    "@types/ioredis": "4.27.1",
     "@types/jest": "27.0.1",
     "@types/js-yaml": "4.0.3",
     "@types/jsonwebtoken": "8.5.5",
