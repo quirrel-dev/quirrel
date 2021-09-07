@@ -81,7 +81,7 @@ test("catchDecryptionErrors", async () => {
       encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
     },
     catchDecryptionErrors(error) {
-      decryptionErrors.push(error);
+      decryptionErrors.push(error as Error);
     },
   });
 
