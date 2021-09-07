@@ -71,7 +71,7 @@ interface CreateQuirrelClientArgs<T> {
   };
 
   fetch?: typeof fetch;
-  catchDecryptionErrors?: (error: Error) => void;
+  catchDecryptionErrors?(error: unknown): void;
 }
 
 const vercelMs = z
