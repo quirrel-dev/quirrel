@@ -338,7 +338,7 @@ describeAcrossBackends("Jobs", (backend) => {
     expect(lastBody).not.toEqual('{"iWill":"beDeleted"}');
   });
 
-  test.only("delete all jobs on a queue", async () => {
+  test("delete all jobs on a queue", async () => {
     await request(quirrel)
       .post("/queues/" + endpoint + "/batch")
       .send([
