@@ -81,7 +81,7 @@ export function Queue<Payload>(
       }
 
       const [_event, _context] = args;
-      if (!_event.body || !_event.headers || !_context.clientContext) {
+      if (!_event.body || !_event.headers || !_context.awsRequestId) {
         return null;
       }
 
