@@ -97,6 +97,27 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     }
   );
 
+  fastify.delete<{ Body: EnqueueJob; Params: QueuesEndpointParams }>(
+    "/:endpoint",
+    {
+      schema: {
+        ...baseSchema,
+        params: EndpointParamsSchema,
+        summary: "Empty a Queue",
+      },
+    },
+    async (request, reply) => {
+      fastify.telemetrist?.dispatch("empty_queue");
+
+      const { tokenId } = request;
+      const { endpoint } = request.params;
+
+      await jobsRepo.emptyQueue(tokenId, endpoint);
+
+      reply.status(204).send();
+    }
+  );
+
   fastify.post<{
     Body: EnqueueJob[];
     Params: QueuesEndpointParams;
