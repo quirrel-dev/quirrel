@@ -91,7 +91,4 @@ test("catchDecryptionErrors", async () => {
   expect(result).toEqual("This is non-decryptable");
 
   expect(decryptionErrors.length).toBe(1);
-  expect(decryptionErrors[0].message).toBe(
-    "Cannot read property 'length' of undefined"
-  );
 });
