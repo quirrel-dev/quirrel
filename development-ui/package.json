@@ -38,7 +38,7 @@
     "@parcel/reporter-bundle-analyzer": "2.0.0-nightly.1694",
     "@types/chai": "4.2.21",
     "@types/ioredis": "4.27.4",
-    "@types/jest": "27.0.1",
+    "@types/jest": "27.0.2",
     "babel-plugin-istanbul": "6.0.0",
     "chai": "4.3.4",
     "ioredis-mock": "5.6.0",
