@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { BaseLayout } from "../layouts/BaseLayout";
-import { QuirrelClient, Job } from "quirrel/client";
+import { QuirrelClient, Job } from "../../../src/client";
 import { produce } from "immer";
 import { getConnectionDetailsFromHash } from "../lib/encrypted-connection-details";
 import { ConfigContext } from "..";
