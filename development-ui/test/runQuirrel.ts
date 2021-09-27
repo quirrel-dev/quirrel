@@ -1,4 +1,4 @@
-import { QuirrelClient, runQuirrel as _runQuirrel } from "../../src";
+import { QuirrelClient, runQuirrel as _runQuirrel } from "quirrel";
 import IORedis from "ioredis-mock";
 import http from "http";
 
