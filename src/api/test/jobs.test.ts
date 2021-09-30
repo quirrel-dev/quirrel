@@ -542,6 +542,21 @@ describeAcrossBackends("Jobs", (backend) => {
     expect(bodies).toEqual(["delay & repeat.every", "delay & repeat.every"]);
   });
 
+  test("regression: non-absolute URLs shouldn't be accepted", async () => {
+    await request(quirrel)
+      .post(
+        "/queues/" + encodeURIComponent("https://${SOME_ENV_VAR}/api/someQueue")
+      )
+      .send({
+        body: "something",
+      })
+      .expect(400, {
+        statusCode: 400,
+        error: "Bad Request",
+        message: "endpoint needs to be absolute URL.",
+      });
+  });
+
   describe("cron jobs", () => {
     test("work", async () => {
       await request(quirrel)
