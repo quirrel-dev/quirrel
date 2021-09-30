@@ -338,6 +338,26 @@ describeAcrossBackends("Jobs", (backend) => {
     expect(lastBody).not.toEqual('{"iWill":"beDeleted"}');
   });
 
+  test("delete all jobs on a queue", async () => {
+    await request(quirrel)
+      .post("/queues/" + endpoint + "/batch")
+      .send([
+        {
+          body: JSON.stringify({ iWill: "beDeleted_1" }),
+          runAt: new Date(Date.now() + 300).toISOString(),
+        },
+        {
+          body: JSON.stringify({ iWill: "beDeleted_2" }),
+          runAt: new Date(Date.now() + 300).toISOString(),
+        },
+      ])
+      .expect(201);
+
+    await request(quirrel).delete(`/queues/${endpoint}`).expect(204);
+
+    await request(quirrel).get(`/queues/${endpoint}`).expect(200, { jobs: [], cursor: null });
+  });
+
   test("idempotent jobs", async () => {
     const id = "sameIdAcrossBothJobs";
 
