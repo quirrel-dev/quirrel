@@ -553,7 +553,7 @@ describeAcrossBackends("Jobs", (backend) => {
       .expect(400, {
         statusCode: 400,
         error: "Bad Request",
-        message: "endpoint needs to be absolute.",
+        message: "endpoint needs to be absolute URL.",
       });
   });
 

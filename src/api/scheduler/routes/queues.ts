@@ -64,7 +64,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const INVALID_ENDPOINT_ERROR = {
     statusCode: 400,
     error: "Bad Request",
-    message: "endpoint needs to be absolute.",
+    message: "endpoint needs to be absolute URL.",
   };
 
   const INVALID_TIMEZONE_ERROR = {
