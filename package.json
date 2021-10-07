@@ -22,7 +22,7 @@
     "node": "12 || 14 || 15 || 16"
   },
   "bin": {
-    "quirrel": "dist/cjs/src/cli/index.js"
+    "quirrel": "cli.js"
   },
   "scripts": {
     "start": "node dist/cjs/src/cli/index.js",
