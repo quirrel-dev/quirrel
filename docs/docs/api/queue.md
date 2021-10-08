@@ -111,6 +111,8 @@ Retries a jobs three times, until it successd: After 10 seconds, 5 minutes and 1
 
 You can also specify `{ retry: [ ... ] }` as the third argument to the `Queue` constructor.
 
+> Currently, there's a hard limit of 10 retry attempts.
+
 ### `.enqueueMany`
 
 ```ts
