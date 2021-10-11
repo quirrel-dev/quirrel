@@ -50,6 +50,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://lopermo.com"><img src="https://avatars.githubusercontent.com/u/11388254?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Guillermo López</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=lopermo" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/zyulyaev"><img src="https://avatars.githubusercontent.com/u/9340671?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nikita Zyulyaev</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3Azyulyaev" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/davidsoderberg"><img src="https://avatars.githubusercontent.com/u/2233092?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Söderberg</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=davidsoderberg" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://babas.bot/"><img src="https://avatars.githubusercontent.com/u/764518?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Luis Alfredo Lorenzo</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=babasbot" title="Documentation">📖</a></td>
   </tr>
 </table>
 
