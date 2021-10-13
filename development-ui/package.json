@@ -35,7 +35,7 @@
     "typescript": "^4.2.3"
   },
   "devDependencies": {
-    "@parcel/reporter-bundle-analyzer": "2.0.0-nightly.1694",
+    "@parcel/reporter-bundle-analyzer": "2.0.0",
     "@types/chai": "4.2.22",
     "@types/ioredis": "4.27.7",
     "@types/jest": "27.0.2",
