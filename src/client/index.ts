@@ -344,7 +344,6 @@ export class QuirrelClient<T> {
     }
 
     return {
-      ...this.defaultJobOptions,
       body: stringifiedBody,
       delay,
       id: options.id,
@@ -354,9 +353,11 @@ export class QuirrelClient<T> {
             ...cron,
           }
         : undefined,
-      retry: options.retry?.map(parseDuration),
+      retry: (options.retry ?? this.defaultJobOptions?.retry)?.map(
+        parseDuration
+      ),
       override: options.override,
-      exclusive: options.exclusive,
+      exclusive: options.exclusive ?? this.defaultJobOptions?.exclusive,
     };
   }
 
