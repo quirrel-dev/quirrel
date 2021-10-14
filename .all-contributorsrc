@@ -105,6 +105,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "scttcper",
+      "name": "Scott Cooper",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1400464?v=4",
+      "profile": "https://twitter.com/scttcper",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
