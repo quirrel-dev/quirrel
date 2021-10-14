@@ -5,6 +5,8 @@
     "email": "simon@quirrel.dev",
     "url": "https://quirrel.dev"
   },
+  "repository": "quirrel-dev/quirrel",
+  "homepage": "https://quirrel.dev",
   "license": "MIT",
   "files": [
     "dist",
