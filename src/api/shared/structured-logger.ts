@@ -1,12 +1,12 @@
 import { Logger } from "./logger";
 import * as uuid from "uuid";
-import pino, { Logger as PinoLogger } from "pino";
+import pino from "pino";
 import { JobDTO } from "../../client/job";
 import { QueuesUpdateCronBody } from "../scheduler/types/queues/update-cron";
 
 export class StructuredLogger implements Logger {
   constructor(
-    public readonly log: PinoLogger = pino({
+    public readonly log = pino({
       level: process.env.LOG_LEVEL || "trace",
     })
   ) {}
