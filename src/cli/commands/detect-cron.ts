@@ -33,7 +33,7 @@ export type RouteScheduleManifest = z.TypeOf<
   typeof RouteScheduleManifestSchema
 >;
 
-export function detectedJobsToRouteScheduleMap(
+export function detectedJobsToRouteScheduleManifest(
   jobs: DetectedCronJob[]
 ): RouteScheduleManifest {
   return jobs
@@ -54,7 +54,7 @@ export default function registerDetectCron(program: Command) {
       const jobs = await detectCron(cwd);
 
       if (json) {
-        console.log(stringifyBeautiful(detectedJobsToRouteScheduleMap(jobs)));
+        console.log(stringifyBeautiful(detectedJobsToRouteScheduleManifest(jobs)));
       } else {
         console.log(formatDetectedJobsAsTable(jobs));
       }
