@@ -20,7 +20,6 @@ export default CronJob(
       isValid: true,
       route: "api/hourlyCron",
       schedule: "@hourly",
-      timezone: "Etc/UTC",
     },
   },
   timezone: {
@@ -75,7 +74,6 @@ export default CronJob(
       isValid: true,
       route: "api/hourlyCron",
       schedule: "@hourly",
-      timezone: "Etc/UTC",
     },
   },
   "with block comments": {
@@ -94,7 +92,6 @@ export default CronJob(
       isValid: true,
       route: "api/hourlyCron",
       schedule: "@hourly",
-      timezone: "Etc/UTC",
     },
   },
   "repro tarshan": {
@@ -108,7 +105,6 @@ export const handler = CronJob('admin-report-email-task-daily', '0 15 * * *', as
       isValid: true,
       route: "admin-report-email-task-daily",
       schedule: "0 15 * * *",
-      timezone: "Etc/UTC",
     },
   },
   arguments: {
@@ -122,7 +118,6 @@ export const handler = CronJob('admin-report-email-task-daily', '0 15 * * *', as
       isValid: true,
       route: "admin-report-email-task-daily",
       schedule: "0 15 * * *",
-      timezone: "Etc/UTC",
     },
   },
 
