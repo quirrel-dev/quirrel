@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { CronDetector, DetectedCronJob } from "../cron-detector";
 import * as z from "zod";
-import { cron } from "../../client/index";
+import { cronExpression } from "../../client/index";
 import { stringifyBeautiful } from "../beatiful-json";
 import Table from "easy-table";
 
@@ -10,6 +10,7 @@ export function formatDetectedJobsAsTable(jobs: DetectedCronJob[]) {
     jobs.map((j) => ({
       Route: j.route,
       Schedule: j.isValid ? j.schedule : j.schedule + " (invalid, skipping)",
+      Timezone: j.timezone
     }))
   );
 }
@@ -26,18 +27,18 @@ export async function detectCron(cwd: string) {
 }
 
 export const RouteScheduleManifestSchema = z.array(
-  z.object({ route: z.string(), schedule: cron })
+  z.object({ route: z.string(), schedule: cronExpression, timezone: z.string() })
 );
 export type RouteScheduleManifest = z.TypeOf<
   typeof RouteScheduleManifestSchema
 >;
 
-function detectedJobsToRouteScheduleMap(
+export function detectedJobsToRouteScheduleManifest(
   jobs: DetectedCronJob[]
 ): RouteScheduleManifest {
   return jobs
     .filter((j) => j.isValid)
-    .map((j) => ({ route: j.route, schedule: j.schedule }));
+    .map((j) => ({ route: j.route, schedule: j.schedule, timezone: j.timezone }));
 }
 
 export default function registerDetectCron(program: Command) {
@@ -53,7 +54,7 @@ export default function registerDetectCron(program: Command) {
       const jobs = await detectCron(cwd);
 
       if (json) {
-        console.log(stringifyBeautiful(detectedJobsToRouteScheduleMap(jobs)));
+        console.log(stringifyBeautiful(detectedJobsToRouteScheduleManifest(jobs)));
       } else {
         console.log(formatDetectedJobsAsTable(jobs));
       }
