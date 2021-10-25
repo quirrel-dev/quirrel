@@ -195,10 +195,6 @@ export class JobsRepo implements Closable {
       runAt = new Date(Date.now() + delay);
     }
 
-    if (repeat?.cron) {
-      runAt = cron(runAt ?? new Date(), repeat.cron);
-    }
-
     if (typeof repeat?.times === "number" && repeat.times < 1) {
       throw new Error("repeat.times must be positive");
     }
@@ -214,6 +210,8 @@ export class JobsRepo implements Closable {
       } else {
         schedule_meta = repeat.cron;
       }
+
+      runAt = cron(runAt ?? new Date(), schedule_meta);
     }
 
     if (repeat?.every) {

@@ -633,7 +633,7 @@ describeAcrossBackends("Jobs", (backend) => {
         return new Date(job.body.runAt);
       }
 
-      test.only("they're rescheduled", async () => {
+      test("they're rescheduled", async () => {
         const timezone = "Etc/UTC";
         const resp = await registerCron("0 5 * * *", timezone);
         expect(resp.body).toEqual({ deleted: [] });
@@ -650,7 +650,7 @@ describeAcrossBackends("Jobs", (backend) => {
       });
 
       describe("timezones", () => {
-        test.only("they're rescheduled", async () => {
+        test("they're rescheduled", async () => {
           const schedule = "0 5 * * *";
           const resp = await registerCron(schedule, "Etc/UTC");
           expect(resp.body).toEqual({ deleted: [] });
@@ -663,7 +663,7 @@ describeAcrossBackends("Jobs", (backend) => {
           const runAtJob2 = await getRunAt();
 
           const twoHours = 2 * 60 * 60 * 1000;
-          expect(+runAtJob2 - +runAtJob1).toBeCloseTo(twoHours);
+          expect(+runAtJob1 - +runAtJob2).toBeCloseTo(twoHours);
         });
       });
     });
