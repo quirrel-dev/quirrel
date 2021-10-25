@@ -195,10 +195,6 @@ export class JobsRepo implements Closable {
       runAt = new Date(Date.now() + delay);
     }
 
-    if (repeat?.cron) {
-      runAt = cron(runAt ?? new Date(), repeat.cron);
-    }
-
     if (typeof repeat?.times === "number" && repeat.times < 1) {
       throw new Error("repeat.times must be positive");
     }
@@ -214,6 +210,8 @@ export class JobsRepo implements Closable {
       } else {
         schedule_meta = repeat.cron;
       }
+
+      runAt = cron(runAt ?? new Date(), schedule_meta);
     }
 
     if (repeat?.every) {
@@ -273,7 +271,7 @@ export class JobsRepo implements Closable {
     const routesThatShouldPersist = crons.map((c) => c.route);
     await Promise.all(
       queuesOnSameDeployment.map(async (queue) => {
-        const route = queue.slice(baseUrl.length + 1);
+        const route = queue.slice(baseUrl.length);
         const shouldPersist = routesThatShouldPersist.includes(route);
         if (shouldPersist) {
           return;
