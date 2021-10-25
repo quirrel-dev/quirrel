@@ -32,4 +32,6 @@ test("quirrel ci", async () => {
   // has no cron jobs, so it should be deleted
   await runForDirectory("../../../examples/blitz");
   expect(await client.getById("@cron")).toBeNull();
+
+  teardown();
 });
