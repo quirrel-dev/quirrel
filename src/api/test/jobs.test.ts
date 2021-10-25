@@ -355,7 +355,9 @@ describeAcrossBackends("Jobs", (backend) => {
 
     await request(quirrel).delete(`/queues/${endpoint}`).expect(204);
 
-    await request(quirrel).get(`/queues/${endpoint}`).expect(200, { jobs: [], cursor: null });
+    await request(quirrel)
+      .get(`/queues/${endpoint}`)
+      .expect(200, { jobs: [], cursor: null });
   });
 
   test("idempotent jobs", async () => {
@@ -602,6 +604,68 @@ describeAcrossBackends("Jobs", (backend) => {
       await delay(1200);
 
       expect(bodies).toEqual(["cron", "cron"]);
+    });
+
+    describe("when updating", () => {
+      async function registerCron(
+        schedule: "0 5 * * *" | "0 6 * * *",
+        timezone: "Etc/UTC" | "Europe/Stockholm"
+      ) {
+        return await request(quirrel)
+          .put("/queues/update-cron")
+          .send({
+            baseUrl: decodeURIComponent(endpoint),
+            crons: [
+              {
+                route: "/",
+                schedule,
+                timezone,
+              },
+            ],
+          });
+      }
+
+      async function getRunAt() {
+        const job = await request(quirrel).get(
+          `/queues/${endpoint + encodeURIComponent("/")}/@cron`
+        );
+        expect(job.status).toBe(200);
+        return new Date(job.body.runAt);
+      }
+
+      test.only("they're rescheduled", async () => {
+        const timezone = "Etc/UTC";
+        const resp = await registerCron("0 5 * * *", timezone);
+        expect(resp.body).toEqual({ deleted: [] });
+
+        const runAtJob1 = await getRunAt();
+
+        const resp2 = await registerCron("0 6 * * *", timezone);
+        expect(resp2.body).toEqual({ deleted: [] });
+
+        const runAtJob2 = await getRunAt();
+
+        const oneHour = 60 * 60 * 1000;
+        expect(+runAtJob2 - +runAtJob1).toBeCloseTo(oneHour);
+      });
+
+      describe("timezones", () => {
+        test.only("they're rescheduled", async () => {
+          const schedule = "0 5 * * *";
+          const resp = await registerCron(schedule, "Etc/UTC");
+          expect(resp.body).toEqual({ deleted: [] });
+
+          const runAtJob1 = await getRunAt();
+
+          const resp2 = await registerCron(schedule, "Europe/Stockholm");
+          expect(resp2.body).toEqual({ deleted: [] });
+
+          const runAtJob2 = await getRunAt();
+
+          const twoHours = 2 * 60 * 60 * 1000;
+          expect(+runAtJob2 - +runAtJob1).toBeCloseTo(twoHours);
+        });
+      });
     });
   });
 });
