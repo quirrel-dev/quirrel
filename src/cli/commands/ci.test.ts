@@ -25,9 +25,18 @@ test("quirrel ci", async () => {
     async handler() {},
   });
 
+  const greetGarfieldClient = new QuirrelClient({
+    route: "api/greetGarfieldCron",
+    async handler() {},
+  });
+
   // has cron job, so it should be created
   await runForDirectory("../../../examples/next");
-  expect(await client.getById("@cron")).not.toBeNull();
+  const job = await client.getById("@cron");
+  expect(job?.repeat?.cronTimezone).toBe("Europe/Stockholm");
+
+  const garfieldJob = await greetGarfieldClient.getById("@cron");
+  expect(garfieldJob?.repeat?.cronTimezone).toBe("Etc/UTC");
 
   // has no cron jobs, so it should be deleted
   await runForDirectory("../../../examples/blitz");
