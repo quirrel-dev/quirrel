@@ -52,6 +52,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/davidsoderberg"><img src="https://avatars.githubusercontent.com/u/2233092?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Söderberg</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=davidsoderberg" title="Documentation">📖</a></td>
     <td align="center"><a href="https://babas.bot/"><img src="https://avatars.githubusercontent.com/u/764518?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Luis Alfredo Lorenzo</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=babasbot" title="Documentation">📖</a></td>
     <td align="center"><a href="https://twitter.com/scttcper"><img src="https://avatars.githubusercontent.com/u/1400464?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Scott Cooper</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=scttcper" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/fiddep"><img src="https://avatars.githubusercontent.com/u/12913309?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fredrik Palmquist</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3Afiddep" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
