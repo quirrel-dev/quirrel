@@ -12,9 +12,21 @@ import { Redis } from "ioredis";
 import { fastifyDecoratorPlugin } from "./helper/fastify-decorator-plugin";
 import * as config from "../../client/config";
 
+function withoutWrappingSlashes(url: string): string {
+  return withoutLeadingSlash(withoutTrailingSlash(url));
+}
+
 function withoutTrailingSlash(url: string): string {
   if (url.endsWith("/")) {
     return url.slice(0, url.length - 1);
+  }
+
+  return url;
+}
+
+function withoutLeadingSlash(url: string): string {
+  if (url.startsWith("/")) {
+    return url.slice(1);
   }
 
   return url;
@@ -278,10 +290,10 @@ export class JobsRepo implements Closable {
 
     const routesThatShouldPersist = crons
       .map((c) => c.route)
-      .map(withoutTrailingSlash);
+      .map(withoutWrappingSlashes);
     await Promise.all(
       queuesOnSameDeployment.map(async (queue) => {
-        const route = withoutTrailingSlash(queue.slice(baseUrl.length));
+        const route = withoutWrappingSlashes(queue.slice(baseUrl.length));
         const shouldPersist = routesThatShouldPersist.includes(route);
 
         if (shouldPersist) {
