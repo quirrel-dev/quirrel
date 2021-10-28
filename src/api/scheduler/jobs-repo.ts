@@ -271,7 +271,7 @@ export class JobsRepo implements Closable {
     const routesThatShouldPersist = crons.map((c) => c.route);
     await Promise.all(
       queuesOnSameDeployment.map(async (queue) => {
-        const route = queue.slice(baseUrl.length);
+        const route = queue.slice(baseUrl.length + 1);
         const shouldPersist = routesThatShouldPersist.includes(route);
         if (shouldPersist) {
           return;
