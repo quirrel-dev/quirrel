@@ -30,17 +30,25 @@ test("quirrel ci", async () => {
     async handler() {},
   });
 
-  // has cron job, so it should be created
-  await runForDirectory("../../../examples/next");
-  const job = await client.getById("@cron");
-  expect(job?.repeat?.cronTimezone).toBe("Europe/Stockholm");
+  async function runNext() {
+    await runForDirectory("../../../examples/next");
+    const job = await client.getById("@cron");
+    expect(job?.repeat?.cronTimezone).toBe("Europe/Stockholm");
 
-  const garfieldJob = await greetGarfieldClient.getById("@cron");
-  expect(garfieldJob?.repeat?.cronTimezone).toBe("Etc/UTC");
+    const garfieldJob = await greetGarfieldClient.getById("@cron");
+    expect(garfieldJob?.repeat?.cronTimezone).toBe("Etc/UTC");
+  }
+
+  // has cron job, so it should be created
+  await runNext();
+
+  // second run, nothing should change
+  await runNext();
 
   // has no cron jobs, so it should be deleted
   await runForDirectory("../../../examples/blitz");
   expect(await client.getById("@cron")).toBeNull();
+  expect(await greetGarfieldClient.getById("@cron")).toBeNull();
 
   teardown();
 });
