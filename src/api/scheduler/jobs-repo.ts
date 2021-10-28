@@ -12,6 +12,14 @@ import { Redis } from "ioredis";
 import { fastifyDecoratorPlugin } from "./helper/fastify-decorator-plugin";
 import * as config from "../../client/config";
 
+function withoutTrailingSlash(url: string): string {
+  if (url.endsWith("/")) {
+    return url.slice(0, url.length - 1);
+  }
+
+  return url;
+}
+
 interface PaginationOpts {
   cursor: number;
   count?: number;
@@ -268,11 +276,14 @@ export class JobsRepo implements Closable {
       );
     }
 
-    const routesThatShouldPersist = crons.map((c) => c.route);
+    const routesThatShouldPersist = crons
+      .map((c) => c.route)
+      .map(withoutTrailingSlash);
     await Promise.all(
       queuesOnSameDeployment.map(async (queue) => {
-        const route = queue.slice(baseUrl.length + 1);
+        const route = withoutTrailingSlash(queue.slice(baseUrl.length));
         const shouldPersist = routesThatShouldPersist.includes(route);
+
         if (shouldPersist) {
           return;
         }
