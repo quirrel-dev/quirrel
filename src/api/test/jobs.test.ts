@@ -662,6 +662,11 @@ describeAcrossBackends("Jobs", (backend) => {
 
           const runAtJob2 = await getRunAt();
 
+          console.log({
+            runAtJob1,
+            runAtJob2
+          })
+
           const threeHours = 3 * 60 * 60 * 1000;
           expect(+runAtJob1 - +runAtJob2).toBeCloseTo(threeHours);
         });
