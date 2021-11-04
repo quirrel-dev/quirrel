@@ -123,6 +123,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "alizahid",
+      "name": "Ali Zahid",
+      "avatar_url": "https://avatars.githubusercontent.com/u/941775?v=4",
+      "profile": "https://alizahid.dev",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
