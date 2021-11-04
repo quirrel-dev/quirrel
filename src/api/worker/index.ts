@@ -68,6 +68,8 @@ export async function createWorker({
     let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
     const body = job.payload;
 
+    endpoint = decodeURIComponent(endpoint);
+
     const executionDone = logger?.startingExecution({
       tokenId,
       endpoint,
