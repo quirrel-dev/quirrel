@@ -609,7 +609,7 @@ describeAcrossBackends("Jobs", (backend) => {
     describe("when updating", () => {
       async function registerCron(
         schedule: "0 5 * * *" | "0 6 * * *",
-        timezone: "Etc/UTC" | "Europe/Stockholm"
+        timezone: "Etc/UTC" | "Asia/Taipei" // Taoipei doesn't observe daylight savings
       ) {
         return await request(quirrel)
           .put("/queues/update-cron")
@@ -657,13 +657,13 @@ describeAcrossBackends("Jobs", (backend) => {
 
           const runAtJob1 = await getRunAt();
 
-          const resp2 = await registerCron(schedule, "Europe/Stockholm");
+          const resp2 = await registerCron(schedule, "Asia/Taipei");
           expect(resp2.body).toEqual({ deleted: [] });
 
           const runAtJob2 = await getRunAt();
 
-          const twoHours = 2 * 60 * 60 * 1000;
-          expect(+runAtJob1 - +runAtJob2).toBeCloseTo(twoHours);
+          const eightHours = 8 * 60 * 60 * 1000;
+          expect(+runAtJob1 - +runAtJob2).toBeCloseTo(eightHours);
         });
       });
     });
