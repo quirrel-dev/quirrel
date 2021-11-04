@@ -43,7 +43,7 @@ export default function Activity() {
               case "scheduled":
                 return JSON.stringify(a.payload.body);
               case "rescheduled":
-                return a.payload.runAt;
+                return formatTime(new Date(a.payload.runAt));
               default:
                 return null;
             }
