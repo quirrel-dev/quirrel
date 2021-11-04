@@ -1,5 +1,5 @@
 import type { Redis } from "ioredis";
-import RedisMock from "@quirrel/ioredis-mock";
+import RedisMock from "ioredis-mock";
 
 export class UsageMeter {
   constructor(private readonly redis: Redis) {}
