@@ -1,9 +1,9 @@
 import IORedis from "ioredis";
-import IORedisMock from "@quirrel/ioredis-mock";
+import IORedisMock from "ioredis-mock";
 
 export function createRedisFactory(redisUrl?: string): () => IORedis.Redis {
   if (!redisUrl) {
-    let redis: any | undefined = undefined;
+    let redis: IORedisMock | undefined = undefined;
     return () => {
       if (!redis) {
         redis = new IORedisMock();
