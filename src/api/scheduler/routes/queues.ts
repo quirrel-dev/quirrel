@@ -90,7 +90,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       const { tokenId, body } = request;
       const { endpoint } = request.params;
 
-      if (!isAbsoluteURL(endpoint)) {
+      if (!isAbsoluteURL(decodeURIComponent(endpoint))) {
         return reply.status(400).send(INVALID_ENDPOINT_ERROR);
       }
 
