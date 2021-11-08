@@ -55,6 +55,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/fiddep"><img src="https://avatars.githubusercontent.com/u/12913309?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fredrik Palmquist</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3Afiddep" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://alizahid.dev"><img src="https://avatars.githubusercontent.com/u/941775?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ali Zahid</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=alizahid" title="Code">💻</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://codedrift.com"><img src="https://avatars.githubusercontent.com/u/1795?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jakob Heuser</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=jakobo" title="Code">💻</a> <a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3Ajakobo" title="Bug reports">🐛</a> <a href="#design-jakobo" title="Design">🎨</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->
