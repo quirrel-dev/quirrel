@@ -182,6 +182,23 @@ export class JobsRepo implements Closable {
     await Promise.all(allPromises);
   }
 
+  public async emptyToken(tokenId: string) {
+    let cursor = 0;
+    const allPromises: Promise<any>[] = [];
+    do {
+      const { cursor: newCursor, jobs } = await this.findByTokenId(tokenId, {
+        cursor,
+      });
+      cursor = newCursor;
+
+      for (const job of jobs) {
+        allPromises.push(this.delete(tokenId, job.endpoint, job.id));
+      }
+    } while (cursor !== 0);
+
+    await Promise.all(allPromises);
+  }
+
   public async delete(tokenId: string, endpoint: string, id: string) {
     return await this.producer.delete(
       encodeQueueDescriptor(tokenId, endpoint),
