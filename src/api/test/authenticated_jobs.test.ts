@@ -68,6 +68,15 @@ describeAcrossBackends("Authenticated Jobs", (backend) => {
     expect(verify(lastBody, token, lastSignature)).toBe(true);
 
     await request(quirrel)
+      .post("/queues/" + endpoint)
+      .auth(token, { type: "bearer" })
+      .send({
+        body: JSON.stringify({ foo: "long-standing" }),
+        delay: 1000,
+      })
+      .expect(201);
+
+    await request(quirrel)
       .delete("/tokens/non-existant")
       .auth("ignored", passphrase)
       .expect(404);
@@ -85,11 +94,21 @@ describeAcrossBackends("Authenticated Jobs", (backend) => {
       })
       .expect(401);
 
+    const { text: newToken } = await request(quirrel)
+      .put("/tokens/testproject")
+      .auth("ignored", passphrase)
+      .expect(201);
+
+    await request(quirrel)
+      .get("/queues/" + endpoint)
+      .auth(newToken, { type: "bearer" })
+      .expect(200, { cursor: null, jobs: [] });
+
     await request(quirrel)
       .delete("/usage")
       .auth("ignored", passphrase)
       .expect(200, {
-        testproject: 2, // one for the initial call, one for execution
+        testproject: 4, // one for the initial call, one for execution
       });
 
     await request(quirrel)
