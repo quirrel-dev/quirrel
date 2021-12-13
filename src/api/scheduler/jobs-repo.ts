@@ -165,30 +165,14 @@ export class JobsRepo implements Closable {
     );
   }
 
-  public async emptyQueue(tokenId: string, endpoint: string) {
+  private async emptyByGetter(
+    tokenId: string,
+    getter: (cursor: number) => Promise<{ cursor: number; jobs: JobDTO[] }>
+  ) {
     let cursor = 0;
     const allPromises: Promise<any>[] = [];
     do {
-      const { cursor: newCursor, jobs } = await this.find(tokenId, endpoint, {
-        cursor,
-      });
-      cursor = newCursor;
-
-      for (const job of jobs) {
-        allPromises.push(this.delete(tokenId, endpoint, job.id));
-      }
-    } while (cursor !== 0);
-
-    await Promise.all(allPromises);
-  }
-
-  public async emptyToken(tokenId: string) {
-    let cursor = 0;
-    const allPromises: Promise<any>[] = [];
-    do {
-      const { cursor: newCursor, jobs } = await this.findByTokenId(tokenId, {
-        cursor,
-      });
+      const { cursor: newCursor, jobs } = await getter(cursor);
       cursor = newCursor;
 
       for (const job of jobs) {
@@ -197,6 +181,18 @@ export class JobsRepo implements Closable {
     } while (cursor !== 0);
 
     await Promise.all(allPromises);
+  }
+
+  public async emptyQueue(tokenId: string, endpoint: string) {
+    await this.emptyByGetter(tokenId, (cursor) =>
+      this.find(tokenId, endpoint, { cursor })
+    );
+  }
+
+  public async emptyToken(tokenId: string) {
+    await this.emptyByGetter(tokenId, (cursor) =>
+      this.findByTokenId(tokenId, { cursor })
+    );
   }
 
   public async delete(tokenId: string, endpoint: string, id: string) {
