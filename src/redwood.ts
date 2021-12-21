@@ -14,9 +14,14 @@ registerDevelopmentDefaults({
   applicationBaseUrl: "http://localhost:8911",
 });
 
+function decodeBase64(v: string): string {
+  return Buffer.from(v, "base64").toString("utf8");
+}
+
 interface RedwoodEvent {
   body: string;
   headers: Record<string, string>;
+  isBase64Encoded: boolean;
 }
 
 interface RedwoodResponse {
@@ -43,7 +48,7 @@ export function Queue<Payload>(
 
   async function redwoodHandler(event: RedwoodEvent): Promise<RedwoodResponse> {
     const { body, headers, status } = await quirrel.respondTo(
-      event.body,
+      event.isBase64Encoded ? decodeBase64(event.body) : event.body,
       event.headers
     );
     return {
