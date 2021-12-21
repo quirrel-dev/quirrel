@@ -43,11 +43,13 @@ const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {
     },
 
     async handler(request, reply) {
-      const success = await fastify.tokens!.revoke(request.params.id);
+      const tokenId = request.params.id;
+      const success = await fastify.tokens!.revoke(tokenId);
 
       fastify.telemetrist?.dispatch("token revoked");
 
       if (success) {
+        await fastify.jobs.emptyToken(tokenId);
         reply.status(204);
       } else {
         reply.status(404).send("Not Found");
