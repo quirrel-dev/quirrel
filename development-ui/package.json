@@ -7,12 +7,13 @@
     "build:coverage": "NODE_ENV=test npm run build",
     "start": "serve -l 1234 -s dist",
     "test": "jest --runInBand --forceExit",
-    "test:ci": "npm run build:coverage && start-server-and-test start http://localhost:1234 test && npx nyc report --reporter=lcov"
+    "test:ci": "npm run build:coverage && start-server-and-test start http://localhost:1234 test && npx nyc report --reporter=lcov",
+    "preinstall": "npx npm-force-resolutions"
   },
   "dependencies": {
     "@babel/preset-react": "^7.13.13",
-    "@parcel/transformer-image": "^2.0.0-beta.3.1",
-    "@parcel/transformer-pug": "^2.0.0-beta.3.1",
+    "@parcel/transformer-image": "^2.0.1",
+    "@parcel/transformer-pug": "^2.0.1",
     "@tailwindui/react": "^0.1.1",
     "@types/js-cookie": "^2.2.6",
     "@types/lodash": "^4.14.168",
@@ -25,7 +26,7 @@
     "immer": "^9.0.1",
     "js-cookie": "^3.0.0",
     "lodash": "^4.17.21",
-    "parcel": "^2.0.0-beta.3.1",
+    "parcel": "^2.0.1",
     "postcss": "^8.2.8",
     "quirrel": "file:..",
     "react": "17.0.2",
@@ -35,7 +36,7 @@
     "typescript": "^4.2.3"
   },
   "devDependencies": {
-    "@parcel/reporter-bundle-analyzer": "2.0.0",
+    "@parcel/reporter-bundle-analyzer": "2.0.0-nightly.1694",
     "@types/chai": "4.2.22",
     "@types/ioredis": "4.27.8",
     "@types/jest": "27.0.2",
@@ -49,5 +50,8 @@
     "serve": "12.0.1",
     "start-server-and-test": "1.14.0",
     "ts-jest": "27.0.7"
+  },
+  "resolutions": {
+    "sharp": "0.29.1"
   }
 }
