@@ -37,9 +37,7 @@ describe("SSRF Prevention", () => {
       await request(quirrel)
         .post(
           "/queues/" +
-            encodeURIComponent(
-              `http://${address.address}:${address.port}/database/drop`
-            )
+            encodeURIComponent(`http://localhost:${address.port}/database/drop`)
         )
         .send({ body: "dropthebase" })
         .expect(201);
