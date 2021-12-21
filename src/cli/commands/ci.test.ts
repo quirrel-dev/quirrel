@@ -1,8 +1,8 @@
 import { quirrelCI } from "./ci";
 import path from "path";
 import { run } from "../../api/test/runQuirrel";
-import { AddressInfo } from "ws";
 import { QuirrelClient } from "../../client";
+import { getAddress } from "../../client/test/util";
 
 let teardown: () => Promise<void>;
 
@@ -17,8 +17,7 @@ test("quirrel ci", async () => {
   const quirrel = await run("Mock");
   teardown = quirrel.teardown;
   process.env.QUIRREL_BASE_URL = "https://test-url.app/";
-  process.env.QUIRREL_URL =
-    "http://localhost:" + (quirrel.server.address() as AddressInfo).port;
+  process.env.QUIRREL_URL = getAddress(quirrel.server);
 
   const client = new QuirrelClient({
     route: "api/fetchDataCron",

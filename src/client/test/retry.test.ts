@@ -1,7 +1,6 @@
 import { QuirrelClient } from "..";
 import { run } from "../../api/test/runQuirrel";
 import http from "http";
-import type { AddressInfo } from "net";
 import { expectToBeInRange, getAddress, makeSignal } from "./util";
 
 test("retry", async () => {
@@ -18,15 +17,13 @@ test("retry", async () => {
     })
     .listen(0);
 
-  const { port } = receiver.address() as AddressInfo;
-
   const quirrel = new QuirrelClient({
     route: "",
     async handler() {},
     config: {
       quirrelBaseUrl: getAddress(server.server),
       encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
-      applicationBaseUrl: `http://localhost:${port}`,
+      applicationBaseUrl: getAddress(receiver),
     },
   });
 
