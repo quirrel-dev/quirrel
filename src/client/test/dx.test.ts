@@ -63,4 +63,14 @@ describe("DX", () => {
       ).rejects.toThrowError("retry and repeat cannot be used together");
     });
   });
+
+  describe("when overriding without id", () => {
+    it("throws immediately", async () => {
+      await expect(() =>
+        quirrel.enqueue("", {
+          override: true,
+        })
+      ).rejects.toThrowError("override requires id");
+    });
+  });
 });

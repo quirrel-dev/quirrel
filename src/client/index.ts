@@ -313,6 +313,10 @@ export class QuirrelClient<T> {
       throw new Error("retry and repeat cannot be used together");
     }
 
+    if (options.override && !options.id) {
+      throw new Error("override requires id");
+    }
+
     options = EnqueueJobOptionsSchema.parse(options);
 
     let delay = parseDuration(options.delay);
