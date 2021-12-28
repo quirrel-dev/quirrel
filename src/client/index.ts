@@ -382,7 +382,11 @@ export class QuirrelClient<T> {
       return await this.toJob(await res.json());
     }
 
-    throw new Error(`Unexpected response: ${await res.text()}`);
+    throw new Error(
+      `Unexpected response while trying to enqueue "${JSON.stringify(
+        body
+      )}" to ${this.applicationBaseUrl}: ${await res.text()}`
+    );
   }
 
   /**
@@ -412,7 +416,11 @@ export class QuirrelClient<T> {
       return await Promise.all(response.map((job) => this.toJob(job)));
     }
 
-    throw new Error(`Unexpected response: ${await res.text()}`);
+    throw new Error(
+      `Unexpected response while trying to enqueue "${body}" to ${
+        this.applicationBaseUrl
+      }: ${await res.text()}`
+    );
   }
 
   private async decryptAndDecodeBody(body: string): Promise<T> {
