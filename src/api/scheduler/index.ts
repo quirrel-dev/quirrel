@@ -22,6 +22,7 @@ import indexRoute from "./routes/index";
 import { StructuredLogger } from "../shared/structured-logger";
 import { Logger } from "../shared/logger";
 import { jobsRepoPlugin } from "./jobs-repo";
+import fastifyRateLimit from "fastify-rate-limit";
 
 export interface QuirrelServerConfig {
   redisFactory: () => Redis;
@@ -32,6 +33,9 @@ export interface QuirrelServerConfig {
   runningInDocker?: boolean;
   disableTelemetry?: boolean;
   logger?: Logger;
+  rateLimiter?: {
+    max?: number;
+  };
 }
 
 declare module "fastify" {
@@ -49,6 +53,7 @@ export async function createServer({
   disableTelemetry,
   logger,
   jwtPublicKey,
+  rateLimiter,
 }: QuirrelServerConfig) {
   const app = fastify({
     logger: logger instanceof StructuredLogger ? logger.log : undefined,
@@ -58,6 +63,12 @@ export async function createServer({
   if (!disableTelemetry) {
     app.register(sentryPlugin);
   }
+
+  app.register(fastifyRateLimit, {
+    enableDraftSpec: true,
+    max: rateLimiter?.max ?? 10000,
+    keyGenerator: (req) => req.headers.authorization ?? req.ip,
+  });
 
   app.register(blipp);
 

@@ -89,6 +89,7 @@
     "fastify-blipp": "3.1.0",
     "fastify-cors": "6.0.2",
     "fastify-plugin": "3.0.0",
+    "fastify-rate-limit": "^5.7.0",
     "fastify-static": "^4.2.2",
     "fastify-swagger": "^4.5.0",
     "fastify-websocket": "4.0.0",
