@@ -41,7 +41,7 @@
     "@types/jest": "27.0.3",
     "babel-plugin-istanbul": "6.1.1",
     "chai": "4.3.4",
-    "ioredis-mock": "5.6.0",
+    "ioredis-mock": "5.8.1",
     "jest": "27.4.5",
     "jest-playwright-preset": "1.7.0",
     "nyc": "15.1.0",
