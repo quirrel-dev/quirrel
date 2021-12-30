@@ -12,6 +12,8 @@ type DataFunctionArgs = {
   request: Request;
 }
 
+type ActionFunction = (args: DataFunctionArgs) => Promise<Response> | Response;
+
 export {
   Job,
   EnqueueJobOpts,
@@ -33,7 +35,7 @@ export function Queue<Payload>(
   route: string,
   handler: QuirrelJobHandler<Payload>,
   defaultJobOptions?: DefaultJobOptions,
-): Queue<Payload> {
+): ActionFunction & Queue<Payload> {
   const quirrel = new QuirrelClient<Payload>({
     defaultJobOptions,
     handler,
