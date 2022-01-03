@@ -13,6 +13,8 @@ import { QueuesUpdateCronBody } from "../types/queues/update-cron";
 import { isValidCronExpression } from "../../../shared/is-valid-cron";
 import { isValidTimezone } from "../../../shared/repeat";
 
+import * as Url from "url"
+
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = fastify.jobs;
   const queueRepo = jobsRepo.queueRepo;
@@ -35,6 +37,11 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     return true;
   }
 
+  function isAbsoluteURL(string: string): boolean {
+    const url = Url.parse(string);
+    return Boolean(url.protocol && url.hostname);
+  }
+
   const baseSchema = {
     tags: ["Queueing"],
     security: fastify.adminBasedAuthEnabled
@@ -52,6 +59,12 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     error: "Bad Request",
     message:
       "body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference.",
+  };
+
+  const INVALID_ENDPOINT_ERROR = {
+    statusCode: 400,
+    error: "Bad Request",
+    message: "endpoint needs to be absolute URL.",
   };
 
   const INVALID_TIMEZONE_ERROR = {
@@ -77,6 +90,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       const { tokenId, body } = request;
       const { endpoint } = request.params;
 
+      if (!isAbsoluteURL(endpoint)) {
+        return reply.status(400).send(INVALID_ENDPOINT_ERROR);
+      }
+
       if (!hasValidCronExpression(body)) {
         return reply.status(400).send(INVALID_CRON_EXPRESSION_ERROR);
       }
@@ -94,6 +111,27 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       fastify.logger?.jobCreated({ ...job, tokenId });
 
       reply.status(201).send(job);
+    }
+  );
+
+  fastify.delete<{ Body: EnqueueJob; Params: QueuesEndpointParams }>(
+    "/:endpoint",
+    {
+      schema: {
+        ...baseSchema,
+        params: EndpointParamsSchema,
+        summary: "Empty a Queue",
+      },
+    },
+    async (request, reply) => {
+      fastify.telemetrist?.dispatch("empty_queue");
+
+      const { tokenId } = request;
+      const { endpoint } = request.params;
+
+      await jobsRepo.emptyQueue(tokenId, endpoint);
+
+      reply.status(204).send();
     }
   );
 
@@ -125,6 +163,10 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
           .send(
             "That's a whole lot of jobs! If this wasn't a mistake, please get in touch to lift the 5k limit."
           );
+      }
+
+      if (!isAbsoluteURL(endpoint)) {
+        return reply.status(400).send(INVALID_ENDPOINT_ERROR);
       }
 
       if (!body.every(hasValidCronExpression)) {

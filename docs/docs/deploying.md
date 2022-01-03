@@ -55,6 +55,8 @@ Once our server is ready, we'll need to [get an auth token](https://api.quirrel.
 
 `curl --user ignored:{PASSPHRASE} -X PUT {QUIRREL_SERVER_URL}/tokens/{NAME_OF_TOKEN}`
 
+> The fields inside of `{}` are placeholders and should be replaced by you.
+
 Save the returned token for the next step.
 
 ### Connect your application to the Quirrel deployment

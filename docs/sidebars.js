@@ -39,6 +39,7 @@ module.exports = {
         "api/blitz",
         "api/redwood",
         "api/netlify",
+        "api/remix",
         "api/sveltekit",
         "api/nuxt",
         "api/express",

@@ -338,6 +338,28 @@ describeAcrossBackends("Jobs", (backend) => {
     expect(lastBody).not.toEqual('{"iWill":"beDeleted"}');
   });
 
+  test("delete all jobs on a queue", async () => {
+    await request(quirrel)
+      .post("/queues/" + endpoint + "/batch")
+      .send([
+        {
+          body: JSON.stringify({ iWill: "beDeleted_1" }),
+          runAt: new Date(Date.now() + 300).toISOString(),
+        },
+        {
+          body: JSON.stringify({ iWill: "beDeleted_2" }),
+          runAt: new Date(Date.now() + 300).toISOString(),
+        },
+      ])
+      .expect(201);
+
+    await request(quirrel).delete(`/queues/${endpoint}`).expect(204);
+
+    await request(quirrel)
+      .get(`/queues/${endpoint}`)
+      .expect(200, { jobs: [], cursor: null });
+  });
+
   test("idempotent jobs", async () => {
     const id = "sameIdAcrossBothJobs";
 
@@ -542,6 +564,21 @@ describeAcrossBackends("Jobs", (backend) => {
     expect(bodies).toEqual(["delay & repeat.every", "delay & repeat.every"]);
   });
 
+  test("regression: non-absolute URLs shouldn't be accepted", async () => {
+    await request(quirrel)
+      .post(
+        "/queues/" + encodeURIComponent("https://${SOME_ENV_VAR}/api/someQueue")
+      )
+      .send({
+        body: "something",
+      })
+      .expect(400, {
+        statusCode: 400,
+        error: "Bad Request",
+        message: "endpoint needs to be absolute URL.",
+      });
+  });
+
   describe("cron jobs", () => {
     test("work", async () => {
       await request(quirrel)
@@ -567,6 +604,69 @@ describeAcrossBackends("Jobs", (backend) => {
       await delay(1200);
 
       expect(bodies).toEqual(["cron", "cron"]);
+    });
+
+    describe("when updating", () => {
+      async function registerCron(
+        schedule: "0 5 * * *" | "0 6 * * *",
+        timezone: "Etc/UTC" | "Asia/Taipei" // Taoipei doesn't observe daylight savings
+      ) {
+        return await request(quirrel)
+          .put("/queues/update-cron")
+          .send({
+            baseUrl: decodeURIComponent(endpoint),
+            crons: [
+              {
+                route: "/",
+                schedule,
+                timezone,
+              },
+            ],
+          });
+      }
+
+      async function getRunAt() {
+        const job = await request(quirrel).get(
+          `/queues/${endpoint + encodeURIComponent("/")}/@cron`
+        );
+        expect(job.status).toBe(200);
+        return new Date(job.body.runAt);
+      }
+
+      test("they're rescheduled", async () => {
+        const timezone = "Etc/UTC";
+        const resp = await registerCron("0 5 * * *", timezone);
+        expect(resp.body).toEqual({ deleted: [] });
+
+        const runAtJob1 = await getRunAt();
+
+        const resp2 = await registerCron("0 6 * * *", timezone);
+        expect(resp2.body).toEqual({ deleted: [] });
+
+        const runAtJob2 = await getRunAt();
+
+        const oneHour = 60 * 60 * 1000;
+        expect(+runAtJob2 - +runAtJob1).toBeCloseTo(oneHour);
+      });
+
+      describe("timezones", () => {
+        test("they're rescheduled", async () => {
+          const schedule = "0 5 * * *";
+          const resp = await registerCron(schedule, "Etc/UTC");
+          expect(resp.body).toEqual({ deleted: [] });
+
+          const runAtJob1 = await getRunAt();
+
+          const resp2 = await registerCron(schedule, "Asia/Taipei");
+          expect(resp2.body).toEqual({ deleted: [] });
+
+          const runAtJob2 = await getRunAt();
+
+          const eightHours = 8 * 60 * 60 * 1000;
+          // expect(+runAtJob1 - +runAtJob2).toBeCloseTo(eightHours);
+          expect(runAtJob1).not.toEqual(runAtJob2);
+        });
+      });
     });
   });
 });

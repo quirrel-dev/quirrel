@@ -95,7 +95,7 @@ export async function stopTime(doIt: () => Promise<void>) {
 export function getAddress(server: http.Server): string {
   let { address, port } = server.address() as AddressInfo;
 
-  if (address === "::") {
+  if (address.startsWith("::")) {
     address = "localhost";
   }
 

@@ -96,6 +96,63 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "babasbot",
+      "name": "Luis Alfredo Lorenzo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/764518?v=4",
+      "profile": "https://babas.bot/",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "scttcper",
+      "name": "Scott Cooper",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1400464?v=4",
+      "profile": "https://twitter.com/scttcper",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "fiddep",
+      "name": "Fredrik Palmquist",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12913309?v=4",
+      "profile": "https://github.com/fiddep",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "alizahid",
+      "name": "Ali Zahid",
+      "avatar_url": "https://avatars.githubusercontent.com/u/941775?v=4",
+      "profile": "https://alizahid.dev",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "jakobo",
+      "name": "Jakob Heuser",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1795?v=4",
+      "profile": "https://codedrift.com",
+      "contributions": [
+        "code",
+        "bug",
+        "design"
+      ]
+    },
+    {
+      "login": "m5r",
+      "name": "Mokhtar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13026820?v=4",
+      "profile": "https://www.mokhtar.dev",
+      "contributions": [
+        "doc",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -12,6 +12,26 @@ import { Redis } from "ioredis";
 import { fastifyDecoratorPlugin } from "./helper/fastify-decorator-plugin";
 import * as config from "../../client/config";
 
+function withoutWrappingSlashes(url: string): string {
+  return withoutLeadingSlash(withoutTrailingSlash(url));
+}
+
+function withoutTrailingSlash(url: string): string {
+  if (url.endsWith("/")) {
+    return url.slice(0, url.length - 1);
+  }
+
+  return url;
+}
+
+function withoutLeadingSlash(url: string): string {
+  if (url.startsWith("/")) {
+    return url.slice(1);
+  }
+
+  return url;
+}
+
 interface PaginationOpts {
   cursor: number;
   count?: number;
@@ -145,6 +165,36 @@ export class JobsRepo implements Closable {
     );
   }
 
+  private async emptyByGetter(
+    tokenId: string,
+    getter: (cursor: number) => Promise<{ cursor: number; jobs: JobDTO[] }>
+  ) {
+    let cursor = 0;
+    const allPromises: Promise<any>[] = [];
+    do {
+      const { cursor: newCursor, jobs } = await getter(cursor);
+      cursor = newCursor;
+
+      for (const job of jobs) {
+        allPromises.push(this.delete(tokenId, job.endpoint, job.id));
+      }
+    } while (cursor !== 0);
+
+    await Promise.all(allPromises);
+  }
+
+  public async emptyQueue(tokenId: string, endpoint: string) {
+    await this.emptyByGetter(tokenId, (cursor) =>
+      this.find(tokenId, endpoint, { cursor })
+    );
+  }
+
+  public async emptyToken(tokenId: string) {
+    await this.emptyByGetter(tokenId, (cursor) =>
+      this.findByTokenId(tokenId, { cursor })
+    );
+  }
+
   public async delete(tokenId: string, endpoint: string, id: string) {
     return await this.producer.delete(
       encodeQueueDescriptor(tokenId, endpoint),
@@ -178,10 +228,6 @@ export class JobsRepo implements Closable {
       runAt = new Date(Date.now() + delay);
     }
 
-    if (repeat?.cron) {
-      runAt = cron(runAt ?? new Date(), repeat.cron);
-    }
-
     if (typeof repeat?.times === "number" && repeat.times < 1) {
       throw new Error("repeat.times must be positive");
     }
@@ -197,6 +243,8 @@ export class JobsRepo implements Closable {
       } else {
         schedule_meta = repeat.cron;
       }
+
+      runAt = cron(runAt ?? new Date(), schedule_meta);
     }
 
     if (repeat?.every) {
@@ -253,11 +301,14 @@ export class JobsRepo implements Closable {
       );
     }
 
-    const routesThatShouldPersist = crons.map((c) => c.route);
+    const routesThatShouldPersist = crons
+      .map((c) => c.route)
+      .map(withoutWrappingSlashes);
     await Promise.all(
       queuesOnSameDeployment.map(async (queue) => {
-        const route = queue.slice(baseUrl.length + 1);
+        const route = withoutWrappingSlashes(queue.slice(baseUrl.length));
         const shouldPersist = routesThatShouldPersist.includes(route);
+
         if (shouldPersist) {
           return;
         }

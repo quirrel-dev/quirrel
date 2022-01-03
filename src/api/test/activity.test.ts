@@ -2,11 +2,11 @@ import { run } from "./runQuirrel";
 import fastify from "fastify";
 import request from "supertest";
 import websocket from "websocket";
-import type { AddressInfo } from "net";
 import {
   describeAcrossBackends,
   expectToBeInRange,
   expectToHaveEqualMembers,
+  getAddress,
   makeSignal,
   stopTime,
   waitUntil,
@@ -69,9 +69,9 @@ describeAcrossBackends("Activity", (backend) => {
         expect(error).toBeNull();
       });
 
-      const { address, port } = quirrel.address() as AddressInfo;
-
-      client.connect(`ws://${address}:${port}/activity`);
+      client.connect(
+        getAddress(quirrel).replace("http://", "ws://") + "/activity"
+      );
     });
 
     let id1 = "";

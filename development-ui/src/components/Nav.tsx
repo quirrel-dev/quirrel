@@ -100,7 +100,7 @@ export function Nav() {
             )}
           </div>
           <div className="flex items-center">
-            <div className="md:block">
+            <div className="hidden md:block">
               <div className="flex items-baseline space-x-4">
                 <PillButton to="activity-log">Activity</PillButton>
                 <PillButton to="pending">Pending</PillButton>
@@ -114,7 +114,7 @@ export function Nav() {
             <a
               href="https://github.com/quirrel-dev/quirrel/issues/new/choose"
               target="_blank"
-              className="text-center text-gray-600 hover:text-gray-400 px-3 block text-base font-medium cursor-pointer"
+              className="text-center text-gray-600 hover:text-gray-400 px-3 block text-base font-medium cursor-pointer hidden md:block"
             >
               Feedback
             </a>
