@@ -37,7 +37,7 @@
   "devDependencies": {
     "@parcel/reporter-bundle-analyzer": "2.0.0",
     "@types/chai": "4.3.0",
-    "@types/ioredis": "4.27.8",
+    "@types/ioredis": "4.28.6",
     "@types/jest": "27.0.3",
     "babel-plugin-istanbul": "6.1.1",
     "chai": "4.3.4",
