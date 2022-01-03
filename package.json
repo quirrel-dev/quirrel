@@ -84,7 +84,7 @@
     "easy-table": "1.2.0",
     "expand-tilde": "2.0.2",
     "fast-glob": "3.2.7",
-    "fastify": "3.22.1",
+    "fastify": "3.25.3",
     "fastify-basic-auth": "2.2.0",
     "fastify-blipp": "3.1.0",
     "fastify-cors": "6.0.2",
