@@ -45,7 +45,7 @@
     "jest": "27.4.5",
     "jest-playwright-preset": "1.7.0",
     "nyc": "15.1.0",
-    "playwright": "1.17.1",
+    "playwright": "1.17.2",
     "serve": "13.0.2",
     "start-server-and-test": "1.14.0",
     "ts-jest": "27.1.2"
