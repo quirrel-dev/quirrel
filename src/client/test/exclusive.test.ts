@@ -1,7 +1,6 @@
 import { QuirrelClient } from "..";
 import { run } from "../../api/test/runQuirrel";
 import http from "http";
-import type { AddressInfo } from "net";
 import { getAddress, waitUntil } from "./util";
 
 export function sleep(ms: number) {
@@ -27,8 +26,6 @@ test("exclusive (repro #717)", async () => {
     })
     .listen(0);
 
-  const { port } = endpoint.address() as AddressInfo;
-
   const log: string[] = [];
   const quirrel = new QuirrelClient({
     route: "",
@@ -40,7 +37,7 @@ test("exclusive (repro #717)", async () => {
     config: {
       quirrelBaseUrl: getAddress(server.server),
       encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
-      applicationBaseUrl: `http://localhost:${port}`,
+      applicationBaseUrl: getAddress(endpoint),
     },
   });
 

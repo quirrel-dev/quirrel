@@ -35,19 +35,19 @@
     "typescript": "^4.2.3"
   },
   "devDependencies": {
-    "@parcel/reporter-bundle-analyzer": "2.0.0",
-    "@types/chai": "4.2.22",
-    "@types/ioredis": "4.27.8",
-    "@types/jest": "27.0.2",
+    "@parcel/reporter-bundle-analyzer": "2.0.1",
+    "@types/chai": "4.3.0",
+    "@types/ioredis": "4.28.7",
+    "@types/jest": "27.4.0",
     "babel-plugin-istanbul": "6.1.1",
     "chai": "4.3.4",
-    "ioredis-mock": "5.6.0",
-    "jest": "27.3.1",
+    "ioredis-mock": "5.8.1",
+    "jest": "27.4.5",
     "jest-playwright-preset": "1.7.0",
     "nyc": "15.1.0",
-    "playwright": "1.16.0",
-    "serve": "12.0.1",
+    "playwright": "1.17.1",
+    "serve": "13.0.2",
     "start-server-and-test": "1.14.0",
-    "ts-jest": "27.0.7"
+    "ts-jest": "27.1.2"
   }
 }
