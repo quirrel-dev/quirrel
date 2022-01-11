@@ -53,7 +53,7 @@
     "@types/parse-gitignore": "1.0.0",
     "@types/redis": "4.0.10",
     "@types/supertest": "2.0.11",
-    "@types/uuid": "8.3.3",
+    "@types/uuid": "8.3.4",
     "@types/websocket": "1.0.4",
     "@types/ws": "8.2.2",
     "delay": "5.0.0",
