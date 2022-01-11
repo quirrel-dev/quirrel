@@ -6,6 +6,7 @@ import Encryptor from "secure-e2ee";
 import { symmetric, asymmetric } from "secure-webhooks";
 import ms from "ms";
 import fetch from "cross-fetch";
+import fetchRetry from "@vercel/fetch-retry";
 import type { IncomingHttpHeaders } from "http";
 import pack from "../../package.json";
 import * as EnhancedJSON from "./enhanced-json";
@@ -277,7 +278,7 @@ export class QuirrelClient<T> {
       args.config?.oldSecrets ?? config.getOldEncryptionSecrets() ?? undefined
     );
     this.catchDecryptionErrors = args.catchDecryptionErrors;
-    this.fetch = args.fetch ?? fetch;
+    this.fetch = fetchRetry(args.fetch ?? fetch);
     this.signaturePublicKey =
       args.config?.signaturePublicKey ?? config.getSignaturePublicKey();
   }
