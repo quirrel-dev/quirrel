@@ -4,7 +4,7 @@
 
 ---
 
-🎉 Quirrel joins Netlify. [Learn more](https://dev.to/quirrel/quirrel-is-acquired-and-i-am-joining-netlify-4157-temp-slug-8716287?preview=5d28e3a9a58734af1a1b630cd3503a38a37d593d8f2a3a9dfbcd92aa75160eea213a1e227d0478ea879bb70eeb3365138f04a8de7c7a43db320f03dc) 🎉
+🎉 Quirrel joins Netlify. [Learn more](https://dev.to/quirrel/quirrel-is-acquired-and-i-am-joining-netlify-dha) 🎉
 
 ---
 
