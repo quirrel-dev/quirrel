@@ -105,7 +105,7 @@
     "open": "8.4.0",
     "opentracing": "^0.14.5",
     "parse-gitignore": "1.0.1",
-    "pino": "7.6.3",
+    "pino": "7.6.5",
     "plausible-telemetry": "0.1.0",
     "secure-e2ee": "0.4.0",
     "secure-webhooks": "^0.3.0",
