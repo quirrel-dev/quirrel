@@ -30,7 +30,7 @@ module.exports = {
             alt="netlify logo"
           />
           <span >
-          Quirrel joins Netlify. <a target="_blank" rel="noopener noreferrer" href="TODO">Learn more</a>
+          Quirrel joins Netlify. <a target="_blank" rel="noopener noreferrer" href="https://dev.to/quirrel/quirrel-is-acquired-and-i-am-joining-netlify-dha">Learn more</a>
           </span>
         </div>
         `,
