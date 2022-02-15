@@ -75,7 +75,7 @@
     "basic-auth": "2.0.1",
     "body-parser": "1.19.1",
     "chalk": "4.1.2",
-    "chokidar": "3.5.2",
+    "chokidar": "3.5.3",
     "commander": "^8.0.0",
     "conditional-type-checks": "1.0.5",
     "connect": "3.7.0",
