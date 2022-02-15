@@ -22,6 +22,7 @@ module.exports = {
     "migrating-to-v1",
     "how-quirrel-works",
     "faq",
+    "netlify-acquisition-faq",
   ],
   docs: [
     {

@@ -14,8 +14,8 @@ describe("DX", () => {
   describe("if no protocol given", () => {
     describe("in dev mode", () => {
       it("defaults endpoints to http", async () => {
-        await expect(() => quirrel.enqueue("")).rejects.toThrowError(
-          "request to https://quirrel.mock.com/queues/http%3A%2F%2Fanysite.com%2Fapi%2FsomeAPI failed, reason: getaddrinfo ENOTFOUND quirrel.mock.com"
+        expect((quirrel as any).baseUrl).toBe(
+          "https://quirrel.mock.com/queues/http%3A%2F%2Fanysite.com%2Fapi%2FsomeAPI"
         );
       });
     });
@@ -33,8 +33,8 @@ describe("DX", () => {
             encryptionSecret: "4ws8syoOgeQX6WFvXuUneGNwy7QvLxpk",
           },
         });
-        await expect(() => quirrel.enqueue("")).rejects.toThrowError(
-          "request to https://quirrel.mock.com/queues/https%3A%2F%2Fanysite.com%2Fapi%2FsomeAPI failed, reason: getaddrinfo ENOTFOUND quirrel.mock.com"
+        expect((quirrel as any).baseUrl).toBe(
+          "https://quirrel.mock.com/queues/https%3A%2F%2Fanysite.com%2Fapi%2FsomeAPI"
         );
         process.env.NODE_ENV = oldEnv;
       });

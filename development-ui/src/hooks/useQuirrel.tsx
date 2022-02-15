@@ -246,6 +246,7 @@ function useQuirrelClient() {
         return new QuirrelClient({
           async handler() {},
           route: withoutBeginningSlash(withoutTrailingSlash(url.pathname)),
+          fetch: window.fetch.bind(window),
           config: {
             applicationBaseUrl: url.origin,
             encryptionSecret: instanceDetails.encryptionSecret,

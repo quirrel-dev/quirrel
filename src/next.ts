@@ -20,6 +20,11 @@ interface NextApiResponse {
   send(body: string): void;
 }
 
+type NextApiHandler = (
+  req: NextApiRequest,
+  res: NextApiResponse
+) => void | Promise<void>;
+
 export {
   Job,
   EnqueueJobOpts,
@@ -41,7 +46,7 @@ export function Queue<Payload>(
   route: string,
   handler: QuirrelJobHandler<Payload>,
   defaultJobOptions?: DefaultJobOptions
-): Queue<Payload> {
+): Queue<Payload> & NextApiHandler {
   const quirrel = new QuirrelClient<Payload>({
     defaultJobOptions,
     handler,

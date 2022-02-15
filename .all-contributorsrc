@@ -153,6 +153,15 @@
         "doc",
         "code"
       ]
+    },
+    {
+      "login": "leo-guinan",
+      "name": "Leo Guinan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1247152?v=4",
+      "profile": "https://github.com/leo-guinan",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
