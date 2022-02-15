@@ -69,6 +69,7 @@ export default function registerRun(program: Command) {
     .option("-h, --host <host>", "host to bind on", "localhost")
     .option("-p, --port <port>", "port to bind on", "9181")
     .option("-r, --redis-url <redis-url>", "enables the redis backend")
+    .option("-q, --quiet", "silences welcome message, condenses output", false)
     .option("--no-cron", "Disable cron job detection", false)
     .option(
       "--passphrase <passphrase>",
@@ -82,12 +83,14 @@ export default function registerRun(program: Command) {
         host,
         port,
         cron,
+        quiet,
       }: {
         redisUrl?: string;
         passphrase: string[];
         host: string;
         port: string;
         cron: boolean;
+        quiet: boolean;
       }) => {
         const exit = await runQuirrelDev({
           redisUrl,
@@ -96,7 +99,7 @@ export default function registerRun(program: Command) {
           host,
           port: Number(port),
           disableTelemetry: Boolean(process.env.DISABLE_TELEMETRY),
-          logger: "dx",
+          logger: quiet ? "quiet" : "dx",
         });
 
         process.on("SIGINT", async () => {

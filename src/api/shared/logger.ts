@@ -3,6 +3,7 @@ import { DxLogger } from "./dx-logger";
 import { StructuredLogger } from "./structured-logger";
 import pino from "pino";
 import { QueuesUpdateCronBody } from "../scheduler/types/queues/update-cron";
+import { QuietLogger } from "./quiet-logger";
 
 export interface Logger {
   log?: pino.Logger;
@@ -36,7 +37,7 @@ export interface Logger {
   // ...
 }
 
-export type LoggerType = "dx" | "structured" | "none" | Logger;
+export type LoggerType = "dx" | "structured" | "none" | "quiet" | Logger;
 
 export function getLogger(
   type?: LoggerType,
@@ -57,5 +58,7 @@ export function getLogger(
       return new DxLogger();
     case "structured":
       return new StructuredLogger(logger);
+    case "quiet":
+      return new QuietLogger();
   }
 }
