@@ -63,6 +63,10 @@ export function getQuirrelToken(): string | undefined {
   return process.env.QUIRREL_TOKEN;
 }
 
+export function getOldQuirrelToken(): string | undefined {
+  return process.env.QUIRREL_OLD_TOKEN;
+}
+
 export function getEncryptionSecret(): string | undefined {
   return process.env.QUIRREL_ENCRYPTION_SECRET;
 }

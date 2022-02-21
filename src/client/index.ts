@@ -279,7 +279,7 @@ export class QuirrelClient<T> {
     );
     this.quirrelBaseUrl = quirrelBaseUrl;
     this.token = args.config?.token ?? config.getQuirrelToken();
-    this.oldToken = args.config?.oldToken ?? "TODO: add";
+    this.oldToken = args.config?.oldToken ?? config.getOldQuirrelToken();
     this.route = config.withoutLeadingSlash(args.route);
     this.encryptor = getEncryptor(
       args.config?.encryptionSecret ?? config.getEncryptionSecret(),
