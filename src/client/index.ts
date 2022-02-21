@@ -51,6 +51,12 @@ interface CreateQuirrelClientArgs<T> {
     token?: string;
 
     /**
+     * Token of old Quirrel instance.
+     * Used during a transition from server to server.
+     */
+    oldToken?: string;
+
+    /**
      * Secret used for end-to-end encryption.
      * Needs to be 32 characters long.
      * Recommended way to set this: process.env.QUIRREL_ENCRYPTION_SECRET
@@ -249,6 +255,7 @@ export class QuirrelClient<T> {
   private quirrelBaseUrl;
   private applicationBaseUrl;
   private token;
+  private oldToken?: string;
   private fetch;
   private catchDecryptionErrors;
   private signaturePublicKey;
@@ -272,6 +279,7 @@ export class QuirrelClient<T> {
     );
     this.quirrelBaseUrl = quirrelBaseUrl;
     this.token = args.config?.token ?? config.getQuirrelToken();
+    this.oldToken = args.config?.oldToken ?? "TODO: add";
     this.route = config.withoutLeadingSlash(args.route);
     this.encryptor = getEncryptor(
       args.config?.encryptionSecret ?? config.getEncryptionSecret(),
@@ -556,6 +564,13 @@ export class QuirrelClient<T> {
     if (this.signaturePublicKey) {
       return asymmetric.verify(body, this.signaturePublicKey, signature);
     } else {
+      if (this.oldToken) {
+        const isValid = symmetric.verify(body, this.oldToken, signature);
+        if (isValid) {
+          return true;
+        }
+      }
+
       return symmetric.verify(body, this.token!, signature);
     }
   }
