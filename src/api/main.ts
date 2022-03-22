@@ -15,6 +15,7 @@ cliWithConfig(async (config) => {
     INCIDENT_RECEIVER_PASSPHRASE,
     ENABLE_SSRF_PREVENTION,
     JWT_PUBLIC_KEY,
+    POSTHOG_API_KEY,
   } = config;
 
   const quirrel = await runQuirrel({
@@ -27,6 +28,7 @@ cliWithConfig(async (config) => {
     disableTelemetry: Boolean(DISABLE_TELEMETRY),
     logger: "structured",
     enableSSRFPrevention: !!ENABLE_SSRF_PREVENTION,
+    postHogApiKey: POSTHOG_API_KEY,
     incidentReceiver: INCIDENT_RECEIVER_ENDPOINT
       ? {
           endpoint: INCIDENT_RECEIVER_ENDPOINT,

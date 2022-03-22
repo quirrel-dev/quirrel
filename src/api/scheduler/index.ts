@@ -23,6 +23,7 @@ import { StructuredLogger } from "../shared/structured-logger";
 import { Logger } from "../shared/logger";
 import { jobsRepoPlugin } from "./jobs-repo";
 import fastifyRateLimit from "fastify-rate-limit";
+import posthogPlugin from "./posthog";
 
 export interface QuirrelServerConfig {
   redisFactory: () => Redis;
@@ -33,6 +34,7 @@ export interface QuirrelServerConfig {
   runningInDocker?: boolean;
   disableTelemetry?: boolean;
   logger?: Logger;
+  postHogApiKey?: string;
   rateLimiter?: {
     max?: number;
   };
@@ -54,6 +56,7 @@ export async function createServer({
   logger,
   jwtPublicKey,
   rateLimiter,
+  postHogApiKey,
 }: QuirrelServerConfig) {
   const app = fastify({
     logger: logger instanceof StructuredLogger ? logger.log : undefined,
@@ -62,6 +65,12 @@ export async function createServer({
 
   if (!disableTelemetry) {
     app.register(sentryPlugin);
+  }
+
+  if (postHogApiKey) {
+    app.register(posthogPlugin, {
+      apiKey: postHogApiKey,
+    });
   }
 
   app.register(fastifyRateLimit, {

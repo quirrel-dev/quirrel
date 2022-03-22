@@ -13,6 +13,7 @@ cliWithConfig(async (config) => {
     RUNNING_IN_DOCKER,
     DISABLE_TELEMETRY,
     JWT_PUBLIC_KEY,
+    POSTHOG_API_KEY,
   } = config;
 
   const scheduler = await createServer({
@@ -24,6 +25,7 @@ cliWithConfig(async (config) => {
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
     disableTelemetry: Boolean(DISABLE_TELEMETRY),
     logger: new StructuredLogger(),
+    postHogApiKey: POSTHOG_API_KEY,
   });
 
   return {

@@ -8,6 +8,7 @@ import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
 import type { Logger } from "../shared/logger";
 import { ssrfFilter } from "./ssrf-filter";
+import PostHog from "posthog-node";
 
 export interface ExecutionError {
   toString(): string;
@@ -35,6 +36,7 @@ export interface QuirrelWorkerConfig {
   incidentReceiver?: { endpoint: string; passphrase: string };
   webhookSigningPrivateKey?: string;
   enableSSRFPrevention?: boolean;
+  postHogApiKey?: string;
 }
 
 export async function createWorker({
@@ -47,6 +49,7 @@ export async function createWorker({
   incidentReceiver,
   webhookSigningPrivateKey,
   enableSSRFPrevention,
+  postHogApiKey,
 }: QuirrelWorkerConfig) {
   const redisClient = redisFactory();
   const telemetrist = disableTelemetry
@@ -62,7 +65,19 @@ export async function createWorker({
     usageMeter = new UsageMeter(redisClient);
   }
 
-  const owl = await createOwl(redisFactory, logger, incidentReceiver, telemetrist);
+  let postHog: PostHog | undefined = undefined;
+  if (postHogApiKey) {
+    postHog = new PostHog(postHogApiKey, {
+      host: "https://app.posthog.com",
+    });
+  }
+
+  const owl = await createOwl(
+    redisFactory,
+    logger,
+    incidentReceiver,
+    telemetrist
+  );
 
   const worker = await owl.createWorker(async (job, ack, span) => {
     let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
@@ -141,6 +156,7 @@ export async function createWorker({
   });
 
   async function close() {
+    postHog?.shutdown();
     await worker.close();
     await redisClient.quit();
   }
