@@ -12,6 +12,7 @@ import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
 import { QueuesUpdateCronBody } from "../types/queues/update-cron";
 import { isValidCronExpression } from "../../../shared/is-valid-cron";
 import { isValidTimezone } from "../../../shared/repeat";
+import { JobDTO } from "../../../client/job";
 
 import * as Url from "url"
 
@@ -74,6 +75,19 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       "body.repeat.cronTimezone is invalid, please provide a valid IANA timezone.",
   };
 
+  function captureJobEnqueued(tokenId: string, job: JobDTO) {
+    fastify.postHog?.capture({
+      distinctId: tokenId,
+      event: "jobs enqueued",
+      properties: {
+        endpoint: job.endpoint,
+        exclusive: job.exclusive,
+        repeat: job.repeat,
+        retry: job.retry,
+      },
+    });
+  }
+
   fastify.post<{ Body: EnqueueJob; Params: QueuesEndpointParams }>(
     "/:endpoint",
     {
@@ -107,6 +121,8 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       }
 
       const job = await jobsRepo.enqueue(tokenId, endpoint, body);
+
+      captureJobEnqueued(tokenId, job);
 
       fastify.logger?.jobCreated({ ...job, tokenId });
 
@@ -182,6 +198,7 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       );
 
       jobs.forEach((job) => fastify.logger?.jobCreated({ ...job, tokenId }));
+      jobs.forEach((job) => captureJobEnqueued(tokenId, job));
 
       reply.status(201).send(jobs);
     }
@@ -197,6 +214,11 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     async handler(request, reply) {
       fastify.telemetrist?.dispatch("get_queues");
       const queues = await queueRepo.get(request.tokenId);
+
+      fastify.postHog?.capture({
+        distinctId: request.tokenId,
+        event: "queues listed",
+      });
 
       reply.status(200).send(queues);
     },
@@ -223,6 +245,14 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
         }
       );
 
+      fastify.postHog?.capture({
+        distinctId: request.tokenId,
+        event: "jobs scanned",
+        properties: {
+          endpoint: request.params.endpoint,
+        },
+      });
+
       reply.status(200).send({
         cursor: cursor === 0 ? null : cursor,
         jobs,
@@ -241,6 +271,15 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       fastify.telemetrist?.dispatch("get_job");
 
       const { endpoint, id } = request.params;
+
+      fastify.postHog?.capture({
+        distinctId: request.tokenId,
+        event: "job fetched",
+        properties: {
+          endpoint,
+          id,
+        },
+      });
 
       const job = await jobsRepo.findById(request.tokenId, endpoint, id);
       if (job) {
@@ -265,6 +304,17 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       const { endpoint, id } = request.params;
 
       const result = await jobsRepo.invoke(request.tokenId, endpoint, id);
+
+      fastify.postHog?.capture({
+        distinctId: request.tokenId,
+        event: "job invoked",
+        properties: {
+          endpoint,
+          id,
+          result,
+        },
+      });
+
       switch (result) {
         case "invoked":
           return reply.status(204).send();
@@ -291,6 +341,16 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       if (result === "deleted") {
         fastify.logger?.jobDeleted({ endpoint, id, tokenId: request.tokenId });
       }
+
+      fastify.postHog?.capture({
+        distinctId: request.tokenId,
+        event: "job deleted",
+        properties: {
+          endpoint,
+          id,
+          result,
+        },
+      });
 
       switch (result) {
         case "deleted":
@@ -332,6 +392,11 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       const response = await jobsRepo.updateCron(tokenId, body);
 
       fastify.logger?.cronUpdated(body, response.deleted);
+
+      fastify.postHog?.capture({
+        distinctId: request.tokenId,
+        event: "cron updated",
+      });
 
       reply.status(200).send(response);
     }

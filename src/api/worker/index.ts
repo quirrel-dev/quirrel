@@ -130,6 +130,15 @@ export async function createWorker({
       usageMeter?.record(tokenId),
     ]);
 
+    postHog?.capture({
+      distinctId: tokenId,
+      event: "job executed",
+      properties: {
+        endpoint,
+        status: response.status,
+      },
+    });
+
     if (response.status >= 200 && response.status < 300) {
       executionDone?.();
 
