@@ -14,7 +14,7 @@ import { isValidCronExpression } from "../../../shared/is-valid-cron";
 import { isValidTimezone } from "../../../shared/repeat";
 import { JobDTO } from "../../../client/job";
 
-import * as Url from "url"
+import * as Url from "url";
 
 const jobs: FastifyPluginCallback = (fastify, opts, done) => {
   const jobsRepo = fastify.jobs;
@@ -396,6 +396,9 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       fastify.postHog?.capture({
         distinctId: request.tokenId,
         event: "cron updated",
+        properties: {
+          number: body.crons.length,
+        },
       });
 
       reply.status(200).send(response);
