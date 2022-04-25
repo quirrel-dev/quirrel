@@ -5,6 +5,7 @@ import { EndpointModal } from "./EndpointModal";
 import { SearchBar } from "./SearchBar";
 import { RouterContext, Route, ConfigContext } from "../index";
 import horn from "url:../img/horn_transparent.png";
+import { StatsModal } from "./StatsModal";
 
 interface RouterAnchorProps extends React.HTMLProps<HTMLAnchorElement> {
   to: Route;
@@ -75,6 +76,7 @@ export function Nav() {
             <img className="h-10 w-auto" src={horn} alt="Quirrel Logo" />
 
             {showEndpointModal && <EndpointModal />}
+            <StatsModal />
             {config.linkToAPIDocs && (
               <a
                 href={config.linkToAPIDocs}
