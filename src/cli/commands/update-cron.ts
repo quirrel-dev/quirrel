@@ -8,6 +8,33 @@ import {
 import * as config from "../../client/config";
 import Table from "easy-table";
 
+async function clearOldInstance() {
+  const client = new QuirrelClient({
+    async handler() {},
+    route: "",
+    config: {
+      quirrelBaseUrl: config.getOldQuirrelBaseUrl(),
+      token: config.getOldQuirrelToken(),
+    },
+  });
+  const endpointsResponse = await client.makeRequest("/queues/update-cron", {
+    method: "PUT",
+    body: JSON.stringify({
+      baseUrl: config.withoutTrailingSlash(
+        config.prefixWithProtocol(config.getApplicationBaseUrl())
+      ),
+      crons: [],
+    }),
+    headers: { "content-type": "application/json" },
+  });
+  if (endpointsResponse.status !== 200) {
+    throw new Error(
+      "Failed to clear old instance: " + (await endpointsResponse.text())
+    );
+  }
+  console.log("Cleared old instance.");
+}
+
 export function formatRouteScheduleMapAsTable(jobs: RouteScheduleManifest) {
   return Table.print(
     jobs.map((job) => ({
@@ -65,6 +92,10 @@ export async function updateCron(
       `These jobs are obsolete, and ${dryRun ? "would be" : "were"} removed: `
     );
     deleted.forEach((route) => console.log(route));
+  }
+
+  if (!dryRun && config.getOldQuirrelBaseUrl()) {
+    await clearOldInstance();
   }
 }
 

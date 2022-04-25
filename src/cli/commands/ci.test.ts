@@ -51,3 +51,35 @@ test("quirrel ci", async () => {
 
   teardown();
 });
+
+test("quirrel ci migration", async () => {
+  const quirrelOld = await run("Mock", {
+    port: 0,
+  });
+
+  process.env.QUIRREL_API_URL = getAddress(quirrelOld.server);
+  await runForDirectory("../../../examples/next");
+
+  const oldCron = await quirrelOld.app.app.jobs.findAll({ cursor: 0 });
+  expect(oldCron.cursor).toEqual(0);
+  expect(oldCron.jobs).toHaveLength(2);
+
+  const quirrelNew = await run("Mock", {
+    port: 0,
+  });
+
+  process.env.QUIRREL_MIGRATE_OLD_API_URL = getAddress(quirrelOld.server);
+  process.env.QUIRREL_API_URL = getAddress(quirrelNew.server);
+  await runForDirectory("../../../examples/next");
+
+  const oldCronEmpty = await quirrelOld.app.app.jobs.findAll({ cursor: 0 });
+  expect(oldCronEmpty.cursor).toEqual(0);
+  expect(oldCronEmpty.jobs).toHaveLength(0);
+
+  const newCron = await quirrelNew.app.app.jobs.findAll({ cursor: 0 });
+  expect(newCron.cursor).toEqual(0);
+  expect(newCron.jobs).toHaveLength(2);
+
+  await quirrelOld.teardown();
+  await quirrelNew.teardown();
+});
