@@ -63,7 +63,7 @@ describeAcrossBackends("Jobs", (backend) => {
     expect(lastBody).toEqual('{"foo":"bar"}');
   });
 
-  test.only("stats", async () => {
+  test("stats", async () => {
     await request(quirrel)
       .post("/queues/" + endpoint)
       .send({ body: JSON.stringify({ foo: "bar" }), delay: 1000 })
