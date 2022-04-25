@@ -224,6 +224,24 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
     },
   });
 
+  fastify.get("/stats", {
+    schema: {
+      ...baseSchema,
+      summary: "Statistics about existing queues",
+    },
+    async handler(request, reply) {
+      const stats = await jobsRepo.queueStatsByTokenId(request.tokenId);
+
+      fastify.postHog?.capture({
+        distinctId: request.tokenId,
+        event: "queues stats",
+      });
+
+      reply.status(200).send(stats);
+    },
+  });
+  
+
   fastify.get<{
     Params: QueuesEndpointParams;
     Querystring: SCANQuerystringParams;
