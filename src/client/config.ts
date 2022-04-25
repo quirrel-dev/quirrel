@@ -59,8 +59,22 @@ export function getQuirrelBaseUrl(): string | undefined {
   return isProduction() ? "https://api.quirrel.dev" : "http://localhost:9181";
 }
 
+export function getOldQuirrelBaseUrl(): string | undefined {
+  const fromEnvironment =
+    process.env.QUIRREL_MIGRATE_OLD_API_URL ?? process.env.QUIRREL_MIGRATE_OLD_URL;
+  if (fromEnvironment) {
+    return normalisedURL(fromEnvironment);
+  }
+
+  return undefined;
+}
+
 export function getQuirrelToken(): string | undefined {
   return process.env.QUIRREL_TOKEN;
+}
+
+export function getOldQuirrelToken(): string | undefined {
+  return process.env.QUIRREL_MIGRATE_OLD_TOKEN;
 }
 
 export function getEncryptionSecret(): string | undefined {

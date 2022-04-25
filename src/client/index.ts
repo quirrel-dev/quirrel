@@ -44,11 +44,21 @@ interface CreateQuirrelClientArgs<T> {
     quirrelBaseUrl?: string;
 
     /**
+     * Same as quirrelBaseUrl, for migrating.
+     */
+    quirrelOldBaseUrl?: string;
+
+    /**
      * Bearer Secret for authenticating with Quirrel.
      * Obtain on quirrel.dev or using the API of a self-hosted instance.
      * Recommended way to set this: process.env.QUIRREL_TOKEN
      */
     token?: string;
+
+    /**
+     *  Same as token, for migrating.
+     */
+    oldToken?: string;
 
     /**
      * Secret used for end-to-end encryption.
@@ -247,6 +257,8 @@ export class QuirrelClient<T> {
   private encryptor;
   private defaultHeaders: Record<string, string>;
   private quirrelBaseUrl;
+  private quirrelOldBaseUrl;
+  private quirrelOldToken;
   private applicationBaseUrl;
   private token;
   private fetch;
@@ -273,6 +285,9 @@ export class QuirrelClient<T> {
     this.quirrelBaseUrl = quirrelBaseUrl;
     this.token = args.config?.token ?? config.getQuirrelToken();
     this.route = config.withoutLeadingSlash(args.route);
+    this.quirrelOldBaseUrl =
+      args.config?.quirrelOldBaseUrl ?? config.getOldQuirrelBaseUrl();
+    this.quirrelOldToken = args.config?.oldToken ?? config.getOldQuirrelToken();
     this.encryptor = getEncryptor(
       args.config?.encryptionSecret ?? config.getEncryptionSecret(),
       args.config?.oldSecrets ?? config.getOldEncryptionSecrets() ?? undefined
@@ -556,7 +571,10 @@ export class QuirrelClient<T> {
     if (this.signaturePublicKey) {
       return asymmetric.verify(body, this.signaturePublicKey, signature);
     } else {
-      return symmetric.verify(body, this.token!, signature);
+      return (
+        symmetric.verify(body, this.token!, signature) ||
+        symmetric.verify(body, this.quirrelOldToken ?? "", signature)
+      );
     }
   }
 
