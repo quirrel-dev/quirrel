@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     tags:
+      - "*"
   pull_request:
 
 jobs:
@@ -93,6 +94,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Build and push
