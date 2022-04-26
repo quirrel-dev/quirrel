@@ -14,6 +14,7 @@ cliWithConfig(async (config) => {
     INCIDENT_RECEIVER_ENDPOINT,
     INCIDENT_RECEIVER_PASSPHRASE,
     ENABLE_SSRF_PREVENTION,
+    POSTHOG_API_KEY,
   } = config;
 
   const worker = await createWorker({
@@ -24,6 +25,7 @@ cliWithConfig(async (config) => {
     disableTelemetry: Boolean(DISABLE_TELEMETRY),
     logger: new StructuredLogger(),
     enableSSRFPrevention: !!ENABLE_SSRF_PREVENTION,
+    postHogApiKey: POSTHOG_API_KEY,
     incidentReceiver: INCIDENT_RECEIVER_ENDPOINT
       ? {
           endpoint: INCIDENT_RECEIVER_ENDPOINT,

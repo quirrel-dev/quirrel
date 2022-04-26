@@ -278,7 +278,7 @@ export class QuirrelClient<T> {
       args.config?.oldSecrets ?? config.getOldEncryptionSecrets() ?? undefined
     );
     this.catchDecryptionErrors = args.catchDecryptionErrors;
-    this.fetch = fetchRetry(args.fetch ?? fetch);
+    this.fetch = args.fetch ?? fetchRetry(fetch);
     this.signaturePublicKey =
       args.config?.signaturePublicKey ?? config.getSignaturePublicKey();
   }

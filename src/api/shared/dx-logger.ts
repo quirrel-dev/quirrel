@@ -3,7 +3,7 @@ import chalk from "chalk";
 import { JobDTO } from "../../client/job";
 import { QueuesUpdateCronBody } from "../scheduler/types/queues/update-cron";
 
-function getQueueName(endpoint: string) {
+export function getQueueName(endpoint: string) {
   return new URL(endpoint).pathname;
 }
 

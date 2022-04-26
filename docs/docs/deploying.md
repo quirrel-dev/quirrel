@@ -33,11 +33,14 @@ created on, excluding them from future bugfixes.
 To connect `QUIRREL_BASE_URL` to `VERCEL_URL`, set its value to `@VERCEL_URL` ([notice the @](https://github.com/quirrel-dev/quirrel/blob/d268f0555211afb202c3c3b12b460d14f0f0fb86/quirrel/src/client/config.ts#L12)).
 :::
 
-## Hosted version
-
-For most people, the [hosted version](https://quirrel.dev) of Quirrel is the easiest, and probably also cheapest way of using Quirrel (there's a free tier if your project is just starting out, and OSS and side projects can apply for discounts).
-
 ## How to deploy your own server
+
+:::note Hosting on Fly
+If you're planning to host your Quirrel instance on Fly.io, you can follow [Mokhtar Mial](https://twitter.com/m5r_m)'s tutorial:
+
+[Self-Hosting Quirrel on Fly.io](https://dev.to/remixtape/self-hosting-quirrel-5af7)
+:::
+
 
 🐉 Here be dragons: Running your own infrastructure isn't the easiest thing in the world, and you should know what you're doing.
 
