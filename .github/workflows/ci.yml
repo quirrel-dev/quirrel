@@ -89,6 +89,8 @@ jobs:
         uses: docker/metadata-action@0978a0678a62fd006f5c22ac7d2c82d4f5093cd8
         with:
           images: ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=false
           tags: |
             type=ref,event=branch
             type=ref,event=pr
