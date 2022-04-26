@@ -94,7 +94,7 @@
     "fastify-rate-limit": "^5.7.0",
     "fastify-static": "^4.2.2",
     "fastify-swagger": "^4.5.0",
-    "fastify-websocket": "4.0.0",
+    "fastify-websocket": "4.2.2",
     "ioredis": "4.28.5",
     "ioredis-mock": "^5.6.1",
     "ipaddr.js": "^2.0.1",
