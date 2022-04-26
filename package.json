@@ -55,7 +55,7 @@
     "@types/supertest": "2.0.12",
     "@types/uuid": "8.3.4",
     "@types/websocket": "1.0.5",
-    "@types/ws": "8.2.2",
+    "@types/ws": "8.5.3",
     "delay": "5.0.0",
     "jest": "27.5.1",
     "json-schema-to-typescript": "10.1.5",
