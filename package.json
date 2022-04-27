@@ -19,7 +19,7 @@
   ],
   "main": "dist/cjs/src/index.js",
   "module": "dist/esm/src/index.js",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "engines": {
     "node": "12 || 14 || 15 || 16 || 17"
   },
