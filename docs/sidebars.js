@@ -20,6 +20,7 @@ module.exports = {
       ],
     },
     "migrating-to-v1",
+    "migrating-servers",
     "how-quirrel-works",
     "faq",
     "netlify-acquisition-faq",
