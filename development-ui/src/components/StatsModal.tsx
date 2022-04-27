@@ -18,7 +18,7 @@ export function StatsModal() {
     async function run() {
       const response = await fetch(connectedTo?.baseUrl + "/queues/stats", {
         headers: {
-          Authorisation: `Bearer ${connectedTo?.token}`,
+          Authorization: `Bearer ${connectedTo?.token}`,
         },
       });
 
