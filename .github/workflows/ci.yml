@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12, 14, 15, 16, 17]
+        node-version: [12, 14, 15, 16, 17, 18]
       fail-fast: false
 
     services:
