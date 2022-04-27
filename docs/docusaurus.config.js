@@ -41,6 +41,7 @@ module.exports = {
     },
     algolia: {
       apiKey: "2847a8b1da250cce60314892409484d8",
+      appId: "BH4D9OD16A",
       indexName: "quirrel-next",
       searchParameters: {}, // Optional (if provided by Algolia)
     },
