@@ -63,6 +63,19 @@ describeAcrossBackends("Jobs", (backend) => {
     expect(lastBody).toEqual('{"foo":"bar"}');
   });
 
+  test("stats", async () => {
+    await request(quirrel)
+      .post("/queues/" + endpoint)
+      .send({ body: JSON.stringify({ foo: "bar" }), delay: 1000 })
+      .expect(201);
+
+    await delay(300);
+
+    await request(quirrel)
+      .get("/queues/stats")
+      .expect(200, { [decodeURIComponent(endpoint)]: { count: 1 } });
+  });
+
   test("post multiple jobs", async () => {
     const response = await request(quirrel)
       .post("/queues/" + endpoint + "/batch")

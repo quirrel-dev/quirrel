@@ -150,6 +150,31 @@ export class JobsRepo implements Closable {
     };
   }
 
+  public async queueStatsByTokenId(byTokenId: string) {
+    let cursor = 0;
+
+    const counts: Record<string, number> = {};
+
+    do {
+      const { newCursor, jobs } = await this.producer.scanQueuePattern(
+        encodeQueueDescriptor(byTokenId, "*"),
+        cursor,
+        1000
+      );
+
+      cursor = newCursor;
+
+      for (const job of jobs) {
+        const { endpoint } = decodeQueueDescriptor(job.queue);
+        counts[endpoint] = (counts[endpoint] || 0) + 1;
+      }
+    } while (cursor !== 0);
+
+    return Object.fromEntries(
+      Object.entries(counts).map(([endpoint, count]) => [endpoint, { count }])
+    );
+  }
+
   public async findById(tokenId: string, endpoint: string, id: string) {
     const job = await this.producer.findById(
       encodeQueueDescriptor(tokenId, endpoint),
