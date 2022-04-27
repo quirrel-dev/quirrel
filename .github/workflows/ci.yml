@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     tags:
+      - "*"
   pull_request:
 
 jobs:
@@ -85,14 +86,17 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@0978a0678a62fd006f5c22ac7d2c82d4f5093cd8
         with:
           images: ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=false
           tags: |
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=sha
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Build and push
