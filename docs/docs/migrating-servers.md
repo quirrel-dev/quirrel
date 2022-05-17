@@ -11,8 +11,7 @@ This will result in the old instance slowly draining.
 Once it's fully drained, the migration is complete.
 
 :::warning
-At the moment, this migration *does not* work fully for applications that use `.get`, `.getById`, `.invoke`, `.delete`, `override: true` or `exclusive` jobs.
-A solution for these applications is under active development.
+During the migration, the `exclusive` jobs feature will not work perfectly.
 If that's a problem for your application, [get in touch](mailto:migration@quirrel.dev).
 :::
 
@@ -30,6 +29,6 @@ Here's the step-by-step guide:
   Cron Jobs are transferred on the first run of `quirrel ci`.
 
 4. Use the `Stats` page on [https://ui.quirrel.dev](https://ui.quirrel.dev/) to watch the old instance drain fully. Depending on your application, this can take weeks.
-5. After the old instance is fully drained, remove the `QUIRREL_MIGRATE` environment variables.
+5. After the old instance is fully drained, remove the `QUIRREL_MIGRATE_*` environment variables.
 
 If you face an issue, please [open an issue](https://github.com/quirrel-dev/quirrel/issues/new/choose) on GitHub or [email Simon](mailto:migration@quirrel.dev).
