@@ -30,19 +30,31 @@ export async function createOwl(
     async onError(ack, job, error: ExecutionError) {
       let { tokenId, endpoint } = decodeQueueDescriptor(job.queue);
 
-      await incidentForwarder?.dispatch(
-        {
-          endpoint,
-          tokenId,
-          payload: job.payload,
-          id: job.id,
-          runAt: job.runAt,
-        },
-        {
-          body: error.responseBody,
-          status: error.responseStatus,
-        }
-      );
+      if (incidentForwarder) {
+        await incidentForwarder.dispatch(
+          {
+            endpoint,
+            tokenId,
+            payload: job.payload,
+            id: job.id,
+            runAt: job.runAt,
+          },
+          {
+            body: error.responseBody,
+            status: error.responseStatus,
+          }
+        );
+      } else {
+        logger?.executionErrored(
+          {
+            id: job.id,
+            tokenId: tokenId,
+            endpoint: endpoint,
+            body: job.payload,
+          },
+          error.toString()
+        );
+      }
 
       await telemetrist?.dispatch("execution_errored");
     },
