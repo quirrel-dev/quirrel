@@ -256,6 +256,7 @@ export class QuirrelClient<T> {
   private defaultJobOptions;
   private encryptor;
   private defaultHeaders: Record<string, string>;
+  private oldDefaultHeaders: Record<string, string>;
   private quirrelBaseUrl;
   private quirrelOldBaseUrl;
   private quirrelOldToken;
@@ -288,6 +289,10 @@ export class QuirrelClient<T> {
     this.quirrelOldBaseUrl =
       args.config?.quirrelOldBaseUrl ?? config.getOldQuirrelBaseUrl();
     this.quirrelOldToken = args.config?.oldToken ?? config.getOldQuirrelToken();
+    this.oldDefaultHeaders = {
+      ...getAuthHeaders(this.quirrelOldToken),
+      "X-QuirrelClient-Version": pack.version,
+    };
     this.encryptor = getEncryptor(
       args.config?.encryptionSecret ?? config.getEncryptionSecret(),
       args.config?.oldSecrets ?? config.getOldEncryptionSecrets() ?? undefined
@@ -301,6 +306,18 @@ export class QuirrelClient<T> {
   private get baseUrl() {
     return (
       this.quirrelBaseUrl +
+      "/queues/" +
+      encodeURIComponent(this.applicationBaseUrl + "/" + this.route)
+    );
+  }
+
+  private get oldBaseUrl() {
+    if (!this.quirrelOldBaseUrl) {
+      return undefined;
+    }
+
+    return (
+      this.quirrelOldBaseUrl +
       "/queues/" +
       encodeURIComponent(this.applicationBaseUrl + "/" + this.route)
     );
@@ -388,6 +405,15 @@ export class QuirrelClient<T> {
   async enqueue(payload: T, options: EnqueueJobOptions = {}): Promise<Job<T>> {
     const body = await this.payloadAndOptionsToBody(payload, options);
 
+    if (this.oldBaseUrl && !options.override && options.id) {
+      const res = await this.fetchAgainstOld(
+        `/${encodeURIComponent(options.id)}`
+      );
+      if (res.status === 200) {
+        return await this.toJob(await res.json());
+      }
+    }
+
     const res = await this.fetch(this.baseUrl, {
       method: "POST",
       headers: {
@@ -399,6 +425,12 @@ export class QuirrelClient<T> {
     });
 
     if (res.status === 201) {
+      if (this.oldBaseUrl && options.override && options.id) {
+        await this.fetchAgainstOld(`/${encodeURIComponent(options.id)}`, {
+          method: "DELETE",
+        });
+      }
+
       return await this.toJob(await res.json());
     }
 
@@ -488,9 +520,7 @@ export class QuirrelClient<T> {
     let cursor: number | null = 0;
 
     while (cursor !== null) {
-      const res = await this.fetch(this.baseUrl + "?cursor=" + cursor, {
-        headers: this.defaultHeaders,
-      });
+      const res = await this.fetchAgainstCurrent("?cursor=" + cursor);
 
       const json = await res.json();
 
@@ -503,16 +533,69 @@ export class QuirrelClient<T> {
 
       yield await Promise.all(jobs.map((dto) => this.toJob(dto)));
     }
+
+    if (this.quirrelOldBaseUrl) {
+      let cursor: number | null = 0;
+
+      while (cursor !== null) {
+        const res = await this.fetchAgainstOld("?cursor=" + cursor);
+
+        const json = await res.json();
+
+        const { cursor: newCursor, jobs } = json as {
+          cursor: number | null;
+          jobs: JobDTO[];
+        };
+
+        cursor = newCursor;
+
+        yield await Promise.all(jobs.map((dto) => this.toJob(dto)));
+      }
+    }
   }
+
+  private fetchAgainstCurrent: typeof fetch = async (input, init) => {
+    return await this.fetch(this.baseUrl + input, {
+      ...init,
+      headers: {
+        ...this.defaultHeaders,
+        ...init?.headers,
+      },
+    });
+  };
+
+  private fetchAgainstOld: typeof fetch = async (input, init) => {
+    if (!this.oldBaseUrl) {
+      throw new Error("only call when oldBaseUrl is defined");
+    }
+    return await this.fetch(this.oldBaseUrl + input, {
+      ...init,
+      headers: {
+        ...this.oldDefaultHeaders,
+        ...init?.headers,
+      },
+    });
+  };
+
+  private fetchAndRetryNotFound: typeof fetch = async (input, init) => {
+    const res = await this.fetchAgainstCurrent(input, init);
+    if (!this.oldBaseUrl) {
+      return res;
+    }
+
+    if (res.status !== 404) {
+      return res;
+    }
+
+    return await this.fetchAgainstOld(input, init);
+  };
 
   /**
    * Get a specific job.
    * @returns null if no job was found.
    */
   async getById(id: string): Promise<Job<T> | null> {
-    const res = await this.fetch(this.baseUrl + "/" + encodeURIComponent(id), {
-      headers: this.defaultHeaders,
-    });
+    const res = await this.fetchAndRetryNotFound("/" + encodeURIComponent(id));
 
     if (res.status === 404) {
       return null;
@@ -530,9 +613,8 @@ export class QuirrelClient<T> {
    * @returns false if job could not be found.
    */
   async invoke(id: string): Promise<boolean> {
-    const res = await this.fetch(this.baseUrl + "/" + encodeURIComponent(id), {
+    const res = await this.fetchAndRetryNotFound("/" + encodeURIComponent(id), {
       method: "POST",
-      headers: this.defaultHeaders,
     });
 
     if (res.status === 404) {
@@ -551,9 +633,8 @@ export class QuirrelClient<T> {
    * @returns false if job could not be found.
    */
   async delete(id: string): Promise<boolean> {
-    const res = await this.fetch(this.baseUrl + "/" + encodeURIComponent(id), {
+    const res = await this.fetchAndRetryNotFound("/" + encodeURIComponent(id), {
       method: "DELETE",
-      headers: this.defaultHeaders,
     });
 
     if (res.status === 404) {
