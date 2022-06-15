@@ -17,7 +17,7 @@ If that's a problem for your application, [get in touch](mailto:migration@quirre
 
 Here's the step-by-step guide:
 
-1. Upgrade your application to Quirrel v1.9.0
+1. Upgrade your application to Quirrel v1.9.1
 2. Deploy your own Instance by following [https://github.com/quirrel-dev/quirrel-on-railway](https://github.com/quirrel-dev/quirrel-on-railway) or [https://docs.quirrel.dev/deploying](https://docs.quirrel.dev/deploying). Note down the access token.
 3. Make the following changes to your application's environment variables:
     - set `QUIRREL_MIGRATE_OLD_API_URL` to the hostname of your old instance. If you used hosted Quirrel, that's `api.quirrel.dev`.
