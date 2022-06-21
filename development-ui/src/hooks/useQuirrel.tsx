@@ -451,7 +451,7 @@ export function QuirrelProvider(props: PropsWithChildren<{}>) {
       const result = await loadInitialJobs(getClient);
       if (result === "unauthorized") {
         window.alert(
-          "Connection couldn't be established, you're unauthorized. Please check the token."
+          "Please authenticate with your QUIRREL_TOKEN via the top-left connection menu."
         );
         return "stopPolling";
       }
