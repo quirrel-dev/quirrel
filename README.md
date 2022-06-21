@@ -65,6 +65,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://codedrift.com"><img src="https://avatars.githubusercontent.com/u/1795?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jakob Heuser</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=jakobo" title="Code">💻</a> <a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3Ajakobo" title="Bug reports">🐛</a> <a href="#design-jakobo" title="Design">🎨</a></td>
     <td align="center"><a href="https://www.mokhtar.dev"><img src="https://avatars.githubusercontent.com/u/13026820?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mokhtar</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=m5r" title="Documentation">📖</a> <a href="https://github.com/quirrel-dev/quirrel/commits?author=m5r" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/leo-guinan"><img src="https://avatars.githubusercontent.com/u/1247152?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Leo Guinan</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3Aleo-guinan" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://rainbow.me/brenner.eth"><img src="https://avatars.githubusercontent.com/u/12127609?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Brenner Spear</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/commits?author=BrennerSpear" title="Documentation">📖</a></td>
   </tr>
 </table>
 
