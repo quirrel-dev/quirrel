@@ -292,6 +292,7 @@ function useQuirrelClient() {
 async function isHealthy(
   baseUrl: string
 ): Promise<{ isHealthy: boolean; stopPolling?: boolean }> {
+  baseUrl = withoutTrailingSlash(baseUrl);
   const connectsToLocalhost = baseUrl.includes("localhost");
   try {
     const res = await fetch(baseUrl + "/health");
