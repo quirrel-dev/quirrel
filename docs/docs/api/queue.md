@@ -233,7 +233,7 @@ Repetition options of the job.
 exclusive: boolean;
 ```
 
-If a job is marked as `exclusive`, that means there won't be any other job executed at the same time.
+If a job is marked as `exclusive`, that means there won't be any other job (in the same queue) executed at the same time.
 If applied to all jobs in a queue, that effectively guarantees serial execution.
 
 ### `.invoke`
