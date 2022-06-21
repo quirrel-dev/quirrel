@@ -16,7 +16,7 @@ export class DxLogger implements Logger {
 Welcome to the Quirrel development server.
 
 Open your browser and go to
-    {yellow https://ui.quirrel.dev}
+    {yellow http://${address}}
 to get a better overview over pending jobs.
 ${
   telemetryEnabled
