@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { ConfigContext } from "..";
 import { useQuirrel } from "../hooks/useQuirrel";
 import { connectionDetailsToHash } from "../lib/encrypted-connection-details";
 import { Modal } from "./Modal";
@@ -20,8 +21,11 @@ export function EndpointModal() {
   const [showModal, setShowModal] = useState(false);
 
   const { connectedTo, connectTo } = useQuirrel();
+  const { fixedEndpoint } = useContext(ConfigContext);
 
-  const [endpoint, setEndpoint] = useState(connectedTo?.baseUrl ?? "");
+  const [endpoint, setEndpoint] = useState(
+    connectedTo?.baseUrl ?? fixedEndpoint ?? ""
+  );
   const [token, setToken] = useState(connectedTo?.token ?? "");
   const [encryptionSecret, setEncryptionSecret] = useState(
     connectedTo?.encryptionSecret ?? ""
@@ -82,76 +86,80 @@ export function EndpointModal() {
                 Connect to Quirrel Instance
               </h3>
               <div className="mt-2 space-y-2">
-                <span className="space-x-2 text-blue-400 text-xs">
-                  <button
-                    onClick={() => setEndpoint("http://localhost:9181")}
-                    className="inline-flex items-center hover:text-blue-300 focus:outline-none"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      className="h-3 inline m-1"
+                {!fixedEndpoint && (
+                  <span className="space-x-2 text-blue-400 text-xs">
+                    <button
+                      onClick={() => setEndpoint("http://localhost:9181")}
+                      className="inline-flex items-center hover:text-blue-300 focus:outline-none"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-                      />
-                    </svg>
-                    localhost
-                  </button>
-                  <button
-                    onClick={() => setEndpoint("https://api.quirrel.dev")}
-                    className="inline-flex items-center hover:text-blue-300 focus:outline-none"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      className="h-3 inline m-1"
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        className="h-3 inline m-1"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                        />
+                      </svg>
+                      localhost
+                    </button>
+                    <button
+                      onClick={() => setEndpoint("https://api.quirrel.dev")}
+                      className="inline-flex items-center hover:text-blue-300 focus:outline-none"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
-                      />
-                    </svg>
-                    quirrel.dev
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEndpoint("");
-                    }}
-                    className="inline-flex items-center hover:text-blue-300 focus:outline-none"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="h-3 inline m-1"
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        className="h-3 inline m-1"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+                        />
+                      </svg>
+                      quirrel.dev
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEndpoint("");
+                      }}
+                      className="inline-flex items-center hover:text-blue-300 focus:outline-none"
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M2 5a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm14 1a1 1 0 11-2 0 1 1 0 012 0zM2 13a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2zm14 1a1 1 0 11-2 0 1 1 0 012 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    On-Premise
-                  </button>
-                </span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="h-3 inline m-1"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M2 5a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm14 1a1 1 0 11-2 0 1 1 0 012 0zM2 13a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2zm14 1a1 1 0 11-2 0 1 1 0 012 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      On-Premise
+                    </button>
+                  </span>
+                )}
 
-                <input
-                  placeholder="Endpoint"
-                  name="endpoint"
-                  value={endpoint}
-                  onChange={(evt) => setEndpoint(evt.target.value)}
-                  className="border-gray-300 placeholder-gray-500 appearance-none relative block w-full px-3 py-2 border text-gray-900 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
-                />
+                {!fixedEndpoint && (
+                  <input
+                    placeholder="Endpoint"
+                    name="endpoint"
+                    value={endpoint}
+                    onChange={(evt) => setEndpoint(evt.target.value)}
+                    className="border-gray-300 placeholder-gray-500 appearance-none relative block w-full px-3 py-2 border text-gray-900 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
+                  />
+                )}
 
                 <input
                   placeholder="Token"
