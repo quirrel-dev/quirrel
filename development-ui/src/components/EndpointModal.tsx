@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ConfigContext } from "..";
 import { useQuirrel } from "../hooks/useQuirrel";
 import { connectionDetailsToHash } from "../lib/encrypted-connection-details";
@@ -32,6 +32,15 @@ export function EndpointModal() {
   );
 
   const [bookmarkUrl, setBookmarkUrl] = useState<string>();
+
+  useEffect(() => {
+    if (!connectedTo) {
+      return;
+    }
+    setEndpoint(connectedTo.baseUrl);
+    setToken(connectedTo.token ?? "");
+    setEncryptionSecret(connectedTo.encryptionSecret ?? "");
+  }, [connectedTo]);
 
   return (
     <>
@@ -155,7 +164,7 @@ export function EndpointModal() {
                   <input
                     placeholder="Endpoint"
                     name="endpoint"
-                    value={endpoint}
+                    value={endpoint ?? connectedTo?.baseUrl}
                     onChange={(evt) => setEndpoint(evt.target.value)}
                     className="border-gray-300 placeholder-gray-500 appearance-none relative block w-full px-3 py-2 border text-gray-900 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-sm sm:leading-5"
                   />
