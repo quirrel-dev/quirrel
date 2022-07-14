@@ -82,7 +82,7 @@
     "cron-parser": "4.3.0",
     "cross-fetch": "^3.1.4",
     "cross-spawn": "7.0.3",
-    "dd-trace": "^1.0.0",
+    "dd-trace": "^2.0.0",
     "easy-table": "1.2.0",
     "expand-tilde": "2.0.2",
     "fast-glob": "3.2.11",
