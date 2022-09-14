@@ -4,7 +4,7 @@ import fs from 'fs';
 
 const fileExists = (path: fs.PathLike) => fs.promises.stat(path).then(() => true, () => false)
 
-export function createRedisFactory(redisUrl?: string): () => IORedis.Redis {
+export function createRedisFactory(redisUrl?: string, options: RedisOptions ={}): () => IORedis.Redis {
   if (!redisUrl) {
     let redis: IORedisMock | undefined = undefined;
     return () => {
@@ -20,7 +20,6 @@ export function createRedisFactory(redisUrl?: string): () => IORedis.Redis {
   let redis: IORedis.Redis | undefined = undefined;
   return () => {
     if (!redis) {
-      const options: RedisOptions = {}
       if (process.env.REDIS_TLS_CA_FILE && fs.existsSync(process.env.REDIS_TLS_CA_FILE)) {
         options.tls = {
           ca: fs.readFileSync(process.env.REDIS_TLS_CA_FILE, 'utf8')
