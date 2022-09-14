@@ -54,8 +54,9 @@ Set the `PASSPHRASES` environment variable to some secret passphrase. You can al
 
 #### Optional
 
-Set the `REDIS_TLS_CA_FILE` environment variable to the path of your certificate if your Redis connection requires you to provide a self-signed certificate.
-You can provide the actual file by either [using the official image a base](https://docs.docker.com/engine/reference/builder/#from) or by using a [bind mount](https://docs.docker.com/storage/bind-mounts/).
+Set the `REDIS_TLS_CA_BASE64` environment variable to a base64 encoded certificate if your Redis connection requires you to provide a self-signed certificate.
+
+Alternatively set the `REDIS_TLS_CA_FILE` environment variable to the path of your certificate. You can provide the actual file by either [using the official image a base](https://docs.docker.com/engine/reference/builder/#from) or by using a [bind mount](https://docs.docker.com/storage/bind-mounts/).
 
 ### Acquire a token
 
