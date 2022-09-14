@@ -8,6 +8,7 @@ cliWithConfig(async (config) => {
   const {
     PORT = 9181,
     REDIS_URL,
+    REDIS_TLS_CA_BASE64,
     REDIS_TLS_CA_FILE,
     HOST,
     PASSPHRASES,
@@ -20,7 +21,9 @@ cliWithConfig(async (config) => {
   const scheduler = await createServer({
     port: +PORT,
     host: HOST,
-    redisFactory: createRedisFactory(REDIS_URL ?? "redis://localhost:6379", { tls: { caPath: REDIS_TLS_CA_FILE }}),
+    redisFactory: createRedisFactory(REDIS_URL ?? "redis://localhost:6379", { 
+      tls: REDIS_TLS_CA_BASE64 ? { caBase64: REDIS_TLS_CA_BASE64 } : { caPath: REDIS_TLS_CA_FILE } 
+    }),
     passphrases: !!PASSPHRASES ? PASSPHRASES.split(":") : undefined,
     jwtPublicKey: JWT_PUBLIC_KEY,
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
