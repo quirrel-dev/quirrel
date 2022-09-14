@@ -52,6 +52,11 @@ Set the `REDIS_URL` environment variable to a connection string for your Redis i
 
 Set the `PASSPHRASES` environment variable to some secret passphrase. You can also specify multiple by `:`-separating them.
 
+#### Optional
+
+Set the `REDIS_TLS_CA_FILE` environment variable to the path of your certificate if your Redis connection requires you to provide a self-signed certificate.
+You can provide the actual file by either [using the official image a base](https://docs.docker.com/engine/reference/builder/#from) or by using a [bind mount](https://docs.docker.com/storage/bind-mounts/).
+
 ### Acquire a token
 
 Once our server is ready, we'll need to [get an auth token](https://api.quirrel.dev/documentation/static/index.html#/Admin/put_tokens__id_):
