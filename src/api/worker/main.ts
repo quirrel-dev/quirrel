@@ -7,6 +7,7 @@ import { StructuredLogger } from "../shared/structured-logger";
 cliWithConfig(async (config) => {
   const {
     REDIS_URL,
+    REDIS_TLS_CA_FILE,
     ENABLE_USAGE_METERING,
     RUNNING_IN_DOCKER,
     CONCURRENCY,
@@ -18,7 +19,7 @@ cliWithConfig(async (config) => {
   } = config;
 
   const worker = await createWorker({
-    redisFactory: createRedisFactory(REDIS_URL ?? "redis://localhost:6379"),
+    redisFactory: createRedisFactory(REDIS_URL ?? "redis://localhost:6379", { tls: { caPath: REDIS_TLS_CA_FILE }}),
     enableUsageMetering: Boolean(ENABLE_USAGE_METERING),
     runningInDocker: Boolean(RUNNING_IN_DOCKER),
     concurrency: Number.parseInt(CONCURRENCY ?? "") || 100,

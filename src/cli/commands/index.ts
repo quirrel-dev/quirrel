@@ -26,10 +26,11 @@ function collect(value: string, previous: string[] = []) {
 export async function runQuirrelDev(
   config: Omit<QuirrelConfig, "redisFactory"> & {
     redisUrl?: string;
+    redisTlsCaFile?: string;
     cronCwd?: string;
   }
 ) {
-  const { redisUrl, cronCwd } = config;
+  const { redisUrl, cronCwd, redisTlsCaFile } = config;
   if (redisUrl) {
     if (!(await isRedisConnectionIntact(redisUrl))) {
       throw new Error("Couldn't connect to Redis.");
@@ -38,7 +39,7 @@ export async function runQuirrelDev(
 
   const quirrel = await runQuirrel({
     ...config,
-    redisFactory: createRedisFactory(redisUrl),
+    redisFactory: createRedisFactory(redisUrl, { tls: { caPath: redisTlsCaFile }}),
   });
 
   let cronDetector: CronDetector | undefined;
@@ -69,6 +70,7 @@ export default function registerRun(program: Command) {
     .option("-h, --host <host>", "host to bind on", "localhost")
     .option("-p, --port <port>", "port to bind on", "9181")
     .option("-r, --redis-url <redis-url>", "enables the redis backend")
+    .option("-t, --redis-tls-ca-file <redis-tls-ca-file>", "path to a certificate to use")
     .option("-q, --quiet", "silences welcome message, condenses output", false)
     .option("--no-cron", "Disable cron job detection", false)
     .option(
@@ -79,6 +81,7 @@ export default function registerRun(program: Command) {
     .action(
       async ({
         redisUrl,
+        redisTlsCaFile,
         passphrase,
         host,
         port,
@@ -86,6 +89,7 @@ export default function registerRun(program: Command) {
         quiet,
       }: {
         redisUrl?: string;
+        redisTlsCaFile?: string;
         passphrase: string[];
         host: string;
         port: string;
@@ -94,6 +98,7 @@ export default function registerRun(program: Command) {
       }) => {
         const exit = await runQuirrelDev({
           redisUrl,
+          redisTlsCaFile,
           cronCwd: cron ? process.cwd() : undefined,
           passphrases: passphrase,
           host,
