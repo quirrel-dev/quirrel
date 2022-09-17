@@ -9,12 +9,12 @@ import {
 import { registerDevelopmentDefaults } from "./client/config";
 import type { IncomingHttpHeaders } from "http";
 
-interface NextApiRequest {
+export interface NextApiRequest {
   body: any;
   headers: IncomingHttpHeaders;
 }
 
-interface NextApiResponse {
+export interface NextApiResponse {
   setHeader(key: string, value: string): void;
   status(code: number): void;
   send(body: string): void;
