@@ -7,6 +7,8 @@ cliWithConfig(async (config) => {
   const {
     PORT = 9181,
     REDIS_URL,
+    REDIS_TLS_CA_BASE64,
+    REDIS_TLS_CA_FILE,
     HOST,
     PASSPHRASES,
     RUNNING_IN_DOCKER,
@@ -21,7 +23,12 @@ cliWithConfig(async (config) => {
   const quirrel = await runQuirrel({
     port: +PORT,
     host: HOST,
-    redisFactory: createRedisFactory(REDIS_URL),
+    redisFactory: createRedisFactory(REDIS_URL, {
+      tlsCa: {
+        base64: REDIS_TLS_CA_BASE64,
+        path: REDIS_TLS_CA_FILE,
+      },
+    }),
     passphrases: !!PASSPHRASES ? PASSPHRASES.split(":") : undefined,
     jwtPublicKey: JWT_PUBLIC_KEY,
     runningInDocker: Boolean(RUNNING_IN_DOCKER),

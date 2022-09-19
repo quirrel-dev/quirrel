@@ -38,7 +38,12 @@ export async function runQuirrelDev(
 
   const quirrel = await runQuirrel({
     ...config,
-    redisFactory: createRedisFactory(redisUrl),
+    redisFactory: createRedisFactory(redisUrl, {
+      tlsCa: {
+        base64: process.env.REDIS_TLS_CA_BASE64,
+        path: process.env.REDIS_TLS_CA_FILE,
+      },
+    }),
   });
 
   let cronDetector: CronDetector | undefined;
