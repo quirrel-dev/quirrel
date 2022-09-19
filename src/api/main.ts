@@ -23,8 +23,11 @@ cliWithConfig(async (config) => {
   const quirrel = await runQuirrel({
     port: +PORT,
     host: HOST,
-    redisFactory: createRedisFactory(REDIS_URL, { 
-      tls: REDIS_TLS_CA_BASE64 ? { caBase64: REDIS_TLS_CA_BASE64 } : { caPath: REDIS_TLS_CA_FILE } 
+    redisFactory: createRedisFactory(REDIS_URL, {
+      tlsCa: {
+        base64: REDIS_TLS_CA_BASE64,
+        path: REDIS_TLS_CA_FILE,
+      },
     }),
     passphrases: !!PASSPHRASES ? PASSPHRASES.split(":") : undefined,
     jwtPublicKey: JWT_PUBLIC_KEY,

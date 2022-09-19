@@ -1,16 +1,15 @@
 import IORedis from "ioredis";
 import IORedisMock from "ioredis-mock";
-import fs from 'fs';
+import fs from "fs";
 
-type RedisOptions = IORedis.RedisOptions & { 
-  tls?: (
-    Omit<IORedis.RedisOptions["tls"], 'ca'> & { caPath?: string, caBase64?: never } | 
-    Omit<IORedis.RedisOptions["tls"], 'ca'> & { caPath?: never, caBase64?: string } |
-    IORedis.RedisOptions["tls"] & { caPath: never, caBase64: never } 
-  )
+type RedisOptions = IORedis.RedisOptions & {
+  tlsCa?: { path?: string; base64?: string };
 };
 
-export function createRedisFactory(redisUrl?: string, options: RedisOptions = {}): () => IORedis.Redis {
+export function createRedisFactory(
+  redisUrl?: string,
+  options: RedisOptions = {}
+): () => IORedis.Redis {
   if (!redisUrl) {
     let redis: IORedisMock | undefined = undefined;
     return () => {
@@ -26,18 +25,16 @@ export function createRedisFactory(redisUrl?: string, options: RedisOptions = {}
   let redis: IORedis.Redis | undefined = undefined;
   return () => {
     if (!redis) {
-      if (options.tls?.caPath && fs.existsSync(options.tls.caPath)) {
-        const { caPath, ...tls } = options.tls;
+      if (options.tlsCa?.path && fs.existsSync(options.tlsCa.path)) {
         options.tls = {
-          ...tls,
-          ca: fs.readFileSync(options.tls.caPath, 'utf8'),
+          ...options.tls,
+          ca: fs.readFileSync(options.tlsCa.path, "utf8"),
         };
       }
-      if (options.tls?.caBase64) {
-        const { caBase64, ...tls } = options.tls;
+      if (options.tlsCa?.base64) {
         options.tls = {
-          ...tls,
-          ca: Buffer.from(caBase64, 'base64').toString('ascii'),
+          ...options.tls,
+          ca: Buffer.from(options.tlsCa?.base64, "base64").toString("ascii"),
         };
       }
       redis = new IORedis(redisUrl, options);

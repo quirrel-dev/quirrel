@@ -8,10 +8,7 @@ export async function run(
   const redisFactory = createRedisFactory(
     backend === "Redis"
       ? process.env.REDIS_URL ?? "redis://localhost:6379"
-      : undefined,
-    {
-      tls: process.env.REDIS_TLS_CA_BASE64 ? { caBase64: process.env.REDIS_TLS_CA_BASE64 } : { caPath: process.env.REDIS_TLS_CA_FILE } 
-    }
+      : undefined
   );
   const { httpServer, close, server } = await runQuirrel({
     port: 0,
