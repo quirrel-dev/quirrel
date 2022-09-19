@@ -172,6 +172,16 @@
         "doc",
         "bug"
       ]
+    },
+    {
+      "login": "boredland",
+      "name": "Jonas Strassel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4662748?v=4",
+      "profile": "https://jonas-strassel.de/",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
