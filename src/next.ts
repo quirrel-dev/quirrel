@@ -20,7 +20,7 @@ export interface NextApiResponse {
   send(body: string): void;
 }
 
-type NextApiHandler = (
+export type NextApiHandler = (
   req: NextApiRequest,
   res: NextApiResponse
 ) => void | Promise<void>;
