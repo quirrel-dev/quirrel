@@ -9,7 +9,7 @@ export async function runQuirrel({ port = 9181 }: { port?: number } = {}) {
     port,
     logger: "none",
     redisFactory: () => {
-      return ioredis.createConnectedClient() as any;
+      return ioredis.duplicate() as any;
     },
   });
 
