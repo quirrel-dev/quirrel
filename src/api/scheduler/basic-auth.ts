@@ -1,5 +1,5 @@
 import { FastifyPluginCallback } from "fastify";
-import fastifyBasicAuth from "fastify-basic-auth";
+import fastifyBasicAuth from "@fastify/basic-auth";
 import fp from "fastify-plugin";
 
 interface BasicAuthPluginOpts {
@@ -21,6 +21,6 @@ const basicAuthPlugin: FastifyPluginCallback<BasicAuthPluginOpts> = async (
   });
 };
 
-export default (fp as any)(basicAuthPlugin) as FastifyPluginCallback<
-  BasicAuthPluginOpts
->;
+export default (fp as any)(
+  basicAuthPlugin
+) as FastifyPluginCallback<BasicAuthPluginOpts>;
