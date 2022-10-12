@@ -7,7 +7,7 @@ import tokensRepoPlugin from "./tokens";
 import health from "./routes/health";
 import queues from "./routes/queues";
 import usageRoute from "./routes/usage";
-import swagger from "fastify-swagger";
+import swagger from "@fastify/swagger";
 import pack from "../../../package.json";
 import basicAuthPlugin from "./basic-auth";
 import type { AddressInfo } from "net";
