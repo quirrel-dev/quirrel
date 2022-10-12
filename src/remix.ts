@@ -5,12 +5,13 @@ import {
   Job,
   DefaultJobOptions,
   QuirrelJobHandler,
+  CustomLogger,
 } from "./client";
 import { registerDevelopmentDefaults } from "./client/config";
 
 type DataFunctionArgs = {
   request: Request;
-}
+};
 
 type ActionFunction = (args: DataFunctionArgs) => Promise<Response> | Response;
 
@@ -35,25 +36,33 @@ export function Queue<Payload>(
   route: string,
   handler: QuirrelJobHandler<Payload>,
   defaultJobOptions?: DefaultJobOptions,
+  logger?: CustomLogger<Payload>
 ): ActionFunction & Queue<Payload> {
   const quirrel = new QuirrelClient<Payload>({
     defaultJobOptions,
     handler,
     route,
+    logger,
   });
 
   async function action({ request }: DataFunctionArgs) {
     const body = await request.text();
-    const response = await quirrel.respondTo(body, Object.fromEntries(request.headers.entries()));
+    const response = await quirrel.respondTo(
+      body,
+      Object.fromEntries(request.headers.entries())
+    );
     return new Response(response.body, {
       headers: response.headers,
       status: response.status,
     });
   }
 
-  action.enqueue = (payload: Payload, options: EnqueueJobOptions) => quirrel.enqueue(payload, options);
+  action.enqueue = (payload: Payload, options: EnqueueJobOptions) =>
+    quirrel.enqueue(payload, options);
 
-  action.enqueueMany = (jobs: { payload: Payload; options?: EnqueueJobOptions }[]) => quirrel.enqueueMany(jobs);
+  action.enqueueMany = (
+    jobs: { payload: Payload; options?: EnqueueJobOptions }[]
+  ) => quirrel.enqueueMany(jobs);
 
   action.delete = (jobId: string) => quirrel.delete(jobId);
 
@@ -70,6 +79,7 @@ export function CronJob(
   route: string,
   cronSchedule: NonNullable<NonNullable<EnqueueJobOptions["repeat"]>["cron"]>,
   handler: () => Promise<void>,
+  logger?: CustomLogger
 ) {
-  return Queue(route, handler) as unknown;
+  return Queue(route, handler, {}, logger) as unknown;
 }

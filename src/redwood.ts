@@ -5,10 +5,17 @@ import {
   Job,
   DefaultJobOptions,
   QuirrelJobHandler,
+  CustomLogger,
 } from "./client";
 import { registerDevelopmentDefaults } from "./client/config";
 
-export { Job, EnqueueJobOpts, EnqueueJobOptions, DefaultJobOptions, QuirrelJobHandler };
+export {
+  Job,
+  EnqueueJobOpts,
+  EnqueueJobOptions,
+  DefaultJobOptions,
+  QuirrelJobHandler,
+};
 
 registerDevelopmentDefaults({
   applicationBaseUrl: "http://localhost:8911",
@@ -38,12 +45,14 @@ export type Queue<Payload> = Omit<
 export function Queue<Payload>(
   route: string,
   handler: QuirrelJobHandler<Payload>,
-  defaultJobOptions?: DefaultJobOptions
+  defaultJobOptions?: DefaultJobOptions,
+  logger?: CustomLogger<Payload>
 ): Queue<Payload> {
   const quirrel = new QuirrelClient<Payload>({
     defaultJobOptions,
     handler,
     route,
+    logger,
   });
 
   async function redwoodHandler(event: RedwoodEvent): Promise<RedwoodResponse> {
@@ -79,7 +88,8 @@ export function Queue<Payload>(
 export function CronJob(
   route: string,
   cronSchedule: NonNullable<NonNullable<EnqueueJobOptions["repeat"]>["cron"]>,
-  handler: () => Promise<void>
+  handler: () => Promise<void>,
+  logger?: CustomLogger
 ) {
-  return Queue(route, handler) as unknown;
+  return Queue(route, handler, {}, logger) as unknown;
 }

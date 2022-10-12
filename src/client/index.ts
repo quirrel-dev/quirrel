@@ -23,12 +23,24 @@ export interface JobMeta
   readonly nextRepetition?: Date;
 }
 
+export type CustomLogger<Payload = unknown> = {
+  receivedJob: (route: string, data: Payload) => void;
+  processingError: (route: string, data: Payload, error: unknown) => void;
+};
+
+const defaultLogger: CustomLogger = {
+  receivedJob: (route, data) => console.log(`Received job to ${route}`, data),
+  processingError: (route, data, error) =>
+    console.error(`Error in job at ${route}`, data, error),
+};
+
 export type QuirrelJobHandler<T> = (job: T, meta: JobMeta) => Promise<void>;
 export type DefaultJobOptions = Pick<EnqueueJobOptions, "exclusive" | "retry">;
 
 interface CreateQuirrelClientArgs<T> {
   route: string;
   handler: QuirrelJobHandler<T>;
+  logger?: CustomLogger<T>;
   defaultJobOptions?: DefaultJobOptions;
   config?: {
     /**
@@ -136,10 +148,6 @@ const EnqueueJobOptionsSchema = z.object({
 });
 
 type EnqueueJobOptionsSchema = z.TypeOf<typeof EnqueueJobOptionsSchema>;
-
-type EnqueueJobOptionssSchemaMatchesDocs = AssertTrue<
-  IsExact<EnqueueJobOptions, EnqueueJobOptionsSchema>
->;
 
 /**
  * @deprecated renamed to EnqueueJobOptions
@@ -265,6 +273,7 @@ export class QuirrelClient<T> {
   private fetch;
   private catchDecryptionErrors;
   private signaturePublicKey;
+  private logger: CustomLogger<T>;
 
   constructor(args: CreateQuirrelClientArgs<T>) {
     this.handler = args.handler;
@@ -276,6 +285,7 @@ export class QuirrelClient<T> {
       "X-QuirrelClient-Version": pack.version,
     };
 
+    this.logger = args.logger ?? defaultLogger;
     const quirrelBaseUrl =
       args.config?.quirrelBaseUrl ?? config.getQuirrelBaseUrl();
     this.applicationBaseUrl = config.withoutTrailingSlash(
@@ -691,7 +701,7 @@ export class QuirrelClient<T> {
       (headers["x-quirrel-meta"] as string) ?? "{}"
     );
 
-    console.log(`Received job to ${this.route}: `, payload);
+    this.logger.receivedJob(this.route, payload);
 
     try {
       await this.handler(payload, {
@@ -708,7 +718,7 @@ export class QuirrelClient<T> {
         body: "OK",
       };
     } catch (error) {
-      console.error(error);
+      this.logger.processingError(this.route, payload, error);
       return {
         status: 500,
         headers: {},
