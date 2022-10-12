@@ -22,7 +22,7 @@ import indexRoute from "./routes/index";
 import { StructuredLogger } from "../shared/structured-logger";
 import { Logger } from "../shared/logger";
 import { jobsRepoPlugin } from "./jobs-repo";
-import fastifyRateLimit from "fastify-rate-limit";
+import fastifyRateLimit from "@fastify/rate-limit";
 import posthogPlugin from "./posthog";
 
 export interface QuirrelServerConfig {
