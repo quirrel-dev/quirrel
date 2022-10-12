@@ -14,7 +14,7 @@ import type { AddressInfo } from "net";
 import tokenAuthPlugin from "./token-auth";
 import activityPlugin from "./routes/activity";
 import blipp from "fastify-blipp";
-import cors from "fastify-cors";
+import cors from "@fastify/cors";
 import telemetry from "./telemetry";
 import sentryPlugin from "./sentry";
 import loggerPlugin from "./logger";
