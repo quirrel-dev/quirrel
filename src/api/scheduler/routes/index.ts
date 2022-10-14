@@ -1,5 +1,5 @@
 import { FastifyPluginCallback } from "fastify";
-import fastifyStatic from "fastify-static";
+import fastifyStatic from "@fastify/static";
 import * as path from "path";
 
 const alternativeEntries = ["/", "/cron", "/pending", "/activity-log"];
