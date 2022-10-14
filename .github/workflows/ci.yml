@@ -38,6 +38,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
+        cache: npm
     - if: ${{ matrix.node-version == 14 }}
       uses: microsoft/playwright-github-action@v1
     - run: npm i -g npm@7
