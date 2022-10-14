@@ -11,14 +11,14 @@ export function createRedisFactory(
   options: RedisOptions = {}
 ): () => IORedis.Redis {
   if (!redisUrl) {
-    let redis: IORedisMock | undefined = undefined;
+    let redis: IORedis.Redis | undefined = undefined;
     return () => {
       if (!redis) {
         redis = new IORedisMock();
         return redis;
       }
 
-      return redis.createConnectedClient() as any;
+      return redis.duplicate();
     };
   }
 

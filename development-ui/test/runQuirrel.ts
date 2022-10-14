@@ -3,12 +3,17 @@ import IORedis from "ioredis-mock";
 import http from "http";
 
 export async function runQuirrel({ port = 9181 }: { port?: number } = {}) {
-  const ioredis = new IORedis();
+  let redis: IORedis.Redis | undefined = undefined;
+
   const quirrelServer = await _runQuirrel({
     port,
     logger: "none",
     redisFactory: () => {
-      return ioredis.createConnectedClient() as any;
+      if (!redis) {
+        redis = new IORedis();
+        return redis;
+      }
+      return redis.duplicate();
     },
   });
 
