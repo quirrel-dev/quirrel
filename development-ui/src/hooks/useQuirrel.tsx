@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { BaseLayout } from "../layouts/BaseLayout";
-import { QuirrelClient, Job } from "quirrel/client";
+import { QuirrelClient, Job } from "../../../dist/cjs/src/client";
 import { produce } from "immer";
 import { getConnectionDetailsFromHash } from "../lib/encrypted-connection-details";
 import { ConfigContext } from "..";
@@ -308,7 +308,7 @@ async function isHealthy(
       }
     }
   } catch (error) {
-    if (error.message === "Not allowed to request resource") {
+    if ((error as Error).message === "Not allowed to request resource") {
       window.alert(
         "This browser does not support connecting to your local Quirrel instance. Please use a different browser."
       );
