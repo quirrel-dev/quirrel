@@ -62,12 +62,6 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
       "body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference.",
   };
 
-  const INVALID_ENDPOINT_ERROR = {
-    statusCode: 400,
-    error: "Bad Request",
-    message: "endpoint needs to be absolute URL.",
-  };
-
   const INVALID_TIMEZONE_ERROR = {
     statusCode: 400,
     error: "Bad Request",
@@ -103,10 +97,6 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
 
       const { tokenId, body } = request;
       const { endpoint } = request.params;
-
-      if (!isAbsoluteURL(endpoint)) {
-        return reply.status(400).send(INVALID_ENDPOINT_ERROR);
-      }
 
       if (!hasValidCronExpression(body)) {
         return reply.status(400).send(INVALID_CRON_EXPRESSION_ERROR);
@@ -179,10 +169,6 @@ const jobs: FastifyPluginCallback = (fastify, opts, done) => {
           .send(
             "That's a whole lot of jobs! If this wasn't a mistake, please get in touch to lift the 5k limit."
           );
-      }
-
-      if (!isAbsoluteURL(endpoint)) {
-        return reply.status(400).send(INVALID_ENDPOINT_ERROR);
       }
 
       if (!body.every(hasValidCronExpression)) {

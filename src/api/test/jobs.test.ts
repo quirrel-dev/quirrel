@@ -108,7 +108,7 @@ describeAcrossBackends("Jobs", (backend) => {
       .send({ body: JSON.stringify({ foo: "bar" }), delay: -1 })
       .expect(
         400,
-        '{"statusCode":400,"error":"Bad Request","message":"body.delay should be >= 0"}'
+        '{"statusCode":400,"error":"Bad Request","message":"body/delay must be >= 0"}'
       );
   });
 
@@ -543,7 +543,7 @@ describeAcrossBackends("Jobs", (backend) => {
       .expect(400, {
         statusCode: 400,
         error: "Bad Request",
-        message: "body.repeat.times should be >= 1",
+        message: "body/repeat/times must be >= 1",
       });
 
     await delay(500);
@@ -588,7 +588,7 @@ describeAcrossBackends("Jobs", (backend) => {
       .expect(400, {
         statusCode: 400,
         error: "Bad Request",
-        message: "endpoint needs to be absolute URL.",
+        message: "params/endpoint must match format \"uri\"",
       });
   });
 
