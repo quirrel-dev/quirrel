@@ -8,7 +8,7 @@ const emailQueue = Queue("emailQueue", async (payload) => {
 
 app.use(emailQueue);
 
-app.listen(4000, () => {
+app.listen({ port: 4000 }, () => {
   console.log("Listening on :4000");
 });
 

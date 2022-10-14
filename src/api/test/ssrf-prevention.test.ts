@@ -17,7 +17,7 @@ describe("SSRF Prevention", () => {
       reply.status(200).send("OK");
     });
 
-    await server.listen(0);
+    await server.listen({ port: 0 });
   });
 
   afterAll(async () => {

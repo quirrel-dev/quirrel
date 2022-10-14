@@ -17,7 +17,7 @@ const someQueue = Queue(
 
 app.use(someQueue)
 
-app.listen(3000)
+app.listen({ listen: 3000 })
 ```
 
 Creates a new Queue.

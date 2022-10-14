@@ -1,16 +1,17 @@
 import { QuirrelClient, runQuirrel as _runQuirrel } from "../../dist/cjs/src";
-import IORedis from "ioredis-mock";
 import http from "http";
+import IoRedis, { RedisOptions as OriginalRedisOptions } from "ioredis";
+const IoRedisMock: typeof IoRedis = require('ioredis-mock');
 
 export async function runQuirrel({ port = 9181 }: { port?: number } = {}) {
-  let redis: IORedis.Redis | undefined = undefined;
+  let redis: IoRedis | undefined = undefined;
 
   const quirrelServer = await _runQuirrel({
     port,
     logger: "none",
     redisFactory: () => {
       if (!redis) {
-        redis = new IORedis();
+        redis = new IoRedisMock();
         return redis;
       }
       return redis.duplicate();
@@ -47,7 +48,7 @@ export async function runQuirrel({ port = 9181 }: { port?: number } = {}) {
         res.end();
       });
     })
-    .listen(5000);
+    .listen({ port: 5000 });
 
   return {
     client,

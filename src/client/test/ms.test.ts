@@ -15,7 +15,7 @@ test("ms", async () => {
         jobExecuted.signal();
       });
     })
-    .listen(0);
+    .listen({ port: 0 });
 
   const quirrel = new QuirrelClient({
     async handler() {},

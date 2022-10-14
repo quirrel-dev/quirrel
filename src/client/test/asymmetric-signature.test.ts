@@ -42,7 +42,7 @@ test("asymmetric signature", async () => {
         responses.push(result);
       });
     })
-    .listen(0);
+    .listen({ port: 0 });
 
   quirrel = new QuirrelClient({
     async handler() {},

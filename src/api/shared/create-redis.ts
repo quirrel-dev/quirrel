@@ -1,20 +1,20 @@
-import IORedis from "ioredis";
-import IORedisMock from "ioredis-mock";
+import IoRedis, { RedisOptions as OriginalRedisOptions } from "ioredis";
 import fs from "fs";
+const IoRedisMock: typeof IoRedis = require('ioredis-mock');
 
-type RedisOptions = IORedis.RedisOptions & {
+type RedisOptions = OriginalRedisOptions & {
   tlsCa?: { path?: string; base64?: string };
 };
 
 export function createRedisFactory(
   redisUrl?: string,
   options: RedisOptions = {}
-): () => IORedis.Redis {
+): () => IoRedis {
   if (!redisUrl) {
-    let redis: IORedis.Redis | undefined = undefined;
+    let redis: IoRedis | undefined = undefined;
     return () => {
       if (!redis) {
-        redis = new IORedisMock();
+        redis = new IoRedisMock();
         return redis;
       }
 
@@ -22,7 +22,7 @@ export function createRedisFactory(
     };
   }
 
-  let redis: IORedis.Redis | undefined = undefined;
+  let redis: IoRedis | undefined = undefined;
   return () => {
     if (!redis) {
       if (options.tlsCa?.path && fs.existsSync(options.tlsCa.path)) {
@@ -37,7 +37,7 @@ export function createRedisFactory(
           ca: Buffer.from(options.tlsCa?.base64, "base64").toString("ascii"),
         };
       }
-      redis = new IORedis(redisUrl, options);
+      redis = new IoRedis(redisUrl, options);
       return redis;
     }
 

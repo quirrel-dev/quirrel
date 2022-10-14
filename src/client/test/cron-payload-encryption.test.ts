@@ -23,7 +23,7 @@ test("cron payload with encryption", async () => {
         quirrel.respondTo(body, req.headers);
       });
     })
-    .listen(0);
+    .listen({ port: 0 });
 
   quirrel = new QuirrelClient({
     route: "/",

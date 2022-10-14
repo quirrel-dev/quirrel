@@ -217,7 +217,7 @@ export async function createServer({
     }
   });
 
-  await app.listen(port, host);
+  await app.listen({ port, host });
 
   const { address, port: runningPort } = app.server.address() as AddressInfo;
 

@@ -28,7 +28,7 @@ test("encryption", async () => {
         });
       });
     })
-    .listen(0);
+    .listen({ port: 0 });
 
   quirrel = new QuirrelClient({
     async handler(body, meta) {

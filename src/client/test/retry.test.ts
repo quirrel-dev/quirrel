@@ -15,7 +15,7 @@ test("retry", async () => {
       res.statusCode = 500;
       res.end();
     })
-    .listen(0);
+    .listen({ port: 0 });
 
   const quirrel = new QuirrelClient({
     route: "",

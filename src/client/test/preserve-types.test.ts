@@ -21,7 +21,7 @@ it("preserves payload types", async () => {
         quirrel.respondTo(body, req.headers);
       });
     })
-    .listen(0);
+    .listen({ port: 0 });
 
   quirrel = new QuirrelClient({
     async handler(payload) {

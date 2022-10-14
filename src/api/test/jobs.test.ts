@@ -39,7 +39,7 @@ describeAcrossBackends("Jobs", (backend) => {
       reply.status(200).send("OK");
     });
 
-    endpoint = encodeURIComponent(await server.listen(0));
+    endpoint = encodeURIComponent(await server.listen({ port: 0 }));
   });
 
   beforeEach(async () => {
