@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12, 14, 15, 16, 17]
+        node-version: [14, 16, 18]
       fail-fast: false
 
     services:
@@ -38,13 +38,14 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - if: ${{ matrix.node-version == 14 }}
+        cache: 'npm'
+    - if: ${{ matrix.node-version == 16 }}
       uses: microsoft/playwright-github-action@v1
     - run: npm i -g npm@7
     - run: npm ci
     - run: npm run build
     - run: npm test -- --coverage
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 16 }}
       name: Coveralls Quirrel
       uses: coverallsapp/github-action@master
       with:
@@ -52,13 +53,13 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: coverage/lcov.info
         parallel: true
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 16 }}
       run: npm ci
       working-directory: development-ui
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 16 }}
       run: npm run test:ci
       working-directory: development-ui
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 16 }}
       name: Coveralls Dev UI
       uses: coverallsapp/github-action@master
       with:
@@ -67,7 +68,7 @@ jobs:
         base-path: development-ui
         path-to-lcov: development-ui/coverage/lcov.info
         parallel: true
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 16 }}
       name: Coveralls Finished
       uses: coverallsapp/github-action@master
       with:
