@@ -1,5 +1,5 @@
 import { FastifyPluginCallback } from "fastify";
-import fastifyBasicAuth from "fastify-basic-auth";
+import fastifyBasicAuth from "@fastify/basic-auth";
 import fp from "fastify-plugin";
 
 interface BasicAuthPluginOpts {

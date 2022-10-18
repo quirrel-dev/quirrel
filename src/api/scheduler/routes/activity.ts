@@ -1,5 +1,5 @@
 import type { FastifyPluginCallback, FastifyRequest } from "fastify";
-import fastifyWebsocket from "fastify-websocket";
+import fastifyWebsocket from "@fastify/websocket";
 
 // https://stackoverflow.com/questions/4361173/http-headers-in-websockets-client-api
 function workAroundWebsocketAuth(req: FastifyRequest) {
