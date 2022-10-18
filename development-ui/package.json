@@ -42,10 +42,12 @@
     "@types/jest": "27.4.1",
     "babel-plugin-istanbul": "6.1.1",
     "chai": "4.3.6",
+    "crypto-browserify": "^3.12.0",
     "ioredis-mock": "5.9.1",
     "jest-playwright-preset": "1.7.0",
     "nyc": "15.1.0",
     "playwright": "^1.21.1",
+    "process": "^0.11.10",
     "serve": "13.0.2",
     "start-server-and-test": "1.14.0"
   }
