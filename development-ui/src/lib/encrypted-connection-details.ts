@@ -1,4 +1,4 @@
-import { QuirrelInstanceDetails } from "../hooks/useQuirrel";
+import type { QuirrelInstanceDetails } from "../hooks/useQuirrel";
 import { configToHash, getHashConfig } from "./hash-config";
 import Encryptor from "secure-e2ee";
 

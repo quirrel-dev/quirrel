@@ -20,7 +20,7 @@ export async function runQuirrel({ port = 9181 }: { port?: number } = {}) {
     },
     route: "",
     config: {
-      applicationBaseUrl: "http://localhost:5000",
+      applicationBaseUrl: "http://localhost:6000",
       quirrelBaseUrl: "http://localhost:" + port,
     },
   });
@@ -42,7 +42,7 @@ export async function runQuirrel({ port = 9181 }: { port?: number } = {}) {
         res.end();
       });
     })
-    .listen(5000);
+    .listen(6000);
 
   return {
     client,

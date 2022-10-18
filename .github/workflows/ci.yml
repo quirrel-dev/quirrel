@@ -56,17 +56,12 @@ jobs:
       run: npm ci
       working-directory: development-ui
     - if: ${{ matrix.node-version == 14 }}
-      run: npm run test:ci
+      name: Install Playwright Browsers
+      run: npx playwright install --with-deps
       working-directory: development-ui
     - if: ${{ matrix.node-version == 14 }}
-      name: Coveralls Dev UI
-      uses: coverallsapp/github-action@master
-      with:
-        flag-name: development-ui
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        base-path: development-ui
-        path-to-lcov: development-ui/coverage/lcov.info
-        parallel: true
+      run: npm run test:ci
+      working-directory: development-ui
     - if: ${{ matrix.node-version == 14 }}
       name: Coveralls Finished
       uses: coverallsapp/github-action@master

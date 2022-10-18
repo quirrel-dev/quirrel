@@ -4,24 +4,25 @@ import {
   expectToShowAttachingToQuirrel,
   expectToShowJobTable,
 } from "./connection-retry.spec";
+import { test } from "@playwright/test";
 
 let cleanup: (() => Promise<void>)[] = [];
 
-beforeEach(() => {
+test.beforeEach(() => {
   cleanup = [];
 });
 
-afterEach(async () => {
+test.afterEach(async () => {
   await Promise.all(cleanup.map((clean) => clean()));
 });
 
-it("allows connecting to non-standard ports", async () => {
+test("allows connecting to non-standard ports", async ({ page }) => {
   const quirrelServer = await runQuirrel({ port: 8000 });
   cleanup.push(quirrelServer.cleanup);
 
   await page.goto("http://localhost:1234/pending");
 
-  await expectToShowAttachingToQuirrel();
+  await expectToShowAttachingToQuirrel(page);
 
   await page.click("[data-test-id=open-connection-modal]");
   await page.type("[name=endpoint]", "http://localhost:8000");
@@ -29,5 +30,5 @@ it("allows connecting to non-standard ports", async () => {
 
   await delay(100);
 
-  await expectToShowJobTable();
+  await expectToShowJobTable(page);
 });
