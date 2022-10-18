@@ -81,7 +81,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@0978a0678a62fd006f5c22ac7d2c82d4f5093cd8
+        uses: docker/metadata-action@57396166ad8aefe6098280995947635806a0e6ea
         with:
           images: ghcr.io/${{ github.repository }}
           flavor: |
