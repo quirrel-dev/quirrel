@@ -8,7 +8,7 @@ import health from "./routes/health";
 import queues from "./routes/queues";
 import usageRoute from "./routes/usage";
 import swagger from "@fastify/swagger";
-import swaggerUi from '@fastify/swagger-ui'
+import swaggerUi from "@fastify/swagger-ui";
 import pack from "../../../package.json";
 import basicAuthPlugin from "./basic-auth";
 import type { AddressInfo } from "net";
@@ -216,7 +216,10 @@ export async function createServer({
     }
   });
 
-  await app.listen(port, host);
+  await app.listen({
+    port,
+    host,
+  });
 
   const { address, port: runningPort } = app.server.address() as AddressInfo;
 
