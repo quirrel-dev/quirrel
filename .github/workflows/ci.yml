@@ -56,11 +56,11 @@ jobs:
       run: npm ci
       working-directory: development-ui
     - if: ${{ matrix.node-version == 14 }}
-      run: npm run test:ci
-      working-directory: development-ui
-    - if: ${{ matrix.node-version == 14 }}
       name: Install Playwright Browsers
       run: npx playwright install --with-deps
+      working-directory: development-ui
+    - if: ${{ matrix.node-version == 14 }}
+      run: npm run test:ci
       working-directory: development-ui
     - if: ${{ matrix.node-version == 14 }}
       name: Coveralls Dev UI
