@@ -39,7 +39,7 @@
     "@playwright/test": "1.27.1",
     "@types/chai": "4.3.3",
     "@types/ioredis": "4.28.10",
-    "@types/jest": "27.4.1",
+    "@types/jest": "27.5.2",
     "babel-plugin-istanbul": "6.1.1",
     "chai": "4.3.6",
     "ioredis-mock": "5.9.1",
