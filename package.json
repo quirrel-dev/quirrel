@@ -45,7 +45,7 @@
     "@types/cross-spawn": "6.0.2",
     "@types/expand-tilde": "2.0.0",
     "@types/ioredis": "4.28.10",
-    "@types/jest": "27.4.1",
+    "@types/jest": "27.5.2",
     "@types/js-yaml": "4.0.5",
     "@types/jsonwebtoken": "8.5.8",
     "@types/ms": "0.7.31",
