@@ -2,18 +2,19 @@ import { runQuirrel } from "./runQuirrel";
 import { expect } from "chai";
 import { expectTableCellToEqual, expectTableToBeEmpty } from "./invoke.spec";
 import delay from "delay";
+import { test } from "@playwright/test";
 
 let cleanup: (() => Promise<void>)[] = [];
 
-beforeEach(() => {
+test.beforeEach(() => {
   cleanup = [];
 });
 
-afterEach(async () => {
+test.afterEach(async () => {
   await Promise.all(cleanup.map((clean) => clean()));
 });
 
-test("jobs can be deleted", async () => {
+test("jobs can be deleted", async ({ page }) => {
   const quirrel = await runQuirrel();
   cleanup.push(quirrel.cleanup);
 
@@ -29,7 +30,7 @@ test("jobs can be deleted", async () => {
   expect(await quirrel.client.getById("to-be-deleted")).to.be.null;
 });
 
-test("jobs disappear after being deleted", async () => {
+test("jobs disappear after being deleted", async ({ page }) => {
   const quirrel = await runQuirrel();
   cleanup.push(quirrel.cleanup);
 

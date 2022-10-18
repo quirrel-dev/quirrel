@@ -1,18 +1,19 @@
 import delay from "delay";
 import { runQuirrel } from "./runQuirrel";
 import { expectTableCellToEqual, expectTableToBeEmpty } from "./invoke.spec";
+import { test } from "@playwright/test";
 
 let cleanup: (() => Promise<void>)[] = [];
 
-beforeEach(() => {
+test.beforeEach(() => {
   cleanup = [];
 });
 
-afterEach(async () => {
+test.afterEach(async () => {
   await Promise.all(cleanup.map((clean) => clean()));
 });
 
-it("shows activity feed", async () => {
+test("shows activity feed", async ({ page }) => {
   const quirrel = await runQuirrel();
   cleanup.push(quirrel.cleanup);
 

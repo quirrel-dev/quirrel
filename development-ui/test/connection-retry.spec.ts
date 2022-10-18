@@ -1,24 +1,25 @@
 import delay from "delay";
 import { expect } from "chai";
 import { runQuirrel } from "./runQuirrel";
+import { Page, test } from "@playwright/test";
 
 let cleanup: (() => Promise<void>)[] = [];
 
-beforeEach(() => {
+test.beforeEach(() => {
   cleanup = [];
 });
 
-afterEach(async () => {
+test.afterEach(async () => {
   await Promise.all(cleanup.map((clean) => clean()));
 });
 
-export async function expectToShowAttachingToQuirrel() {
+export async function expectToShowAttachingToQuirrel(page: Page) {
   const attachingEl = await page.$("#attaching-to-quirrel");
   expect(attachingEl).to.exist;
   expect(await attachingEl?.innerText()).to.equal("Attaching to Quirrel ...");
 }
 
-export async function expectToShowJobTable() {
+export async function expectToShowJobTable(page: Page) {
   const tableEl = await page.$("[data-test-class=table]");
   expect(tableEl).to.exist;
   expect(await tableEl?.textContent()).to.equal(
@@ -26,10 +27,10 @@ export async function expectToShowJobTable() {
   );
 }
 
-it("automatically connects when Quirrel is started", async () => {
+test("automatically connects when Quirrel is started", async ({ page }) => {
   await page.goto("http://localhost:1234/pending");
 
-  await expectToShowAttachingToQuirrel();
+  await expectToShowAttachingToQuirrel(page);
 
   const quirrelServer = await runQuirrel();
 
@@ -37,9 +38,9 @@ it("automatically connects when Quirrel is started", async () => {
 
   await delay(550);
 
-  await expectToShowJobTable();
+  await expectToShowJobTable(page);
 
   await quirrelServer.cleanup();
 
-  await expectToShowAttachingToQuirrel();
+  await expectToShowAttachingToQuirrel(page);
 });

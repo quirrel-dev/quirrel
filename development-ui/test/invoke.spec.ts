@@ -1,14 +1,15 @@
 import delay from "delay";
 import { runQuirrel } from "./runQuirrel";
 import { expect } from "chai";
+import { Page, test } from "@playwright/test";
 
 let cleanup: (() => Promise<void>)[] = [];
 
-beforeEach(() => {
+test.beforeEach(() => {
   cleanup = [];
 });
 
-afterEach(async () => {
+test.afterEach(async () => {
   await Promise.all(cleanup.map((clean) => clean()));
 });
 
@@ -16,7 +17,7 @@ export async function expectTableCellToEqual(
   row: number,
   column: number,
   value: string,
-  _page = page
+  _page: Page
 ) {
   const rowEl = await _page.$(`//tr[${row}]`);
   expect(rowEl).to.exist;
@@ -25,12 +26,12 @@ export async function expectTableCellToEqual(
   ).to.equal(value);
 }
 
-export async function expectTableToBeEmpty(_page = page) {
+export async function expectTableToBeEmpty(_page: Page) {
   const table = await _page.$(`tbody`);
   expect(await table?.innerHTML()).to.equal("");
 }
 
-it("allows invoking jobs", async () => {
+test("allows invoking jobs", async ({ page }) => {
   const quirrel = await runQuirrel();
   cleanup.push(quirrel.cleanup);
 
