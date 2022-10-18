@@ -63,15 +63,6 @@ jobs:
       run: npm run test:ci
       working-directory: development-ui
     - if: ${{ matrix.node-version == 14 }}
-      name: Coveralls Dev UI
-      uses: coverallsapp/github-action@master
-      with:
-        flag-name: development-ui
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        base-path: development-ui
-        path-to-lcov: development-ui/coverage/lcov.info
-        parallel: true
-    - if: ${{ matrix.node-version == 14 }}
       name: Coveralls Finished
       uses: coverallsapp/github-action@master
       with:
