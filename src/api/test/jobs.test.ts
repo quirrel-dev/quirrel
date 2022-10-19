@@ -592,7 +592,7 @@ describeAcrossBackends("Jobs", (backend) => {
       .expect(400, {
         statusCode: 400,
         error: "Bad Request",
-        message: "params/endpoint needs to be absolute URL.",
+        message: 'params/endpoint must match format "uri"',
       });
   });
 
