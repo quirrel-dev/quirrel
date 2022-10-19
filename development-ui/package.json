@@ -32,9 +32,7 @@
     "react-dom": "17.0.2",
     "secure-e2ee": "^0.4.0",
     "tailwindcss": "^2.1.2",
-    "typescript": "^4.2.3",
-    "crypto-browserify": "^3.12.0",
-    "process": "^0.11.10"
+    "typescript": "^4.2.3"
   },
   "devDependencies": {
     "@parcel/reporter-bundle-analyzer": "2.5.0",
@@ -50,5 +48,9 @@
     "playwright": "1.21.1",
     "serve": "13.0.2",
     "start-server-and-test": "1.14.0"
+  },
+  "alias": {
+    "process": false,
+    "crypto": false
   }
 }
