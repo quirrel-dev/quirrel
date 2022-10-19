@@ -1,12 +1,5 @@
 {
-  "presets": [
-    [
-      "@babel/preset-react",
-      {
-        "runtime": "automatic"
-      }
-    ]
-  ],
+  "presets": [],
   "env": {
     "test": {
       "plugins": ["istanbul"]
