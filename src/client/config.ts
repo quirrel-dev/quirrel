@@ -92,12 +92,14 @@ export function getOldEncryptionSecrets(): string[] | null {
 let developmentApplicationBaseUrl: string | undefined;
 
 function getNetlifyURL() {
-  const { SITE_ID, NETLIFY_DEV, DEPLOY_URL } = process.env;
-  if (SITE_ID) {
-    return SITE_ID + ".netlify.app";
+  const siteId = process.env.SITE_ID;
+  const netlifyDev = process.env.NETLIFY_DEV;
+  const deployUrl = process.env.DEPLOY_URL;
+  if (siteId) {
+    return siteId + ".netlify.app";
   } else {
-    if (NETLIFY_DEV) {
-      return DEPLOY_URL;
+    if (netlifyDev) {
+      return deployUrl;
     }
   }
 }
