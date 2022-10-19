@@ -39,7 +39,11 @@ describeAcrossBackends("Jobs", (backend) => {
       reply.status(200).send("OK");
     });
 
-    endpoint = encodeURIComponent(await server.listen(0));
+    endpoint = encodeURIComponent(
+      await server.listen({
+        port: 0,
+      })
+    );
   });
 
   beforeEach(async () => {
@@ -108,7 +112,7 @@ describeAcrossBackends("Jobs", (backend) => {
       .send({ body: JSON.stringify({ foo: "bar" }), delay: -1 })
       .expect(
         400,
-        '{"statusCode":400,"error":"Bad Request","message":"body.delay should be >= 0"}'
+        '{"statusCode":400,"error":"Bad Request","message":"body/delay should be >= 0"}'
       );
   });
 
@@ -121,7 +125,7 @@ describeAcrossBackends("Jobs", (backend) => {
       })
       .expect(
         400,
-        '{"statusCode":400,"error":"Bad Request","message":"body.repeat.cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference."}'
+        '{"statusCode":400,"error":"Bad Request","message":"body/repeat/cron uses unsupported syntax. See https://github.com/harrisiirak/cron-parser for reference."}'
       );
   });
 
@@ -134,7 +138,7 @@ describeAcrossBackends("Jobs", (backend) => {
       })
       .expect(
         400,
-        '{"statusCode":400,"error":"Bad Request","message":"body.repeat.cronTimezone is invalid, please provide a valid IANA timezone."}'
+        '{"statusCode":400,"error":"Bad Request","message":"body/repeat/cronTimezone is invalid, please provide a valid IANA timezone."}'
       );
   });
 
@@ -543,7 +547,7 @@ describeAcrossBackends("Jobs", (backend) => {
       .expect(400, {
         statusCode: 400,
         error: "Bad Request",
-        message: "body.repeat.times should be >= 1",
+        message: "body/repeat/times should be >= 1",
       });
 
     await delay(500);

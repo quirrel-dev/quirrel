@@ -32,7 +32,9 @@ describeAcrossBackends("Activity", (backend) => {
       reply.status(200).send("OK");
     });
 
-    const endpoint = encodeURIComponent(await server.listen(0));
+    const endpoint = encodeURIComponent(await server.listen({
+      port: 0
+    }));
     const client = new websocket.client();
 
     const log: any[] = [];
