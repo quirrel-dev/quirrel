@@ -50,6 +50,7 @@
   },
   "alias": {
     "process": false,
-    "crypto": false
+    "crypto": false,
+    "node-fetch": false
   }
 }
