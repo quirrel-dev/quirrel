@@ -42,7 +42,7 @@
     "babel-plugin-istanbul": "6.1.1",
     "chai": "4.3.6",
     "ioredis-mock": "5.9.1",
-    "jest-playwright-preset": "1.7.0",
+    "jest-playwright-preset": "1.7.2",
     "nyc": "15.1.0",
     "playwright": "1.22.0",
     "serve": "13.0.2",
