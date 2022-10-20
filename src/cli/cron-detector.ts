@@ -104,7 +104,7 @@ export class CronDetector {
   ) {
     const rules = parseChokidarRulesFromGitignore(cwd);
     this.watcher = chokidar.watch(["**/*.[jt]s", "**/*.[jt]sx"], {
-      ignored: ["node_moduules", "**/node_modules", ...rules.ignoredPaths],
+      ignored: ["node_modules", "**/node_modules", ...rules.ignoredPaths],
       cwd,
     });
 
@@ -180,8 +180,9 @@ export class CronDetector {
       }
 
       if (!newJob.isValid) {
-        console.error(`
-🚨Encountered invalid cron expression: ${newJob.schedule}`);
+        console.error(
+          `🚨Encountered invalid cron expression: ${newJob.schedule}`
+        );
         return;
       }
 
