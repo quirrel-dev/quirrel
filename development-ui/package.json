@@ -43,7 +43,7 @@
     "ioredis-mock": "5.9.1",
     "nyc": "15.1.0",
     "playwright": "1.22.0",
-    "serve": "13.0.2",
+    "serve": "14.0.1",
     "start-server-and-test": "1.14.0"
   },
   "alias": {
