@@ -18,7 +18,11 @@ function testAgainst(backend: "Redis" | "Mock") {
       throw new Error("Something broke!");
     });
 
-    const endpoint = encodeURIComponent(await server.listen(0));
+    const endpoint = encodeURIComponent(
+      await server.listen({
+        port: 0,
+      })
+    );
 
     const incidentReceiverAuthorizations: any[] = [];
     const incidentReceiverBodies: any[] = [];
@@ -36,7 +40,9 @@ function testAgainst(backend: "Redis" | "Mock") {
     });
 
     const incidentReceiverEndpoint =
-      (await incidentReceiver.listen(0)) + "/incident";
+      (await incidentReceiver.listen({
+        port: 0,
+      })) + "/incident";
 
     const res = await run(backend, {
       incidentReceiver: {

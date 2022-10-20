@@ -7,14 +7,15 @@ import tokensRepoPlugin from "./tokens";
 import health from "./routes/health";
 import queues from "./routes/queues";
 import usageRoute from "./routes/usage";
-import swagger from "fastify-swagger";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
 import pack from "../../../package.json";
 import basicAuthPlugin from "./basic-auth";
 import type { AddressInfo } from "net";
 import tokenAuthPlugin from "./token-auth";
 import activityPlugin from "./routes/activity";
 import blipp from "fastify-blipp";
-import cors from "fastify-cors";
+import cors from "@fastify/cors";
 import telemetry from "./telemetry";
 import sentryPlugin from "./sentry";
 import loggerPlugin from "./logger";
@@ -22,7 +23,7 @@ import indexRoute from "./routes/index";
 import { StructuredLogger } from "../shared/structured-logger";
 import { Logger } from "../shared/logger";
 import { jobsRepoPlugin } from "./jobs-repo";
-import fastifyRateLimit from "fastify-rate-limit";
+import fastifyRateLimit from "@fastify/rate-limit";
 import posthogPlugin from "./posthog";
 
 export interface QuirrelServerConfig {
@@ -90,7 +91,6 @@ export async function createServer({
   app.decorate("adminBasedAuthEnabled", enableAdminBasedAuth);
 
   app.register(swagger, {
-    routePrefix: "/documentation",
     openapi: {
       info: {
         title: "Quirrel API",
@@ -156,7 +156,10 @@ export async function createServer({
         },
       ],
     },
-    exposeRoute: true,
+  });
+
+  app.register(swaggerUi, {
+    routePrefix: "/documentation",
   });
 
   app.register(loggerPlugin, {
@@ -213,7 +216,10 @@ export async function createServer({
     }
   });
 
-  await app.listen(port, host);
+  await app.listen({
+    port,
+    host,
+  });
 
   const { address, port: runningPort } = app.server.address() as AddressInfo;
 

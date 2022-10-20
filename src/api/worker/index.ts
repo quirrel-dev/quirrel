@@ -8,7 +8,7 @@ import { Telemetrist } from "../shared/telemetrist";
 import { createOwl } from "../shared/owl";
 import type { Logger } from "../shared/logger";
 import { ssrfFilter } from "./ssrf-filter";
-import PostHog from "posthog-node";
+import { PostHog } from "posthog-node";
 
 export interface ExecutionError {
   toString(): string;

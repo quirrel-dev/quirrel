@@ -1,6 +1,6 @@
 import { FastifyPluginCallback } from "fastify";
 import fp from "fastify-plugin";
-import PostHog from "posthog-node";
+import { PostHog } from "posthog-node";
 
 declare module "fastify" {
   interface FastifyInstance {

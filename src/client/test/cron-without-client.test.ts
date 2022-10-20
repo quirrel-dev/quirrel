@@ -11,7 +11,9 @@ test("cronjob without QuirrelClient", async () => {
     lastIncident = req.body;
     reply.code(200).send();
   });
-  const incidentEndpoint = await incidentReceiver.listen(0);
+  const incidentEndpoint = await incidentReceiver.listen({
+    port: 0,
+  });
 
   let callCount = 0;
   let lastWasError = false;
@@ -32,7 +34,9 @@ test("cronjob without QuirrelClient", async () => {
     reply.code(200).send();
     return;
   });
-  const endpoint = await applicationServer.listen(0);
+  const endpoint = await applicationServer.listen({
+    port: 0,
+  });
 
   const quirrelServer = await run("Mock", {
     incidentReceiver: { endpoint: incidentEndpoint, passphrase: "something" },
