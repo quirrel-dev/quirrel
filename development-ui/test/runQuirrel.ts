@@ -5,6 +5,7 @@ import http from "http";
 export async function runQuirrel({ port = 9181 }: { port?: number } = {}) {
   const ioredis = new IORedis();
   const quirrelServer = await _runQuirrel({
+    host: "localhost",
     port,
     logger: "none",
     redisFactory: () => {
