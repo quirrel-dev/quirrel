@@ -42,7 +42,7 @@
     "chai": "4.3.6",
     "ioredis-mock": "5.9.1",
     "nyc": "15.1.0",
-    "playwright": "1.21.1",
+    "playwright": "1.22.0",
     "serve": "13.0.2",
     "start-server-and-test": "1.14.0"
   },
