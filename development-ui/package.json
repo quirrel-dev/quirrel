@@ -44,7 +44,7 @@
     "ioredis-mock": "5.9.1",
     "jest-playwright-preset": "1.7.0",
     "nyc": "15.1.0",
-    "playwright": "1.21.1",
+    "playwright": "1.22.0",
     "serve": "13.0.2",
     "start-server-and-test": "1.14.0"
   },
