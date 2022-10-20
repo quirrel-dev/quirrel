@@ -42,8 +42,6 @@ jobs:
       uses: microsoft/playwright-github-action@v1
     - run: npm i -g npm@7
     - run: npm ci
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
     - run: npm run build
     - run: npm test -- --coverage
     - if: ${{ matrix.node-version == 14 }}
