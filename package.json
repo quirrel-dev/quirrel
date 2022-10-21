@@ -75,7 +75,7 @@
     "@fastify/swagger": "^8.0.0",
     "@fastify/swagger-ui": "^1.1.0",
     "@fastify/websocket": "^7.1.0",
-    "@quirrel/owl": "^0.14.3",
+    "@quirrel/owl": "^0.15.0",
     "@sentry/node": "^6.19.7",
     "@sentry/tracing": "^6.19.7",
     "@vercel/fetch-retry": "^5.0.3",
