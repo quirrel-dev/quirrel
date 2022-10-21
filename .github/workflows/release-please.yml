@@ -17,10 +17,12 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
       - uses: actions/setup-node@v3
         with:
-          node-version: '*'
+          node-version: '16'
           cache: 'npm'
           check-latest: true
           registry-url: 'https://registry.npmjs.org'
+        if: ${{ steps.release.outputs.release_created }}
+      - run: npm ci
         if: ${{ steps.release.outputs.release_created }}
       - run: npm publish
         if: ${{ steps.release.outputs.release_created }}
