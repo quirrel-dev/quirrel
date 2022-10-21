@@ -105,7 +105,7 @@
     "node-fetch": "2.6.7",
     "open": "8.4.0",
     "opentracing": "^0.14.7",
-    "parse-gitignore": "^1.0.1",
+    "parse-gitignore": "^2.0.0",
     "pino": "^8.6.1",
     "plausible-telemetry": "0.1.0",
     "posthog-node": "^2.1.0",
