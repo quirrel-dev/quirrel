@@ -17,6 +17,7 @@ If it doesn't, feel free to [reach out](mailto:troubleshooting@quirrel.dev).
 
 :::note Cron Jobs
 If you're using [CronJobs()](/api/cronjob), make sure to run `quirrel ci` during the deploy process.
+Make sure to have `QUIRREL_API_URL`, a `QUIRREL_TOKEN` and the `QUIRREL_BASE_URL` set when executing `quirrel ci`.
 
 ```json
 "scripts": { "vercel-build": "npm run build && quirrel ci" }
