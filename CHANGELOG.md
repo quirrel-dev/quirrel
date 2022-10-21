@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.12.0](https://github.com/quirrel-dev/quirrel/compare/v1.11.0...v1.12.0) (2022-10-21)
+
+
+### Features
+
+* update owl, ioredis, ioredis-mock ([#1036](https://github.com/quirrel-dev/quirrel/issues/1036)) ([d328c7d](https://github.com/quirrel-dev/quirrel/commit/d328c7d8aaeb57b70ef6ca3b85d55aa902fb102c))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @quirrel/owl to ^0.15.0 ([#1066](https://github.com/quirrel-dev/quirrel/issues/1066)) ([4e6eed4](https://github.com/quirrel-dev/quirrel/commit/4e6eed4401a93f820fec0667bfa31879bbc2e19a))
+* typo in CronDetector searchpath ([#1058](https://github.com/quirrel-dev/quirrel/issues/1058)) ([0635fd5](https://github.com/quirrel-dev/quirrel/commit/0635fd5e1fe7fe3e27b3cee7fd56a68347c22423))
+
 ## [1.11.0](https://github.com/quirrel-dev/quirrel/compare/v1.10.0...v1.11.0) (2022-10-21)
 
 
