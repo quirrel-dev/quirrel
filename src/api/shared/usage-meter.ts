@@ -17,15 +17,7 @@ export class UsageMeter {
       `,
       1,
       "usage"
-    );
-
-    if (this.redis instanceof RedisMock) {
-      for (const key of Object.keys(result)) {
-        result[key] = Number(result[key]);
-      }
-
-      return result
-    }
+    ) as any;
 
     const usage: Record<string, number> = {};
 
