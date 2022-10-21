@@ -2,8 +2,14 @@ import { QuirrelClient, runQuirrel as _runQuirrel } from "../../";
 import IORedis from "ioredis-mock";
 import http from "http";
 
+function getRandomPort() {
+  return 3000 + Math.floor(Math.random() * 1000);
+}
+
 export async function runQuirrel({ port = 9181 }: { port?: number } = {}) {
-  const ioredis = new IORedis();
+  const ioredis = new IORedis({
+    port: getRandomPort(),
+  });
   const quirrelServer = await _runQuirrel({
     host: "localhost",
     port,
