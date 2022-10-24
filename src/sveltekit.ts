@@ -10,11 +10,20 @@ import { registerDevelopmentDefaults } from "./client/config";
 export { Job, EnqueueJobOptions, DefaultJobOptions, QuirrelJobHandler };
 
 registerDevelopmentDefaults({
-  applicationBaseUrl: "localhost:3000",
+  applicationBaseUrl: "localhost:5173",
 });
 
+declare global {
+  interface Response {
+  }
+}
+
+interface SvelteEvent {
+  request: SvelteRequest
+}
+
 interface SvelteRequest {
-  body: string;
+  text: () => Promise<string>;
   headers: Record<string, string>;
 }
 
@@ -40,16 +49,13 @@ export function Queue<Payload>(
     route,
   });
 
-  async function svelteHandler(request: SvelteRequest): Promise<SvelteResponse> {
+  async function svelteHandler({ request }: SvelteEvent): Promise<Response> {
     const { body, headers, status } = await quirrel.respondTo(
-      request.body,
+      await request.text(),
       request.headers
     );
-    return {
-      status,
-      body,
-      headers,
-    };
+
+    return new Response(body, { headers, status })
   }
 
   svelteHandler.enqueue = (payload: Payload, options: EnqueueJobOptions) =>
