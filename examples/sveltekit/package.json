@@ -2,24 +2,23 @@
 	"name": "sveltekit",
 	"version": "0.0.1",
 	"scripts": {
-		"dev": "svelte-kit dev",
-		"build": "svelte-kit build",
-		"start": "svelte-kit start"
+		"dev": "vite dev",
+		"build": "vite build",
+		"start": "node build/index.js"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-node": "next",
-		"@sveltejs/kit": "next",
-		"svelte": "^3.29.0",
-		"svelte-preprocess": "^4.0.0",
+		"@sveltejs/adapter-node": "1.0.0-next.99",
+		"@sveltejs/kit": "1.0.0-next.525",
+		"svelte": "^3",
 		"tslib": "^2.0.0",
 		"typescript": "^4.0.0",
-		"vite": "^2.1.0"
+		"vite": "^3"
 	},
 	"type": "module",
 	"engines": {
 		"node": ">= 12.17.0"
 	},
 	"dependencies": {
-		"quirrel": "file:../../quirrel"
+		"quirrel": "file:../.."
 	}
 }
