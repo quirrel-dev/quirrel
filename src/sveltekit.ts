@@ -13,23 +13,12 @@ registerDevelopmentDefaults({
   applicationBaseUrl: "localhost:5173",
 });
 
-declare global {
-  interface Response {
-  }
-}
-
 interface SvelteEvent {
   request: SvelteRequest
 }
 
 interface SvelteRequest {
   text: () => Promise<string>;
-  headers: Record<string, string>;
-}
-
-interface SvelteResponse {
-  status: number;
-  body: string;
   headers: Record<string, string>;
 }
 
