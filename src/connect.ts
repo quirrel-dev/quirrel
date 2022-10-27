@@ -6,7 +6,7 @@ import {
   EnqueueJobOpts,
   EnqueueJobOptions,
   Job,
-  CustomLogger,
+  QuirrelOptions,
 } from "./client";
 import bodyParser from "body-parser";
 
@@ -30,14 +30,12 @@ declare module "connect" {
 export function Queue<Payload>(
   route: string,
   handler: QuirrelJobHandler<Payload>,
-  defaultJobOptions?: DefaultJobOptions,
-  logger?: CustomLogger<Payload>
+  options?: QuirrelOptions<Payload>,
 ): Queue<Payload> {
   const quirrel = new QuirrelClient({
     route,
     handler,
-    defaultJobOptions,
-    logger,
+    options,
   });
 
   const server = connect() as Queue<Payload>;
@@ -75,7 +73,7 @@ export function CronJob(
   route: string,
   cronSchedule: NonNullable<NonNullable<EnqueueJobOptions["repeat"]>["cron"]>,
   handler: () => Promise<void>,
-  logger?: CustomLogger
+  options?: QuirrelOptions
 ) {
-  return Queue(route, handler, {}, logger) as unknown;
+  return Queue(route, handler, options) as unknown;
 }

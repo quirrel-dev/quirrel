@@ -1,4 +1,4 @@
-import { CustomLogger, EnqueueJobOptions, QuirrelClient } from "./client";
+import { EnqueueJobOptions, QuirrelClient, QuirrelOptions } from "./client";
 import { registerDevelopmentDefaults } from "./client/config";
 import * as connect from "./connect";
 
@@ -9,10 +9,9 @@ registerDevelopmentDefaults({
 export function Queue<Payload>(
   path: string,
   handler: connect.QuirrelJobHandler<Payload>,
-  defaultJobOptions?: connect.DefaultJobOptions,
-  logger?: CustomLogger<Payload>
+  options?: QuirrelOptions,
 ): Omit<QuirrelClient<Payload>, "respondTo" | "makeRequest"> {
-  const client = connect.Queue(path, handler, defaultJobOptions, logger);
+  const client = connect.Queue(path, handler, options);
 
   (client as any).path = path;
   (client as any).handler = client.handle;
@@ -24,9 +23,9 @@ export function CronJob(
   route: string,
   cronSchedule: NonNullable<NonNullable<EnqueueJobOptions["repeat"]>["cron"]>,
   handler: () => Promise<void>,
-  logger?: CustomLogger
+  options?: QuirrelOptions
 ) {
-  return Queue(route, handler, {}, logger) as unknown;
+  return Queue(route, handler, options) as unknown;
 }
 
 export * from "./connect";

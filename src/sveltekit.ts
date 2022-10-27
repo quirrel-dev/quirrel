@@ -4,7 +4,7 @@ import {
   Job,
   DefaultJobOptions,
   QuirrelJobHandler,
-  CustomLogger,
+  QuirrelOptions,
 } from "./client";
 import { registerDevelopmentDefaults } from "./client/config";
 
@@ -33,14 +33,12 @@ export type Queue<Payload> = Omit<
 export function Queue<Payload>(
   route: string,
   handler: QuirrelJobHandler<Payload>,
-  defaultJobOptions?: DefaultJobOptions,
-  logger?: CustomLogger<Payload>
+  options?: QuirrelOptions<Payload>,
 ): Queue<Payload> {
   const quirrel = new QuirrelClient<Payload>({
-    defaultJobOptions,
+    options,
     handler,
     route,
-    logger,
   });
 
   async function svelteHandler(
@@ -79,7 +77,7 @@ export function CronJob(
   route: string,
   cronSchedule: NonNullable<NonNullable<EnqueueJobOptions["repeat"]>["cron"]>,
   handler: () => Promise<void>,
-  logger?: CustomLogger
+  options?: QuirrelOptions
 ) {
-  return Queue(route, handler, {}, logger) as unknown;
+  return Queue(route, handler, options) as unknown;
 }

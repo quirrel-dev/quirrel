@@ -75,9 +75,11 @@ describe("client logger", () => {
         quirrelBaseUrl,
         applicationBaseUrl: "http://localhost",
       },
-      logger: {
-        receivedJob,
-        processingError,
+      options: {
+        logger: {
+          receivedJob,
+          processingError,
+        },
       },
     });
     await quirrel.respondTo(JSON.stringify({ result: "success" }), {});

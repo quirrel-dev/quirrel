@@ -40,8 +40,7 @@ export type DefaultJobOptions = Pick<EnqueueJobOptions, "exclusive" | "retry">;
 interface CreateQuirrelClientArgs<T> {
   route: string;
   handler: QuirrelJobHandler<T>;
-  logger?: CustomLogger<T>;
-  defaultJobOptions?: DefaultJobOptions;
+  options?: QuirrelOptions<T>;
   config?: {
     /**
      * Recommended way to set this: process.env.QUIRREL_BASE_URL
@@ -258,6 +257,10 @@ function getAuthHeaders(
   return { Authorization: `Bearer ${token}` };
 }
 
+export interface QuirrelOptions<T = unknown> extends DefaultJobOptions {
+  logger?: CustomLogger<T>;
+}
+
 export class QuirrelClient<T> {
   private handler;
   private route;
@@ -277,7 +280,7 @@ export class QuirrelClient<T> {
 
   constructor(args: CreateQuirrelClientArgs<T>) {
     this.handler = args.handler;
-    this.defaultJobOptions = args.defaultJobOptions;
+    this.defaultJobOptions = args.options;
 
     const token = args.config?.token ?? config.getQuirrelToken();
     this.defaultHeaders = {
@@ -285,7 +288,7 @@ export class QuirrelClient<T> {
       "X-QuirrelClient-Version": pack.version,
     };
 
-    this.logger = args.logger ?? defaultLogger;
+    this.logger = args.options?.logger ?? defaultLogger;
     const quirrelBaseUrl =
       args.config?.quirrelBaseUrl ?? config.getQuirrelBaseUrl();
     this.applicationBaseUrl = config.withoutTrailingSlash(

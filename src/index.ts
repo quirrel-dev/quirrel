@@ -5,5 +5,6 @@ export {
   EnqueueJobOptions,
   Job,
   QuirrelClient,
+  QuirrelOptions,
 } from "./client";
 export { runQuirrelDev } from "./cli/commands/index";
