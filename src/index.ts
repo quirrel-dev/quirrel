@@ -6,5 +6,6 @@ export {
   Job,
   QuirrelClient,
   QuirrelOptions,
+  QuirrelLogger,
 } from "./client";
 export { runQuirrelDev } from "./cli/commands/index";

@@ -23,12 +23,12 @@ export interface JobMeta
   readonly nextRepetition?: Date;
 }
 
-export type CustomLogger<Payload = unknown> = {
+export type QuirrelLogger<Payload = unknown> = {
   receivedJob: (route: string, data: Payload) => void;
   processingError: (route: string, data: Payload, error: unknown) => void;
 };
 
-const defaultLogger: CustomLogger = {
+const defaultLogger: QuirrelLogger = {
   receivedJob: (route, data) => console.log(`Received job to ${route}`, data),
   processingError: (route, data, error) =>
     console.error(`Error in job at ${route}`, data, error),
@@ -258,7 +258,7 @@ function getAuthHeaders(
 }
 
 export interface QuirrelOptions<T = unknown> extends DefaultJobOptions {
-  logger?: CustomLogger<T>;
+  logger?: QuirrelLogger<T>;
 }
 
 export class QuirrelClient<T> {
@@ -276,7 +276,7 @@ export class QuirrelClient<T> {
   private fetch;
   private catchDecryptionErrors;
   private signaturePublicKey;
-  private logger: CustomLogger<T>;
+  private logger: QuirrelLogger<T>;
 
   constructor(args: CreateQuirrelClientArgs<T>) {
     this.handler = args.handler;
