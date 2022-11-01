@@ -4,6 +4,6 @@ const queue = Queue("greetingsQueue", async (name: string) => {
   console.log(`Greetings, ${name}!`);
 });
 
-export const post = queue;
+export const POST = queue;
 
 export default queue;

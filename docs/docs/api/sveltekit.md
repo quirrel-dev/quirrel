@@ -2,7 +2,7 @@
 title: SvelteKit
 ---
 
-```ts title="src/routes/greetingsQueue.ts"
+```ts title="src/routes/greetingsQueue/+server.ts"
 import { Queue } from "quirrel/sveltekit";
 
 const queue = Queue(
@@ -12,13 +12,13 @@ const queue = Queue(
   }
 );
 
-export const post = queue
+export const POST = queue
 
 export default queue
 ```
 
 Creates a new Queue.
-Make sure to export it from an [endpoint](https://kit.svelte.dev/docs#routing-endpoints), otherwise it won't work.
+Make sure to export it as a [server route](https://kit.svelte.dev/docs/routing#server), otherwise it won't work.
 
 #### Parameters
 
