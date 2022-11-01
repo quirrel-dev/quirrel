@@ -23,13 +23,24 @@ export interface JobMeta
   readonly nextRepetition?: Date;
 }
 
+export type QuirrelLogger<Payload = unknown> = {
+  receivedJob: (route: string, data: Payload) => void;
+  processingError: (route: string, data: Payload, error: unknown) => void;
+};
+
+const defaultLogger: QuirrelLogger = {
+  receivedJob: (route, data) => console.log(`Received job to ${route}`, data),
+  processingError: (route, data, error) =>
+    console.error(`Error in job at ${route}`, data, error),
+};
+
 export type QuirrelJobHandler<T> = (job: T, meta: JobMeta) => Promise<void>;
 export type DefaultJobOptions = Pick<EnqueueJobOptions, "exclusive" | "retry">;
 
 interface CreateQuirrelClientArgs<T> {
   route: string;
   handler: QuirrelJobHandler<T>;
-  defaultJobOptions?: DefaultJobOptions;
+  options?: QuirrelOptions<T>;
   config?: {
     /**
      * Recommended way to set this: process.env.QUIRREL_BASE_URL
@@ -136,10 +147,6 @@ const EnqueueJobOptionsSchema = z.object({
 });
 
 type EnqueueJobOptionsSchema = z.TypeOf<typeof EnqueueJobOptionsSchema>;
-
-type EnqueueJobOptionssSchemaMatchesDocs = AssertTrue<
-  IsExact<EnqueueJobOptions, EnqueueJobOptionsSchema>
->;
 
 /**
  * @deprecated renamed to EnqueueJobOptions
@@ -250,6 +257,10 @@ function getAuthHeaders(
   return { Authorization: `Bearer ${token}` };
 }
 
+export interface QuirrelOptions<T = unknown> extends DefaultJobOptions {
+  logger?: QuirrelLogger<T>;
+}
+
 export class QuirrelClient<T> {
   private handler;
   private route;
@@ -265,10 +276,11 @@ export class QuirrelClient<T> {
   private fetch;
   private catchDecryptionErrors;
   private signaturePublicKey;
+  private logger: QuirrelLogger<T>;
 
   constructor(args: CreateQuirrelClientArgs<T>) {
     this.handler = args.handler;
-    this.defaultJobOptions = args.defaultJobOptions;
+    this.defaultJobOptions = args.options;
 
     const token = args.config?.token ?? config.getQuirrelToken();
     this.defaultHeaders = {
@@ -276,6 +288,7 @@ export class QuirrelClient<T> {
       "X-QuirrelClient-Version": pack.version,
     };
 
+    this.logger = args.options?.logger ?? defaultLogger;
     const quirrelBaseUrl =
       args.config?.quirrelBaseUrl ?? config.getQuirrelBaseUrl();
     this.applicationBaseUrl = config.withoutTrailingSlash(
@@ -691,7 +704,7 @@ export class QuirrelClient<T> {
       (headers["x-quirrel-meta"] as string) ?? "{}"
     );
 
-    console.log(`Received job to ${this.route}: `, payload);
+    this.logger.receivedJob(this.route, payload);
 
     try {
       await this.handler(payload, {
@@ -708,7 +721,7 @@ export class QuirrelClient<T> {
         body: "OK",
       };
     } catch (error) {
-      console.error(error);
+      this.logger.processingError(this.route, payload, error);
       return {
         status: 500,
         headers: {},

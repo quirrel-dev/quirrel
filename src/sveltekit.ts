@@ -4,6 +4,7 @@ import {
   Job,
   DefaultJobOptions,
   QuirrelJobHandler,
+  QuirrelOptions,
 } from "./client";
 import { registerDevelopmentDefaults } from "./client/config";
 
@@ -14,7 +15,7 @@ registerDevelopmentDefaults({
 });
 
 interface SvelteEvent {
-  request: SvelteRequest
+  request: SvelteRequest;
 }
 
 interface SvelteRequest {
@@ -30,10 +31,10 @@ export type Queue<Payload> = Omit<
 export function Queue<Payload>(
   route: string,
   handler: QuirrelJobHandler<Payload>,
-  defaultJobOptions?: DefaultJobOptions
+  options?: QuirrelOptions<Payload>
 ): Queue<Payload> {
   const quirrel = new QuirrelClient<Payload>({
-    defaultJobOptions,
+    options,
     handler,
     route,
   });
@@ -44,7 +45,7 @@ export function Queue<Payload>(
       request.headers
     );
 
-    return new Response(body, { headers, status })
+    return new Response(body, { headers, status });
   }
 
   svelteHandler.enqueue = (payload: Payload, options: EnqueueJobOptions) =>
@@ -68,7 +69,8 @@ export function Queue<Payload>(
 export function CronJob(
   route: string,
   cronSchedule: NonNullable<NonNullable<EnqueueJobOptions["repeat"]>["cron"]>,
-  handler: () => Promise<void>
+  handler: () => Promise<void>,
+  options?: QuirrelOptions
 ) {
-  return Queue(route, handler) as unknown;
+  return Queue(route, handler, options) as unknown;
 }

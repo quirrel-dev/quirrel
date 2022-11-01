@@ -5,6 +5,7 @@ import {
   Job,
   DefaultJobOptions,
   QuirrelJobHandler,
+  QuirrelOptions,
 } from "./client";
 import { registerDevelopmentDefaults } from "./client/config";
 import type { IncomingHttpHeaders } from "http";
@@ -45,10 +46,10 @@ export type Queue<Payload> = Omit<
 export function Queue<Payload>(
   route: string,
   handler: QuirrelJobHandler<Payload>,
-  defaultJobOptions?: DefaultJobOptions
+  options?: QuirrelOptions,
 ): Queue<Payload> & NextApiHandler {
   const quirrel = new QuirrelClient<Payload>({
-    defaultJobOptions,
+    options,
     handler,
     route,
   });
@@ -83,7 +84,8 @@ export function Queue<Payload>(
 export function CronJob(
   route: string,
   cronSchedule: NonNullable<NonNullable<EnqueueJobOptions["repeat"]>["cron"]>,
-  handler: () => Promise<void>
+  handler: () => Promise<void>,
+  options?: QuirrelOptions
 ) {
-  return Queue(route, handler) as unknown;
+  return Queue(route, handler, options) as unknown;
 }
