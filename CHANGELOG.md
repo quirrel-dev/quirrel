@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/quirrel-dev/quirrel/compare/v1.13.0...v1.13.1) (2022-11-07)
+
+
+### Bug Fixes
+
+* correctly default --no-cron ([#1091](https://github.com/quirrel-dev/quirrel/issues/1091)) ([1cbe816](https://github.com/quirrel-dev/quirrel/commit/1cbe81644e5ffb6f188e08dff1383454f1e59d0b)), closes [#1089](https://github.com/quirrel-dev/quirrel/issues/1089)
+
 ## [1.13.0](https://github.com/quirrel-dev/quirrel/compare/v1.12.0...v1.13.0) (2022-11-01)
 
 
