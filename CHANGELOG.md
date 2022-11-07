@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.13.0](https://github.com/quirrel-dev/quirrel/compare/v1.12.0...v1.13.0) (2022-11-01)
+
+
+### Features
+
+* allow passing a logger function to quirrel client ([#1039](https://github.com/quirrel-dev/quirrel/issues/1039)) ([398f53a](https://github.com/quirrel-dev/quirrel/commit/398f53a053d18f56ed1a99ec67066003f413c6c4))
+* SvelteKit update ([#1082](https://github.com/quirrel-dev/quirrel/issues/1082)) ([8596694](https://github.com/quirrel-dev/quirrel/commit/8596694038b76154b030868698f2ba75548309aa))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/node to v18 ([#1083](https://github.com/quirrel-dev/quirrel/issues/1083)) ([565e5a8](https://github.com/quirrel-dev/quirrel/commit/565e5a8604cb326ee422784de75af0578e443dc2))
+* **deps:** update docusaurus monorepo to v2.2.0 ([#1086](https://github.com/quirrel-dev/quirrel/issues/1086)) ([5e219b9](https://github.com/quirrel-dev/quirrel/commit/5e219b986cdfe5ba5ed383e616530533126ac438))
+
 ## [1.12.0](https://github.com/quirrel-dev/quirrel/compare/v1.11.0...v1.12.0) (2022-10-21)
 
 
