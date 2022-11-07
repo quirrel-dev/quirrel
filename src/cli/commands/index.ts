@@ -75,7 +75,7 @@ export default function registerRun(program: Command) {
     .option("-p, --port <port>", "port to bind on", "9181")
     .option("-r, --redis-url <redis-url>", "enables the redis backend")
     .option("-q, --quiet", "silences welcome message, condenses output", false)
-    .option("--no-cron", "Disable cron job detection", false)
+    .option("--no-cron", "Disable cron job detection")
     .option(
       "--passphrase <passphrase>",
       "secure the server with a passphrase",
