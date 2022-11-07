@@ -192,6 +192,15 @@
         "code",
         "doc"
       ]
+    },
+    {
+      "login": "mr47",
+      "name": "Dmitry Poddubniy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/651943?v=4",
+      "profile": "https://mr47.in",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
