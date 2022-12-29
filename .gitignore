@@ -4,8 +4,8 @@ src/api/scheduler/types
 dist/
 
 /*.js
-!jest.config.js
 /*.cjs
+!jest.config.cjs
 /*.mjs
 /*.d.ts
 
