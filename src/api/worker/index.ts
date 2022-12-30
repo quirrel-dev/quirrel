@@ -1,13 +1,13 @@
-import { decodeQueueDescriptor } from "../shared/queue-descriptor";
-import { UsageMeter } from "../shared/usage-meter";
+import { decodeQueueDescriptor } from "../shared/queue-descriptor.js";
+import { UsageMeter } from "../shared/usage-meter.js";
 import fetch from "node-fetch";
-import { TokenRepo } from "../shared/token-repo";
+import { TokenRepo } from "../shared/token-repo.js";
 import { asymmetric, symmetric } from "secure-webhooks";
 import { Redis } from "ioredis";
-import { Telemetrist } from "../shared/telemetrist";
-import { createOwl } from "../shared/owl";
-import type { Logger } from "../shared/logger";
-import { ssrfFilter } from "./ssrf-filter";
+import { Telemetrist } from "../shared/telemetrist.js";
+import { createOwl } from "../shared/owl.js";
+import type { Logger } from "../shared/logger.js";
+import { ssrfFilter } from "./ssrf-filter.js";
 import { PostHog } from "posthog-node";
 
 export interface ExecutionError {

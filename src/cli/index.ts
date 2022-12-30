@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-import pack from "../../package.json";
+import { env } from "process"
 
 import { Command, program } from "commander";
-import registerUI from "./commands/ui";
-import registerCI from "./commands/ci";
-import registerDetectCron from "./commands/detect-cron";
-import registerUpdateCron from "./commands/update-cron";
-import registerRun from "./commands/index";
+import registerUI from "./commands/ui.js";
+import registerCI from "./commands/ci.js";
+import registerDetectCron from "./commands/detect-cron.js";
+import registerUpdateCron from "./commands/update-cron.js";
+import registerRun from "./commands/index.js";
 
-program.version(pack.version);
+program.version(env.npm_package_version ?? "unknown");
 
 const command = program as Command;
 

@@ -1,1 +1,1 @@
-export * from "./next";
+export * from "./next.js";

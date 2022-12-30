@@ -1,6 +1,6 @@
 import { FastifyPluginCallback } from "fastify";
 import fp from "fastify-plugin";
-import { Logger } from "../shared/logger";
+import { Logger } from "../shared/logger.js";
 
 declare module "fastify" {
   interface FastifyInstance {

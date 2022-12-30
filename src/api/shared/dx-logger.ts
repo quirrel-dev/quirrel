@@ -1,7 +1,7 @@
-import { Logger } from "./logger";
+import { Logger } from "./logger.js";
 import chalk from "chalk";
-import { JobDTO } from "../../client/job";
-import { QueuesUpdateCronBody } from "../scheduler/types/queues/update-cron";
+import { JobDTO } from "../../client/job.js";
+import { QueuesUpdateCronBody } from "../scheduler/types/queues/update-cron.js";
 
 export function getQueueName(endpoint: string) {
   return new URL(endpoint).pathname;

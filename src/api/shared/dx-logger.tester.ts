@@ -1,4 +1,4 @@
-import { DxLogger } from "./dx-logger";
+import { DxLogger } from "./dx-logger.js";
 
 const dxLogger = new DxLogger();
 

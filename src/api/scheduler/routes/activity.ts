@@ -10,7 +10,7 @@ function workAroundWebsocketAuth(req: FastifyRequest) {
 }
 
 const activityPlugin: FastifyPluginCallback = (fastify, _opts, done) => {
-  fastify.register(fastifyWebsocket);
+  fastify.register(fastifyWebsocket.default);
 
   fastify.register(async (fastify) => {
     fastify.get(

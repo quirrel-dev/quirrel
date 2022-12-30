@@ -1,6 +1,6 @@
 import { FastifyPluginCallback } from "fastify";
 import fp from "fastify-plugin";
-import { Telemetrist } from "../shared/telemetrist";
+import { Telemetrist } from "../shared/telemetrist.js";
 
 declare module "fastify" {
   interface FastifyInstance {

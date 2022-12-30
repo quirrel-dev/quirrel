@@ -1,4 +1,4 @@
-import { QuirrelClient } from "..";
+import { QuirrelClient } from "../index.js";
 
 describe("DX", () => {
   const quirrel = new QuirrelClient({

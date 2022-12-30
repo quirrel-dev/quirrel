@@ -1,8 +1,8 @@
 require("../shared/tracer")("quirrel-scheduler");
-import { createServer } from ".";
-import { cliWithConfig } from "../../shared/cliWithConfig";
-import { createRedisFactory } from "../shared/create-redis";
-import { StructuredLogger } from "../shared/structured-logger";
+import { createServer } from "./index.js";
+import { cliWithConfig } from "../../shared/cliWithConfig.js";
+import { createRedisFactory } from "../shared/create-redis.js";
+import { StructuredLogger } from "../shared/structured-logger.js";
 
 cliWithConfig(async (config) => {
   const {

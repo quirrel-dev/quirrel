@@ -1,17 +1,16 @@
-import { Job, JobDTO } from "./job";
-import * as config from "./config";
+import { Job, JobDTO } from "./job.js";
+import * as config from "./config.js";
 import * as z from "zod";
-import type { IsExact, AssertTrue } from "conditional-type-checks";
-import Encryptor from "secure-e2ee";
+import { Encryptor } from "secure-e2ee";
 import { symmetric, asymmetric } from "secure-webhooks";
 import ms from "ms";
 import fetch from "cross-fetch";
 import fetchRetry from "@vercel/fetch-retry";
 import type { IncomingHttpHeaders } from "http";
-import pack from "../../package.json";
-import * as EnhancedJSON from "./enhanced-json";
-import { isValidCronExpression } from "../shared/is-valid-cron";
-import { isValidTimezone } from "../shared/repeat";
+import { env } from "process"
+import * as EnhancedJSON from "./enhanced-json.js";
+import { isValidCronExpression } from "../shared/is-valid-cron.js";
+import { isValidTimezone } from "../shared/repeat.js";
 
 export { Job };
 
@@ -285,7 +284,7 @@ export class QuirrelClient<T> {
     const token = args.config?.token ?? config.getQuirrelToken();
     this.defaultHeaders = {
       ...getAuthHeaders(token),
-      "X-QuirrelClient-Version": pack.version,
+      "X-QuirrelClient-Version": env.npm_package_version ?? "unknown",
     };
 
     this.logger = args.options?.logger ?? defaultLogger;
@@ -304,7 +303,7 @@ export class QuirrelClient<T> {
     this.quirrelOldToken = args.config?.oldToken ?? config.getOldQuirrelToken();
     this.oldDefaultHeaders = {
       ...getAuthHeaders(this.quirrelOldToken),
-      "X-QuirrelClient-Version": pack.version,
+      "X-QuirrelClient-Version": env.npm_package_version ?? "unknown",
     };
     this.encryptor = getEncryptor(
       args.config?.encryptionSecret ?? config.getEncryptionSecret(),

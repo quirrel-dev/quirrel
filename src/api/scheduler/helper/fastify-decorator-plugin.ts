@@ -17,5 +17,5 @@ export function fastifyDecoratorPlugin(
     done();
   };
 
-  return fp(plugin);
+  return fp.default(plugin);
 }

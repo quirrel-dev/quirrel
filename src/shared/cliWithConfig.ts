@@ -1,5 +1,5 @@
 import { program } from "commander";
-import pack from "../../package.json";
+import { env } from "process"
 import yaml from "js-yaml";
 import { promises as fs } from "fs";
 
@@ -18,7 +18,7 @@ export async function cliWithConfig(
   });
 
   program
-    .version(pack.version)
+    .version(env.npm_package_version ?? "unknown")
     .option("-c, --config <path>", "path to config file (json or yaml)");
   program.parse(process.argv);
 

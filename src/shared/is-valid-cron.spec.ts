@@ -1,4 +1,4 @@
-import { isValidCronExpression } from "./is-valid-cron";
+import { isValidCronExpression } from "./is-valid-cron.js";
 
 test(isValidCronExpression.name, () => {
   expect(isValidCronExpression("* * * * *")).toBe(true);

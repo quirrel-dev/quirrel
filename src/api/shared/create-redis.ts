@@ -1,6 +1,6 @@
-import IORedis, { RedisOptions as _RedisOptions } from "ioredis";
+import IORedis, { Redis as IORedisType, RedisOptions as _RedisOptions } from "ioredis";
 import IORedisMock from "ioredis-mock";
-import fs from "fs";
+import * as fs from "fs";
 
 type RedisOptions = _RedisOptions & {
   tlsCa?: { path?: string; base64?: string };
@@ -13,7 +13,7 @@ function getRandomPort() {
 export function createRedisFactory(
   redisUrl?: string,
   options: RedisOptions = {}
-): () => IORedis {
+): () => IORedisType {
   if (!redisUrl) {
     let redis: IORedisMock | undefined = undefined;
     return () => {
@@ -28,7 +28,7 @@ export function createRedisFactory(
     };
   }
 
-  let redis: IORedis | undefined = undefined;
+  let redis: IORedisType | undefined = undefined;
   return () => {
     if (!redis) {
       if (options.tlsCa?.path && fs.existsSync(options.tlsCa.path)) {
@@ -43,7 +43,7 @@ export function createRedisFactory(
           ca: Buffer.from(options.tlsCa?.base64, "base64").toString("ascii"),
         };
       }
-      redis = new IORedis(redisUrl, options);
+      redis = new IORedis.default(redisUrl, options);
       return redis;
     }
 

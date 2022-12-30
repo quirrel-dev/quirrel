@@ -1,11 +1,9 @@
-import { run } from "../../api/test/runQuirrel";
-import { getAddress, makeSignal } from "./util";
-import { QuirrelClient } from "..";
-import http from "http";
+import { run } from "../../api/test/runQuirrel.js";
+import { getAddress } from "./util.js";
+import { QuirrelClient } from "../index.js";
 
 const errorLogMock = jest.fn();
 const logMock = jest.fn();
-const receiverMock = jest.fn();
 
 global.console = {
   ...global.console,

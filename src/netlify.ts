@@ -1,7 +1,7 @@
-import { registerDevelopmentDefaults } from "./client/config";
+import { registerDevelopmentDefaults } from "./client/config.js";
 
 registerDevelopmentDefaults({
   applicationBaseUrl: "http://localhost:8888",
 });
 
-export * from "./redwood";
+export * from "./redwood.js";

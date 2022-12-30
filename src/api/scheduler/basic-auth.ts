@@ -10,7 +10,7 @@ const basicAuthPlugin: FastifyPluginCallback<BasicAuthPluginOpts> = async (
   fastify,
   opts
 ) => {
-  fastify.register(fastifyBasicAuth, {
+  fastify.register(fastifyBasicAuth.default, {
     validate(username, password, req, reply, done) {
       if (opts.passphrases.includes(password)) {
         done();

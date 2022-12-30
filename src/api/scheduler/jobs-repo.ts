@@ -1,16 +1,16 @@
-import { EnqueueJob } from "./types/queues/POST/body";
-import { QueuesUpdateCronBody } from "./types/queues/update-cron";
+import { EnqueueJob } from "./types/queues/POST/body.js";
+import { QueuesUpdateCronBody } from "./types/queues/update-cron.js";
 import {
   encodeQueueDescriptor,
   decodeQueueDescriptor,
-} from "../shared/queue-descriptor";
+} from "../shared/queue-descriptor.js";
 import * as uuid from "uuid";
-import { cron, embedTimezone, parseTimezonedCron } from "../../shared/repeat";
+import { cron, embedTimezone, parseTimezonedCron } from "../../shared/repeat.js";
 import Owl, { Closable, Job } from "@quirrel/owl";
-import { QueueRepo } from "./queue-repo";
+import { QueueRepo } from "./queue-repo.js";
 import { Redis } from "ioredis";
-import { fastifyDecoratorPlugin } from "./helper/fastify-decorator-plugin";
-import * as config from "../../client/config";
+import { fastifyDecoratorPlugin } from "./helper/fastify-decorator-plugin.js";
+import * as config from "../../client/config.js";
 
 function withoutWrappingSlashes(url: string): string {
   return withoutLeadingSlash(withoutTrailingSlash(url));
@@ -58,7 +58,7 @@ export class JobsRepo implements Closable {
   protected producer;
   public readonly queueRepo: QueueRepo;
 
-  constructor(protected readonly owl: Owl<"every" | "cron">, redis: Redis) {
+  constructor(protected readonly owl: Owl.default<"every" | "cron">, redis: Redis) {
     this.producer = this.owl.createProducer();
     this.queueRepo = new QueueRepo(redis, this);
   }

@@ -1,8 +1,8 @@
 import { Command } from "commander";
-import { CronDetector, DetectedCronJob } from "../cron-detector";
+import { CronDetector, DetectedCronJob } from "../cron-detector.js";
 import * as z from "zod";
-import { cronExpression } from "../../client/index";
-import { stringifyBeautiful } from "../beatiful-json";
+import { cronExpression } from "../../client/index.js";
+import { stringifyBeautiful } from "../beatiful-json.js";
 import Table from "easy-table";
 
 export function formatDetectedJobsAsTable(jobs: DetectedCronJob[]) {

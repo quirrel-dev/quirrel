@@ -1,11 +1,11 @@
 import { Command } from "commander";
 import { promises as fs } from "fs";
-import { QuirrelClient } from "../../client";
+import { QuirrelClient } from "../../client/index.js";
 import {
   RouteScheduleManifest,
   RouteScheduleManifestSchema,
-} from "./detect-cron";
-import * as config from "../../client/config";
+} from "./detect-cron.js";
+import * as config from "../../client/config.js";
 import Table from "easy-table";
 
 async function clearOldInstance() {

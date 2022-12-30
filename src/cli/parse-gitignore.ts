@@ -3,7 +3,7 @@
 import spawn from "cross-spawn";
 import expandTilde from "expand-tilde";
 import fastGlob from "fast-glob";
-import fs from "fs";
+import * as fs from "fs";
 import parseGitignore from "parse-gitignore";
 
 function partition<A, B>(

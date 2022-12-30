@@ -1,7 +1,7 @@
-import { QuirrelClient } from "..";
-import { run } from "../../api/test/runQuirrel";
-import http from "http";
-import { expectToBeInRange, getAddress, makeSignal } from "./util";
+import { QuirrelClient } from "../index.js";
+import { run } from "../../api/test/runQuirrel.js";
+import * as http from "http";
+import { expectToBeInRange, getAddress, makeSignal } from "./util.js";
 
 test("retry", async () => {
   const server = await run("Mock");

@@ -1,6 +1,6 @@
 import request from "supertest";
-import { run } from "./runQuirrel";
-import type http from "http";
+import { run } from "./runQuirrel.js";
+import type * as http from "http";
 
 function testAgainst(backend: "Redis" | "Mock") {
   describe(backend + " > health", () => {

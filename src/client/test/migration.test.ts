@@ -1,7 +1,7 @@
-import { QuirrelClient } from "..";
+import { QuirrelClient } from "../index.js";
 import { symmetric } from "secure-webhooks";
-import { run } from "../../api/test/runQuirrel";
-import { getAddress } from "./util";
+import { run } from "../../api/test/runQuirrel.js";
+import { getAddress } from "./util.js";
 
 test("migration", async () => {
   process.env.NODE_ENV = "production";

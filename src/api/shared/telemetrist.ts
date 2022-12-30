@@ -1,6 +1,6 @@
 import PlausibleTelemetry from "plausible-telemetry";
 
-export class Telemetrist extends PlausibleTelemetry {
+export class Telemetrist extends PlausibleTelemetry.default {
   constructor(runningInDocker: boolean) {
     super("telemetry.quirrel.dev", runningInDocker ? "mobile" : "tablet");
   }

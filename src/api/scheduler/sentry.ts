@@ -1,7 +1,7 @@
 import { FastifyPluginCallback } from "fastify";
 import * as Sentry from "@sentry/node";
 import fp from "fastify-plugin";
-import pack from "../../../package.json";
+import { env } from "process"
 
 interface SentryPluginOptions {}
 
@@ -15,7 +15,7 @@ const sentryPlugin: FastifyPluginCallback<SentryPluginOptions> = (
       "https://3f2af43f2e7d423b9c258ba4373e8be2@o462664.ingest.sentry.io/5466383",
     tracesSampleRate: 0.1,
     environment: process.env.NODE_ENV,
-    release: pack.version,
+    release: env.npm_package_version,
   });
 
   fastify.setErrorHandler((err, request, reply) => {

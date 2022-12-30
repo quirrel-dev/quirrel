@@ -1,10 +1,10 @@
-import { run } from "./runQuirrel";
-import fastify, { FastifyInstance } from "fastify";
+import { run } from "./runQuirrel.js";
+import { fastify, FastifyInstance } from "fastify";
 import delay from "delay";
 import { verify } from "secure-webhooks";
-import type http from "http";
+import type * as http from "http";
 import request from "supertest";
-import { describeAcrossBackends } from "../../client/test/util";
+import { describeAcrossBackends } from "../../client/test/util.js";
 
 const passphrase = "hello";
 

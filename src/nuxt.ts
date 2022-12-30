@@ -1,6 +1,6 @@
-import { EnqueueJobOptions, QuirrelClient, QuirrelOptions } from "./client";
-import { registerDevelopmentDefaults } from "./client/config";
-import * as connect from "./connect";
+import { EnqueueJobOptions, QuirrelClient, QuirrelOptions } from "./client/index.js";
+import { registerDevelopmentDefaults } from "./client/config.js";
+import * as connect from "./connect.js";
 
 registerDevelopmentDefaults({
   applicationBaseUrl: "http://localhost:3000",
@@ -28,4 +28,4 @@ export function CronJob(
   return Queue(route, handler, options) as unknown;
 }
 
-export * from "./connect";
+export * from "./connect.js";

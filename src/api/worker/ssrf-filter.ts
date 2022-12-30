@@ -1,8 +1,8 @@
 // shamelessly stolem from https://github.com/y-mehta/ssrf-req-filter
 
-import https from "https";
-import http from "http";
-import ipaddr from "ipaddr.js"
+import * as https from "https";
+import * as http from "http";
+import * as ipaddr from "ipaddr.js"
 
 function checkIp(ip: string): boolean {
   if (!ipaddr.isValid(ip)) {

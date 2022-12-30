@@ -1,7 +1,7 @@
-import { QuirrelClient } from "..";
-import { run } from "../../api/test/runQuirrel";
+import { QuirrelClient } from "../index.js";
+import { run } from "../../api/test/runQuirrel.js";
 import * as http from "http";
-import { getAddress, waitUntil } from "./util";
+import { getAddress, waitUntil } from "./util.js";
 import { generateKeyPairSync } from "crypto";
 
 function getKeyPair() {

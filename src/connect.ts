@@ -7,7 +7,7 @@ import {
   EnqueueJobOptions,
   Job,
   QuirrelOptions,
-} from "./client";
+} from "./client/index.js";
 import bodyParser from "body-parser";
 
 export {

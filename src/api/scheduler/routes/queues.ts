@@ -1,18 +1,35 @@
 import { FastifyPluginCallback } from "fastify";
 
-import EndpointParamsSchema from "../schemas/queues/endpoint-params.json";
-import SCANQueryStringSchema from "../schemas/queues/scan-querystring.json";
-import EndpointJobIDParamsSchema from "../schemas/queues/endpoint-jobid-params.json";
-import POSTQueuesEndpointBodySchema from "../schemas/queues/POST/body.json";
-import PUTUpdateCronBodySchema from "../schemas/queues/update-cron.json";
-import { EnqueueJob } from "../types/queues/POST/body";
-import { SCANQuerystringParams } from "../types/queues/scan-querystring";
-import { QueuesEndpointParams } from "../types/queues/endpoint-params";
-import { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params";
-import { QueuesUpdateCronBody } from "../types/queues/update-cron";
-import { isValidCronExpression } from "../../../shared/is-valid-cron";
-import { isValidTimezone } from "../../../shared/repeat";
-import { JobDTO } from "../../../client/job";
+import type { EnqueueJob } from "../types/queues/POST/body.js";
+import type { SCANQuerystringParams } from "../types/queues/scan-querystring.js";
+import type { QueuesEndpointParams } from "../types/queues/endpoint-params.js";
+import type { QueuesEndpointIdParams } from "../types/queues/endpoint-jobid-params.js";
+import type { QueuesUpdateCronBody } from "../types/queues/update-cron.js";
+import { isValidCronExpression } from "../../../shared/is-valid-cron.js";
+import { isValidTimezone } from "../../../shared/repeat.js";
+import { JobDTO } from "../../../client/job.js";
+import { readFileSync } from "fs"
+import { join } from "path"
+
+const POSTQueuesEndpointBodySchema = JSON.parse(
+  readFileSync(join(import.meta.url, "..", "..","schemas","queues","POST","body.json"), "utf-8")
+)
+
+const PUTUpdateCronBodySchema = JSON.parse(
+  readFileSync(join(import.meta.url, "..", "..", "schemas","queues","update-cron.json"), "utf-8")
+)
+
+const EndpointJobIDParamsSchema = JSON.parse(
+  readFileSync(join(import.meta.url, "..", "..","schemas","queues","endpoint-jobid-params.json"), "utf-8")
+)
+
+const SCANQueryStringSchema = JSON.parse(
+  readFileSync(join(import.meta.url, "..", "..","schemas","queues","scan-querystring.json"), "utf-8")
+)
+
+const EndpointParamsSchema = JSON.parse(
+  readFileSync(join(import.meta.url, "..", "..","schemas","queues","endpoint-params.json"), "utf-8")
+)
 
 import * as Url from "url";
 

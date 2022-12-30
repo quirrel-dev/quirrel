@@ -1,4 +1,4 @@
-import * as EnhancedJSON from "./enhanced-json";
+import * as EnhancedJSON from "./enhanced-json.js";
 
 describe("EnhancedJSON", () => {
   describe("when parsing an old job with the new thing, old job being an", () => {

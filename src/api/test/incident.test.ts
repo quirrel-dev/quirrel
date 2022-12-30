@@ -1,5 +1,5 @@
-import { run } from "./runQuirrel";
-import fastify from "fastify";
+import { run } from "./runQuirrel.js";
+import { fastify } from "fastify";
 import delay from "delay";
 import request from "supertest";
 

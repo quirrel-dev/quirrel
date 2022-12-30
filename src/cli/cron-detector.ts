@@ -1,12 +1,12 @@
-import { cronExpression, timezone } from "../client/index";
-import { cron } from "../client/index";
-import fs from "fs";
+import { timezone } from "../client/index.js";
+import { cron } from "../client/index.js";
+import * as fs from "fs";
 import * as chokidar from "chokidar";
-import { parseChokidarRulesFromGitignore } from "./parse-gitignore";
+import { parseChokidarRulesFromGitignore } from "./parse-gitignore.js";
 import * as babel from "@babel/parser";
 import traverse from "@babel/traverse";
-import path from "path";
-import * as config from "../client/config";
+import * as path from "path";
+import * as config from "../client/config.js";
 
 export interface DetectedCronJob {
   route: string;
@@ -33,7 +33,7 @@ export function detectQuirrelCronJob(file: string): DetectedCronJob | null {
       sourceType: "unambiguous",
       plugins: ["typescript"],
     });
-    traverse(ast, {
+    traverse.default(ast, {
       CallExpression(path) {
         const { callee } = path.node;
         if (callee.type !== "Identifier" || callee.name !== "CronJob") {
