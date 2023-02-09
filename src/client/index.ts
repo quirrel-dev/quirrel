@@ -157,7 +157,6 @@ export interface EnqueueJobOptions {
   /**
    * Can be used to make a job easier to manage.
    * If there's already a job with the same ID, this job will be trashed.
-   * @tutorial https://demo.quirrel.dev/managed
    */
   id?: string;
 
