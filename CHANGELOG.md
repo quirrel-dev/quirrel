@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.13.2](https://github.com/quirrel-dev/quirrel/compare/v1.13.1...v1.13.2) (2023-02-16)
+
+
+### Bug Fixes
+
+* remove broken tutorial link ([#1119](https://github.com/quirrel-dev/quirrel/issues/1119)) ([df0288e](https://github.com/quirrel-dev/quirrel/commit/df0288e1ed3362bcc8cfb79e3b4b065c735badbc))
+* respect custom host in local dev ([#1122](https://github.com/quirrel-dev/quirrel/issues/1122)) ([71304ff](https://github.com/quirrel-dev/quirrel/commit/71304ff68faa09fe525db6df155779caf9ee98ba)), closes [#1121](https://github.com/quirrel-dev/quirrel/issues/1121)
+
 ## [1.13.1](https://github.com/quirrel-dev/quirrel/compare/v1.13.0...v1.13.1) (2022-11-07)
 
 
