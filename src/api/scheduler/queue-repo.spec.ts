@@ -1,4 +1,4 @@
-import { idempotent } from "./queue-repo";
+import { idempotent } from "./queue-repo.js";
 
 describe("idempotent", () => {
   it("only executes once per key", async () => {

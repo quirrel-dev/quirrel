@@ -1,8 +1,8 @@
-import { run } from "./runQuirrel";
-import fastify, { FastifyInstance } from "fastify";
+import { run } from "./runQuirrel.js";
+import { fastify, FastifyInstance } from "fastify";
 import request from "supertest";
 import delay from "delay";
-import { getAddress } from "../../client/test/util";
+import { getAddress } from "../../client/test/util.js";
 
 describe("SSRF Prevention", () => {
   let server: FastifyInstance;

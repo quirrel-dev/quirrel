@@ -1,10 +1,19 @@
 import { FastifyPluginCallback } from "fastify";
 
-import POSTTokensParamsSchema from "../schemas/tokens/PUT/params.json";
-import { POSTTokensParams } from "../types/tokens/PUT/params";
+import type { POSTTokensParams } from "../types/tokens/PUT/params.js";
+import type { DELETETokensTokenParams } from "../types/tokens/DELETE/params.js";
 
-import DELETETokenParamsSchema from "../schemas/tokens/DELETE/params.json";
-import { DELETETokensTokenParams } from "../types/tokens/DELETE/params";
+import { readFileSync } from "fs"
+import { join } from "path"
+
+const POSTTokensParamsSchema = JSON.parse(
+  readFileSync(join(import.meta.url, "..", "..","schemas","tokens","PUT","params.json"), "utf-8")
+)
+
+const DELETETokenParamsSchema = JSON.parse(
+  readFileSync(join(import.meta.url, "..", "..","schemas","tokens","DELETE","params.json"), "utf-8")
+)
+
 
 const tokensPlugin: FastifyPluginCallback = (fastify, opts, done) => {
   fastify.addHook("onRequest", fastify.basicAuth);

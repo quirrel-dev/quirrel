@@ -1,9 +1,9 @@
-import { QuirrelConfig, runQuirrel } from "../../api";
+import { QuirrelConfig, runQuirrel } from "../../api/index.js";
 import IORedis from "ioredis";
-import { createRedisFactory } from "../../api/shared/create-redis";
-import { CronDetector } from "../cron-detector";
+import { createRedisFactory } from "../../api/shared/create-redis.js";
+import { CronDetector } from "../cron-detector.js";
 import { Command } from "commander";
-import { getApplicationBaseUrl } from "../../client/config";
+import { getApplicationBaseUrl } from "../../client/config.js";
 
 function requireFrameworkClientForDevelopmentDefaults(framework: string) {
   require(`../../${framework}`);
@@ -11,7 +11,7 @@ function requireFrameworkClientForDevelopmentDefaults(framework: string) {
 
 async function isRedisConnectionIntact(redisUrl: string) {
   try {
-    const client = new IORedis(redisUrl);
+    const client = new IORedis.default(redisUrl);
     await client.ping();
     return true;
   } catch (error) {

@@ -1,6 +1,6 @@
-import { Job, QuirrelClient } from "..";
-import { run } from "../../api/test/runQuirrel";
-import { getAddress } from "./util";
+import { Job, QuirrelClient } from "../index.js";
+import { run } from "../../api/test/runQuirrel.js";
+import { getAddress } from "./util.js";
 
 test("getAll", async () => {
   const server = await run("Mock");

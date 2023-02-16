@@ -1,4 +1,4 @@
-import { detectQuirrelCronJob } from "./cron-detector";
+import { detectQuirrelCronJob } from "./cron-detector.js";
 
 const cases: Record<
   string,

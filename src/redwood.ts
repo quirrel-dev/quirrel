@@ -6,8 +6,8 @@ import {
   DefaultJobOptions,
   QuirrelJobHandler,
   QuirrelOptions,
-} from "./client";
-import { registerDevelopmentDefaults } from "./client/config";
+} from "./client/index.js";
+import { registerDevelopmentDefaults } from "./client/config.js";
 
 export {
   Job,

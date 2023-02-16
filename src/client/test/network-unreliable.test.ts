@@ -1,6 +1,6 @@
-import { QuirrelClient } from "..";
-import http from "http";
-import { getAddress } from "./util";
+import { QuirrelClient } from "../index.js";
+import * as http from "http";
+import { getAddress } from "./util.js";
 
 test("network unreliable", async () => {
   let callNumber = 0;

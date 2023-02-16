@@ -1,4 +1,4 @@
-import { replaceLocalhostWithDockerHost } from ".";
+import { replaceLocalhostWithDockerHost } from "./index.js";
 
 test("replaceLocalhostWithDockerHost", () => {
   expect(

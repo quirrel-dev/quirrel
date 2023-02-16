@@ -1,5 +1,5 @@
-import { run } from "./runQuirrel";
-import fastify from "fastify";
+import { run } from "./runQuirrel.js";
+import { fastify } from "fastify";
 import request from "supertest";
 import websocket from "websocket";
 import {
@@ -10,7 +10,7 @@ import {
   makeSignal,
   stopTime,
   waitUntil,
-} from "../../client/test/util";
+} from "../../client/test/util.js";
 
 jest.setTimeout(20 * 1000);
 

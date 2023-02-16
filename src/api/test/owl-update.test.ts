@@ -1,5 +1,5 @@
 import request from "supertest";
-import { run } from "./runQuirrel";
+import { run } from "./runQuirrel.js";
 
 describe("owl-updates", () => {
   test("0.5 to 0.8", async () => {

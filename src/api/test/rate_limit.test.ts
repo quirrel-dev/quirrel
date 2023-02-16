@@ -1,4 +1,4 @@
-import { run } from "./runQuirrel";
+import { run } from "./runQuirrel.js";
 import request from "supertest";
 
 test("rate limiter", async () => {

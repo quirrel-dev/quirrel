@@ -1,11 +1,11 @@
 import Owl from "@quirrel/owl";
 import { Redis } from "ioredis";
-import { cron, every } from "../../shared/repeat";
-import { IncidentForwarder } from "./incident-forwarder";
-import { decodeQueueDescriptor } from "./queue-descriptor";
-import { ExecutionError } from "../worker";
-import { Telemetrist } from "./telemetrist";
-import { Logger } from "./logger";
+import { cron, every } from "../../shared/repeat.js";
+import { IncidentForwarder } from "./incident-forwarder.js";
+import { decodeQueueDescriptor } from "./queue-descriptor.js";
+import { ExecutionError } from "../worker/index.js";
+import { Telemetrist } from "./telemetrist.js";
+import { Logger } from "./logger.js";
 
 export async function createOwl(
   redisFactory: () => Redis,
@@ -20,7 +20,7 @@ export async function createOwl(
       )
     : undefined;
 
-  const owl = new Owl({
+  const owl = new Owl.default({
     redisFactory: redisFactory as any,
     scheduleMap: {
       every,

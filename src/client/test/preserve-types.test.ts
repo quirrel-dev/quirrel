@@ -1,8 +1,8 @@
-import { QuirrelClient } from "..";
-import { run } from "../../api/test/runQuirrel";
+import { QuirrelClient } from "../index.js";
+import { run } from "../../api/test/runQuirrel.js";
 import * as http from "http";
 import delay from "delay";
-import { getAddress } from "./util";
+import { getAddress } from "./util.js";
 
 it("preserves payload types", async () => {
   const server = await run("Mock");

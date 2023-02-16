@@ -1,5 +1,5 @@
-import { run } from "./runQuirrel";
-import type http from "http";
+import { run } from "./runQuirrel.js";
+import type * as http from "http";
 import request from "supertest";
 import jwt from "jsonwebtoken";
 

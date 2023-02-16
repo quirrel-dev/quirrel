@@ -1,8 +1,14 @@
 import { FastifyPluginCallback } from "fastify";
-import { UsageMeter } from "../../shared/usage-meter";
+import { UsageMeter } from "../../shared/usage-meter.js";
 
-import DELETEUsageResponseSchema from "../schemas/usage/DELETE/response.json";
-import { DELETEUsageResponse } from "../types/usage/DELETE/response";
+import { DELETEUsageResponse } from "../types/usage/DELETE/response.js";
+
+import { readFileSync } from "fs"
+import { join } from "path"
+
+const DELETEUsageResponseSchema = JSON.parse(
+  readFileSync(join(import.meta.url, "..", "..","schemas","usage","DELETE","response.json"), "utf-8")
+)
 
 const usageRoute: FastifyPluginCallback = (fastify, opts, done) => {
   const usageMeter = new UsageMeter(fastify.redis);

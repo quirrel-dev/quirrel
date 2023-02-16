@@ -1,15 +1,16 @@
 import { FastifyPluginCallback } from "fastify";
 
-import GetHealthResponseSchema from "../schemas/health.json";
-import { GETHealthResponse } from "../types/health";
+import { GETHealthResponse } from "../types/health.js";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 const health: FastifyPluginCallback = (app, opts, done) => {
   async function checkRedis() {
     try {
-      await app.redis.ping()
-      return true
+      await app.redis.ping();
+      return true;
     } catch (e) {
-      return false
+      return false;
     }
   }
 
@@ -18,10 +19,12 @@ const health: FastifyPluginCallback = (app, opts, done) => {
     {
       schema: {
         response: {
-          200: GetHealthResponseSchema,
+          200: JSON.parse(
+            readFileSync(join(import.meta.url, "..", "..", "schemas", "health.json"), "utf-8")
+          ),
         },
         tags: ["Admin"],
-        summary: "Check availability"
+        summary: "Check availability",
       },
     },
     async (request, reply) => {

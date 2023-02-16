@@ -1,7 +1,7 @@
-import { Logger } from "./logger";
-import { JobDTO } from "../../client/job";
-import { QueuesUpdateCronBody } from "../scheduler/types/queues/update-cron";
-import { getQueueName } from "./dx-logger";
+import { Logger } from "./logger.js";
+import { JobDTO } from "../../client/job.js";
+import { QueuesUpdateCronBody } from "../scheduler/types/queues/update-cron.js";
+import { getQueueName } from "./dx-logger.js";
 
 export class QuietLogger implements Logger {
   started() {}

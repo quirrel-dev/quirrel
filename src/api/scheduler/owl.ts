@@ -1,11 +1,11 @@
 import type Owl from "@quirrel/owl";
 import { FastifyPluginCallback } from "fastify";
 import fp from "fastify-plugin";
-import { createOwl } from "../shared/owl";
+import { createOwl } from "../shared/owl.js";
 
 declare module "fastify" {
   interface FastifyInstance {
-    owl: Owl<"every" | "cron">;
+    owl: Owl.default<"every" | "cron">;
   }
 }
 

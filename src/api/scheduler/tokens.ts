@@ -1,6 +1,6 @@
 import { FastifyPluginCallback } from "fastify";
 import fp from "fastify-plugin";
-import { TokenRepo } from "../shared/token-repo";
+import { TokenRepo } from "../shared/token-repo.js";
 
 declare module "fastify" {
   interface FastifyInstance {

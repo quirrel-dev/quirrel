@@ -1,7 +1,7 @@
-import { run } from "./runQuirrel";
-import fastify, { FastifyInstance } from "fastify";
+import { run } from "./runQuirrel.js";
+import { fastify, FastifyInstance } from "fastify";
 import delay from "delay";
-import type http from "http";
+import type * as http from "http";
 import request from "supertest";
 import { Redis } from "ioredis";
 import {
@@ -9,7 +9,7 @@ import {
   expectToBeInRange,
   makeSignal,
   stopTime,
-} from "../../client/test/util";
+} from "../../client/test/util.js";
 
 describeAcrossBackends("Jobs", (backend) => {
   let quirrel: http.Server;

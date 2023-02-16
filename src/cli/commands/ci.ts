@@ -1,6 +1,6 @@
 import { Command } from "commander";
-import { detectCron, detectedJobsToRouteScheduleManifest } from "./detect-cron";
-import { updateCron } from "./update-cron";
+import { detectCron, detectedJobsToRouteScheduleManifest } from "./detect-cron.js";
+import { updateCron } from "./update-cron.js";
 
 export default function registerCI(program: Command) {
   program

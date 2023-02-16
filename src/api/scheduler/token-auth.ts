@@ -6,7 +6,7 @@ import {
 } from "fastify";
 import fp from "fastify-plugin";
 import { IncomingMessage, IncomingHttpHeaders } from "http";
-import { UsageMeter } from "../shared/usage-meter";
+import { UsageMeter } from "../shared/usage-meter.js";
 import basicAuth from "basic-auth";
 import jwt from "jsonwebtoken";
 

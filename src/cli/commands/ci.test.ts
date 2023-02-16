@@ -1,8 +1,8 @@
-import { quirrelCI } from "./ci";
-import path from "path";
-import { run } from "../../api/test/runQuirrel";
-import { QuirrelClient } from "../../client";
-import { getAddress } from "../../client/test/util";
+import { quirrelCI } from "./ci.js";
+import * as path from "path";
+import { run } from "../../api/test/runQuirrel.js";
+import { QuirrelClient } from "../../client/index.js";
+import { getAddress } from "../../client/test/util.js";
 
 let teardown: () => Promise<void>;
 

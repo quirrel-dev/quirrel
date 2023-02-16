@@ -1,30 +1,30 @@
 import fastify from "fastify";
 import { Redis } from "ioredis";
-import owlPlugin from "./owl";
-import redisPlugin from "./redis";
-import tokensRoute from "./routes/tokens";
-import tokensRepoPlugin from "./tokens";
-import health from "./routes/health";
-import queues from "./routes/queues";
-import usageRoute from "./routes/usage";
+import owlPlugin from "./owl.js";
+import redisPlugin from "./redis.js";
+import tokensRoute from "./routes/tokens.js";
+import tokensRepoPlugin from "./tokens.js";
+import health from "./routes/health.js";
+import queues from "./routes/queues.js";
+import usageRoute from "./routes/usage.js";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import pack from "../../../package.json";
-import basicAuthPlugin from "./basic-auth";
+import { env } from "process"
+import basicAuthPlugin from "./basic-auth.js";
 import type { AddressInfo } from "net";
-import tokenAuthPlugin from "./token-auth";
-import activityPlugin from "./routes/activity";
+import tokenAuthPlugin from "./token-auth.js";
+import activityPlugin from "./routes/activity.js";
 import blipp from "fastify-blipp";
 import cors from "@fastify/cors";
-import telemetry from "./telemetry";
-import sentryPlugin from "./sentry";
-import loggerPlugin from "./logger";
-import indexRoute from "./routes/index";
-import { StructuredLogger } from "../shared/structured-logger";
-import { Logger } from "../shared/logger";
-import { jobsRepoPlugin } from "./jobs-repo";
+import telemetry from "./telemetry.js";
+import sentryPlugin from "./sentry.js";
+import loggerPlugin from "./logger.js";
+import indexRoute from "./routes/index.js";
+import { StructuredLogger } from "../shared/structured-logger.js";
+import { Logger } from "../shared/logger.js";
+import { jobsRepoPlugin } from "./jobs-repo.js";
 import fastifyRateLimit from "@fastify/rate-limit";
-import posthogPlugin from "./posthog";
+import posthogPlugin from "./posthog.js";
 
 export interface QuirrelServerConfig {
   redisFactory: () => Redis;
@@ -59,7 +59,7 @@ export async function createServer({
   rateLimiter,
   postHogApiKey,
 }: QuirrelServerConfig) {
-  const app = fastify({
+  const app = fastify.default({
     logger: logger instanceof StructuredLogger ? logger.log : undefined,
     maxParamLength: 500,
   });
@@ -74,15 +74,15 @@ export async function createServer({
     });
   }
 
-  app.register(fastifyRateLimit, {
+  app.register(fastifyRateLimit.default, {
     enableDraftSpec: true,
     max: rateLimiter?.max ?? 10000,
     keyGenerator: (req) => req.headers.authorization ?? req.ip,
   });
 
-  app.register(blipp);
+  app.register(blipp.default);
 
-  app.register(cors, {
+  app.register(cors.default, {
     origin: "*",
   });
 
@@ -90,12 +90,12 @@ export async function createServer({
 
   app.decorate("adminBasedAuthEnabled", enableAdminBasedAuth);
 
-  app.register(swagger, {
+  app.register(swagger.default, {
     openapi: {
       info: {
         title: "Quirrel API",
         description: "The Queueing Solution for Serverless.",
-        version: pack.version,
+        version: env.npm_package_version ?? "unknown",
         contact: {
           email: "info@quirrel.dev",
           name: "Quirrel",
@@ -158,7 +158,7 @@ export async function createServer({
     },
   });
 
-  app.register(swaggerUi, {
+  app.register(swaggerUi.default, {
     routePrefix: "/documentation",
   });
 

@@ -1,8 +1,8 @@
 require("../shared/tracer")("quirrel-worker");
-import { createWorker } from ".";
-import { cliWithConfig } from "../../shared/cliWithConfig";
-import { createRedisFactory } from "../shared/create-redis";
-import { StructuredLogger } from "../shared/structured-logger";
+import { createWorker } from "./index.js";
+import { cliWithConfig } from "../../shared/cliWithConfig.js";
+import { createRedisFactory } from "../shared/create-redis.js";
+import { StructuredLogger } from "../shared/structured-logger.js";
 
 cliWithConfig(async (config) => {
   const {

@@ -1,8 +1,8 @@
-import { createServer, QuirrelServerConfig } from "./scheduler";
-import { getLogger, LoggerType } from "./shared/logger";
-import { createWorker, QuirrelWorkerConfig } from "./worker";
-import pack from "../../package.json";
-import { Telemetrist } from "./shared/telemetrist";
+import { createServer, QuirrelServerConfig } from "./scheduler/index.js";
+import { getLogger, LoggerType } from "./shared/logger.js";
+import { createWorker, QuirrelWorkerConfig } from "./worker/index.js";
+import { Telemetrist } from "./shared/telemetrist.js";
+import { env } from "process"
 
 export type QuirrelConfig = Omit<QuirrelServerConfig, "logger"> &
   Omit<QuirrelWorkerConfig, "enableUsageMetering" | "logger"> & {
@@ -21,7 +21,7 @@ export async function runQuirrel(config: QuirrelConfig) {
 
   if (!config.disableTelemetry) {
     new Telemetrist(config.runningInDocker ?? false).record(
-      `/version/${pack.version}`
+      `/version/${env.npm_package_version}`
     );
   }
 

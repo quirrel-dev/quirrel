@@ -1,4 +1,4 @@
-export { QuirrelConfig, runQuirrel } from "./api";
+export { QuirrelConfig, runQuirrel } from "./api/index.js";
 export {
   DefaultJobOptions,
   EnqueueJobOpts,
@@ -7,5 +7,5 @@ export {
   QuirrelClient,
   QuirrelOptions,
   QuirrelLogger,
-} from "./client";
-export { runQuirrelDev } from "./cli/commands/index";
+} from "./client/index.js";
+export { runQuirrelDev } from "./cli/commands/index.js";
