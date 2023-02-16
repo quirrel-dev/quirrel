@@ -18,7 +18,7 @@ export {
 };
 
 registerDevelopmentDefaults({
-  applicationBaseUrl: "http://localhost:8911",
+  applicationPort: 8911,
 });
 
 function decodeBase64(v: string): string {
