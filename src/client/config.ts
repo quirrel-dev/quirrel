@@ -89,7 +89,7 @@ export function getOldEncryptionSecrets(): string[] | null {
   return JSON.parse(process.env.QUIRREL_OLD_SECRETS ?? "null");
 }
 
-let developmentApplicationBaseUrl: string | undefined;
+let developmentApplicationPort: number | undefined;
 
 function getNetlifyURL() {
   const siteId = process.env.SITE_ID;
@@ -108,12 +108,12 @@ function getVercelURL() {
   return process.env.VERCEL_URL;
 }
 
-export function getApplicationBaseUrl(): string {
+export function getApplicationBaseUrl(host = "localhost"): string {
   const baseUrl =
     resolveEnvReference("QUIRREL_BASE_URL") ||
     getNetlifyURL() ||
     getVercelURL() ||
-    developmentApplicationBaseUrl;
+    `http://${host}:${developmentApplicationPort}`;
 
   if (!baseUrl) {
     throw new Error("Please specify QUIRREL_BASE_URL.");
@@ -123,17 +123,17 @@ export function getApplicationBaseUrl(): string {
 }
 
 export function registerDevelopmentDefaults({
-  applicationBaseUrl,
+  applicationPort,
 }: {
-  applicationBaseUrl: string;
+  applicationPort: number;
 }) {
   if (isProduction()) {
     return;
   }
 
-  if (developmentApplicationBaseUrl) {
+  if (developmentApplicationPort) {
     return;
   }
 
-  developmentApplicationBaseUrl = applicationBaseUrl;
+  developmentApplicationPort = applicationPort;
 }

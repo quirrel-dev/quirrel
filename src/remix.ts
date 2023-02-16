@@ -24,7 +24,7 @@ export {
 };
 
 registerDevelopmentDefaults({
-  applicationBaseUrl: "http://localhost:3000",
+  applicationPort: 3000,
 });
 
 export type Queue<Payload> = Omit<

@@ -11,7 +11,7 @@ import { registerDevelopmentDefaults } from "./client/config";
 export { Job, EnqueueJobOptions, DefaultJobOptions, QuirrelJobHandler };
 
 registerDevelopmentDefaults({
-  applicationBaseUrl: "localhost:5173",
+  applicationPort: 5173,
 });
 
 interface SvelteEvent {

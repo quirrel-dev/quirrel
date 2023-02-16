@@ -3,7 +3,7 @@ import { registerDevelopmentDefaults } from "./client/config";
 import * as connect from "./connect";
 
 registerDevelopmentDefaults({
-  applicationBaseUrl: "http://localhost:3000",
+  applicationPort: 3000,
 });
 
 export function Queue<Payload>(

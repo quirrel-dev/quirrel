@@ -56,7 +56,7 @@ export async function runQuirrelDev(
       }
 
       await quirrel.server.app.jobs.updateCron("anonymous", {
-        baseUrl: getApplicationBaseUrl(),
+        baseUrl: getApplicationBaseUrl(config.host),
         crons: jobs,
       });
     });
