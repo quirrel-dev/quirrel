@@ -17,8 +17,27 @@
     "!jest.config.js",
     "README.md"
   ],
-  "main": "dist/cjs/src/index.js",
-  "module": "dist/esm/src/index.js",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./": {
+      "import": "./dist/",
+      "require": "./dist/"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*"
+      ]
+    }
+  },
   "version": "1.13.1",
   "engines": {
     "node": "14 || 15 || 16 || 17 || 18"
@@ -29,12 +48,10 @@
   "scripts": {
     "start": "node dist/cjs/src/cli/index.js",
     "test": "DISABLE_TELEMETRY=true jest --forceExit --runInBand",
-    "build": "run-s build:schemas build:tsc:** build:proxies build:**",
+    "build": "run-s build:schemas build:tsup build:**",
     "build:schemas": "json2ts -i src/api/scheduler/schemas/ -o src/api/scheduler/types/",
     "build:ui": "cd development-ui && npm ci && npm run build:fastify",
-    "build:tsc:esm": "tsc --module es2015 --outDir dist/esm",
-    "build:tsc:cjs": "tsc",
-    "build:proxies": "./generate-proxies.sh",
+    "build:tsup": "tsup --format cjs,esm --dts --clean src/*.ts",
     "prepack": "run-s build"
   },
   "devDependencies": {
@@ -61,6 +78,7 @@
     "npm-run-all": "4.1.5",
     "supertest": "6.3.1",
     "ts-jest": "29.0.3",
+    "tsup": "^6.5.0",
     "typescript": "4.8.4",
     "websocket": "1.0.34"
   },
