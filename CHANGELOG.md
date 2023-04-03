@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.3](https://github.com/quirrel-dev/quirrel/compare/v1.13.2...v1.13.3) (2023-04-03)
+
+
+### Bug Fixes
+
+* update sveltekit `Request` type ([#1131](https://github.com/quirrel-dev/quirrel/issues/1131)) ([2197fcd](https://github.com/quirrel-dev/quirrel/commit/2197fcd914c07cd11d113383cbf3bba500db51b2))
+
 ## [1.13.2](https://github.com/quirrel-dev/quirrel/compare/v1.13.1...v1.13.2) (2023-02-16)
 
 
