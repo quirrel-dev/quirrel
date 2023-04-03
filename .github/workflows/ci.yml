@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14, 16, 18]
+        node-version: [14, 16, 18, 19]
       fail-fast: false
 
     services:
@@ -38,13 +38,13 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 18 }}
       uses: microsoft/playwright-github-action@v1
     - run: npm i -g npm@7
     - run: npm ci
     - run: npm run build
     - run: npm test -- --coverage
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 18 }}
       name: Coveralls Quirrel
       uses: coverallsapp/github-action@master
       with:
@@ -52,17 +52,17 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: coverage/lcov.info
         parallel: true
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 18 }}
       run: npm ci
       working-directory: development-ui
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 18 }}
       name: Install Playwright Browsers
       run: npx playwright install --with-deps
       working-directory: development-ui
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 18 }}
       run: npm run test:ci
       working-directory: development-ui
-    - if: ${{ matrix.node-version == 14 }}
+    - if: ${{ matrix.node-version == 18 }}
       name: Coveralls Finished
       uses: coverallsapp/github-action@master
       with:
