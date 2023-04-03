@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.4](https://github.com/quirrel-dev/quirrel/compare/v1.13.3...v1.13.4) (2023-04-03)
+
+
+### Bug Fixes
+
+* add node v19 support (previous commit didn't rigger automation) ([be7b368](https://github.com/quirrel-dev/quirrel/commit/be7b36895a04b13931c5f49ce90aacf1e9618cd7))
+
 ## [1.13.3](https://github.com/quirrel-dev/quirrel/compare/v1.13.2...v1.13.3) (2023-04-03)
 
 
