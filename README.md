@@ -73,6 +73,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/JonathonRP"><img src="https://avatars.githubusercontent.com/u/30267655?v=4?s=100" width="100px;" alt="Jonathon Reese Perry"/><br /><sub><b>Jonathon Reese Perry</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3AJonathonRP" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://blog.iroco.co"><img src="https://avatars.githubusercontent.com/u/551723?v=4?s=100" width="100px;" alt="Bruno Thomas"/><br /><sub><b>Bruno Thomas</b></sub></a><br /><a href="https://github.com/quirrel-dev/quirrel/issues?q=author%3Abamthomas" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>
