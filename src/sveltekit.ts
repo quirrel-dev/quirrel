@@ -15,12 +15,7 @@ registerDevelopmentDefaults({
 });
 
 interface SvelteEvent {
-  request: SvelteRequest;
-}
-
-interface SvelteRequest {
-  text: () => Promise<string>;
-  headers: Record<string, string>;
+  request: Request;
 }
 
 export type Queue<Payload> = Omit<
@@ -42,7 +37,7 @@ export function Queue<Payload>(
   async function svelteHandler({ request }: SvelteEvent): Promise<Response> {
     const { body, headers, status } = await quirrel.respondTo(
       await request.text(),
-      request.headers
+      Object.fromEntries([...request.headers.entries()])
     );
 
     return new Response(body, { headers, status });
