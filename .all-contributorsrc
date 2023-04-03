@@ -210,6 +210,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "bamthomas",
+      "name": "Bruno Thomas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/551723?v=4",
+      "profile": "http://blog.iroco.co",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
