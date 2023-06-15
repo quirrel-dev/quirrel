@@ -34,14 +34,14 @@
   },
   "devDependencies": {
     "@parcel/reporter-bundle-analyzer": "2.7.0",
-    "@playwright/test": "1.27.1",
+    "@playwright/test": "1.35.1",
     "@types/chai": "4.3.3",
     "@types/ioredis": "4.28.10",
     "babel-plugin-istanbul": "6.1.1",
     "chai": "4.3.6",
     "ioredis-mock": "8.2.2",
     "nyc": "15.1.0",
-    "playwright": "1.27.1",
+    "playwright": "1.35.1",
     "serve": "14.0.1",
     "start-server-and-test": "1.14.0"
   },
