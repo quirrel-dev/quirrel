@@ -13,10 +13,10 @@ module.exports = {
       label: "Deployment",
       collapsed: false,
       items: [
+        "deployment/connecting",
         "deployment/docker",
         "deployment/railway",
         "deployment/fly",
-        "deployment/vercel",
       ],
     },
     {
