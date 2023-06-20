@@ -1,0 +1,21 @@
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Development
+
+During development, you can use Quirrel's lightweight local server.
+This runs entirely on your machine, without needing any database or other external services.
+
+After installing Quirrel via `npm install quirrel`, the local server is started by running `quirrel` in your terminal.
+This will start a server and automatically start scanning for CronJobs in your project.
+If you're using the default development port of your framework (like `:3000` for Next.js), then Quirrel will automatically detect and use the local server.
+
+You can run `quirrel ui` to open up an admin interface that could be useful in local development.
+
+To always run Quirrel as part of your local development environment, you can add it to your `package.json`:
+
+```json
+"scripts": {
+  "dev": "concurrently 'next dev' 'quirrel'"
+}
+```

@@ -1,20 +1,43 @@
----
-title: Next.js
----
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
-```ts title="pages/api/someQueue.ts"
-import { Queue } from "quirrel/next";
+# Next.js
 
-export default Queue(
-"api/someQueue",
+<Tabs>
+<TabItem value="app" label="App Router">
+
+```typescript title="app/api/queues/sample/route.ts"
+import { Queue } from "quirrel/next-app";
+
+export const sampleQueue = Queue(
+  "api/queues/sample",
   async (job, meta) => {
     // do something
   }
 );
+
+export const POST = sampleQueue;
+```
+
+Creates a new Queue.
+Make sure to export it from a [Route Handler](https://nextjs.org/docs/app/building-your-application/routing/router-handlers), otherwise it won't work.
+
+</TabItem>
+<TabItem value="page" label="Pages Router">
+
+```typescript title="pages/api/queues/sample.ts"
+import { Queue } from "quirrel/next-pages";
+
+export default Queue("api/queues/sample", async (job, meta) => {
+  // do something
+});
 ```
 
 Creates a new Queue.
 Make sure to export it from an [API Route](https://nextjs.org/docs/api-routes/introduction), otherwise it won't work.
+
+</TabItem>
+</Tabs>
 
 #### Parameters
 
@@ -25,6 +48,7 @@ function Queue<T>(
   defaultJobOptions?: { exclusive?: boolean }
 ): QueueInstance<T>
 ```
+
 
 | Parameter           | Usage                                                           |
 | ------------------- | --------------------------------------------------------------- |

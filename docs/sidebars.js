@@ -7,7 +7,18 @@ module.exports = {
       collapsed: false,
       items: ["getting-started/next-js", "getting-started/blitz-js"],
     },
-    "deploying",
+    "development",
+    {
+      type: "category",
+      label: "Deployment",
+      collapsed: false,
+      items: [
+        "deployment/connecting",
+        "deployment/docker",
+        "deployment/railway",
+        "deployment/fly",
+      ],
+    },
     {
       type: "category",
       label: "Recipes",
