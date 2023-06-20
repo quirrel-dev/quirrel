@@ -67,7 +67,7 @@
   "dependencies": {
     "@babel/parser": "^7.14.7",
     "@babel/traverse": "^7.14.7",
-    "@fastify/basic-auth": "^4.0.0",
+    "@fastify/basic-auth": "^5.0.0",
     "@fastify/cors": "^8.1.0",
     "@fastify/rate-limit": "^7.5.0",
     "@fastify/static": "^6.5.0",
