@@ -7,7 +7,23 @@ module.exports = {
       collapsed: false,
       items: ["getting-started/next-js", "getting-started/blitz-js"],
     },
-    "deploying",
+    {
+      type: "category",
+      label: "Development",
+      collapsed: false,
+      items: ["development/docker-compose", "development/local-server"],
+    },
+    {
+      type: "category",
+      label: "Deployment",
+      collapsed: false,
+      items: [
+        "deployment/docker",
+        "deployment/railway",
+        "deployment/fly",
+        "deployment/vercel",
+      ],
+    },
     {
       type: "category",
       label: "Recipes",

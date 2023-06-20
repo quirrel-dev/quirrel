@@ -1,0 +1,82 @@
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Quirrel Instance
+
+It is crucial to understand how to run a Quirrel local development instance. Here's a step-by-step guide:
+
+## Prerequisites
+
+Before starting, make sure that you have the following installed:
+
+- [Node.js](https://nodejs.org/en/download/) (v14 or above)
+- Your preferred package manager - [npm](https://www.npmjs.com/get-npm), [yarn](https://classic.yarnpkg.com/en/docs/install/), or [pnpm](https://pnpm.io/installation)
+
+## Steps to Run Quirrel in Local Development Instance
+
+1.  **Install Quirrel as a Project Dependency**
+
+   You need to add Quirrel to your project dependencies. Depending on the package manager you are using, the command would be one of the following:
+
+   <Tabs>
+
+   <TabItem value="pnpm" label="pnpm">
+
+   ```bash
+   pnpm install quirrel
+   ```
+
+   </TabItem>
+   <TabItem value="yarn" label="yarn">
+
+   ```bash
+   yarn add quirrel
+   ```
+
+   </TabItem>
+   <TabItem value="npm" label="npm">
+
+   ```bash
+   npm install quirrel
+   ```
+
+   </TabItem>
+   </Tabs>
+
+2.  **Running Quirrel Locally**
+
+   There are two ways to run Quirrel on your local development instance:
+
+   - You can append Quirrel to your existing dev command in your `package.json` file. Here is an example:
+
+   <Tabs>
+
+   <TabItem value="unix" label="Unix">
+
+    ```json
+    "scripts": {
+      "dev": "next dev & quirrel"
+    }
+    ```
+
+   </TabItem>
+   <TabItem value="windows" label="windows">
+
+   If you are developing on a windows machine you can use concurrently to achieve this.
+
+    ```json
+    "scripts": {
+      "dev": "concurrently 'next dev' 'quirrel'"
+    }
+    ```
+
+   </TabItem>
+   </Tabs>
+
+   - If you have installed Quirrel globally, you can run the Quirrel CLI command directly in your terminal:
+
+   ```bash
+   quirrel
+   ```
+
+Please note that running Quirrel locally might require you to have a local instance of Redis, depending upon your configuration.
