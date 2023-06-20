@@ -38,17 +38,19 @@ This is all we need installed to create our first Queue!
 <Tabs>
 <TabItem value="app" label="App Router">
 
-Create a new [API Route](https://nextjs.org/docs/app/building-your-application/routing/router-handlers) at `app/api/queues/email.js` and paste the following:
+Create a new [Router Handler](https://nextjs.org/docs/app/building-your-application/routing/router-handlers) at `app/api/queues/email.js` and paste the following:
 
 ```typescript title="app/api/queues/email/route.ts"
-import { Queue } from "quirrel/next13"
+import { Queue } from "quirrel/next-app"
 
-export const { POST, queue: emailQueue } Queue(
+export const emailQueue = Queue(
   "api/queues/email", // 👈 the route it's reachable on
   async job => {
     await email.send( ... )
   }
 )
+
+export const POST = emailQueue
 ```
 
 </TabItem>
@@ -57,7 +59,7 @@ export const { POST, queue: emailQueue } Queue(
 Create a new [API Route](https://nextjs.org/docs/api-routes/introduction) at `pages/api/queues/email.js` and paste the following:
 
 ```typescript title="pages/api/queues/email.ts"
-import { Queue } from "quirrel/next"
+import { Queue } from "quirrel/next-pages"
 
 export default Queue(
   "api/queues/email", // 👈 the route it's reachable on
@@ -81,6 +83,28 @@ In this example, it sends an email.
 Now that we declared the Queue, using it is straight forward.
 Simply import it and enqueue a new job:
 
+<Tabs>
+<TabItem value="app" label="App Router">
+
+Create a new [Router Handler](https://nextjs.org/docs/app/building-your-application/routing/router-handlers) at `app/api/queues/email.js` and paste the following:
+
+```ts {6-9}
+import { emailQueue } from "app/api/queues/email"
+
+// could be some API route / getServerSideProps / ...
+export default async (req, res) => {
+
+  await emailQueue.enqueue(
+    ..., // job to be enqueued
+    { delay: "24h" } // scheduling options
+  )
+
+}
+```
+</TabItem>
+<TabItem value="page" label="Pages Router">
+
+
 ```ts {6-9}
 import EmailQueue from "pages/api/queues/email"
 
@@ -94,6 +118,9 @@ export default async (req, res) => {
 
 }
 ```
+
+</TabItem>
+</Tabs>
 
 Calling `.enqueue` will trigger a call to the Quirrel server to enqueue a new job.
 After 24 hours, when the job is due, the Queue's worker function will receive the job payload and execute it.
