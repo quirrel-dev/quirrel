@@ -1,20 +1,42 @@
----
-title: CronJob
----
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# CronJob
 
 CronJobs are specified very similar to Queues:
 
-```ts title="pages/api/someCronJob.ts"
-import { CronJob } from "quirrel/next";
+<Tabs>
+<TabItem value="app" label="Nextjs App Router">
 
-export default CronJob(
-  "api/someCronJob", // the route that it's reachable on
+```typescript title="app/api/cron/sample/route.ts"
+import { CronJob } from "quirrel/next13";
+
+export const { POST } = CronJob(
+  "api/cron/sample", // the route that it's reachable on
   ["0 2 * * *", "Europe/Berlin"], // every day at 2AM, in Berlin time. you can also write @weekly or @daily!
   async (job) => {
     // do something
   }
 );
 ```
+
+</TabItem>
+<TabItem value="page" label="Nextjs Pages Router">
+
+```typescript title="pages/api/cron/sample.ts"
+import { CronJob } from "quirrel/next";
+
+export default CronJob(
+  "api/cron/sample", // the route that it's reachable on
+  ["0 2 * * *", "Europe/Berlin"], // every day at 2AM, in Berlin time. you can also write @weekly or @daily!
+  async (job) => {
+    // do something
+  }
+);
+```
+
+</TabItem>
+</Tabs>
 
 :::note 🚨 Other Frameworks 🚨
 The example above is for Next.js.

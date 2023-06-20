@@ -1,6 +1,7 @@
----
-title: Next.js
----
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Next.js
 
 This document guides you through setting up Quirrel and creating your first queue in an existing project.
 
@@ -10,8 +11,8 @@ If you're looking for a tutorial instead, check out the [Water Drinking Reminder
 
 Architecturally, Quirrel consists of two main parts:
 
-1. The Quirrel *server* receives jobs from your application and then makes requests back to it whenever a job is due.
-2. The Quirrel *client* is used by your application to interface with the server.
+1. The Quirrel _server_ receives jobs from your application and then makes requests back to it whenever a job is due.
+2. The Quirrel _client_ is used by your application to interface with the server.
 
 First, we're gonna setup the Quirrel server locally.
 To install it, simply run `npm install quirrel` in your project root,
@@ -21,20 +22,41 @@ That's it!
 :::note
 You can use [`concurrently`](https://github.com/kimmobrunfeldt/concurrently)
 to have the Quirrel server be started together with Next:
+
 ```json
 "scripts": {
   "dev": "concurrently 'next dev' 'quirrel'"
 }
 ```
+
 :::
 
 This is all we need installed to create our first Queue!
 
 ## Your first Queue
 
-Create a new [API Route](https://nextjs.org/docs/api-routes/introduction) at `pages/api/queues/email.js` and paste the following: 
+<Tabs>
+<TabItem value="app" label="App Router">
 
-```js title="pages/api/queues/email.js"
+Create a new [API Route](https://nextjs.org/docs/app/building-your-application/routing/router-handlers) at `app/api/queues/email.js` and paste the following:
+
+```typescript title="app/api/queues/email/route.ts"
+import { Queue } from "quirrel/next13"
+
+export const { POST, queue: emailQueue } Queue(
+  "api/queues/email", // 👈 the route it's reachable on
+  async job => {
+    await email.send( ... )
+  }
+)
+```
+
+</TabItem>
+<TabItem value="page" label="Pages Router">
+
+Create a new [API Route](https://nextjs.org/docs/api-routes/introduction) at `pages/api/queues/email.js` and paste the following:
+
+```typescript title="pages/api/queues/email.ts"
 import { Queue } from "quirrel/next"
 
 export default Queue(
@@ -45,6 +67,9 @@ export default Queue(
 )
 ```
 
+</TabItem>
+</Tabs>
+
 Up top, we're importing `Queue`, which is a function that we use to declare a new Queue and export it as default.
 
 `Queue` takes two arguments.  
@@ -52,7 +77,6 @@ The first one is the location of the API Route it's been declared in.
 This is required for the Quirrel server to know where jobs need to be sent upon execution.  
 The second one is a worker function that actually executes the job.
 In this example, it sends an email.
-
 
 Now that we declared the Queue, using it is straight forward.
 Simply import it and enqueue a new job:
@@ -81,4 +105,8 @@ In there, you can also manually invoke jobs, so you don't have to wait for 24 ho
 
 To use it, simply run `quirrel ui` or open [ui.quirrel.dev](https://ui.quirrel.dev) in your browser.
 
-<img src={require("./dev-ui.png").default} alt="Screenshot of the Development UI" height="400rem"/>
+<img
+  src={require("./dev-ui.png").default}
+  alt="Screenshot of the Development UI"
+  height="400rem"
+/>
