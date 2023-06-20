@@ -6,49 +6,27 @@ import TabItem from "@theme/TabItem";
 <Tabs>
 <TabItem value="app" label="App Router">
 
-#### Deceleration
-
 ```typescript title="app/api/queues/sample/route.ts"
-import { Queue } from "quirrel/next13";
+import { Queue } from "quirrel/next-app";
 
-export const { POST, queue: sampleQueue } = Queue(
+export const sampleQueue = Queue(
   "api/queues/sample",
   async (job, meta) => {
     // do something
   }
 );
+
+export const POST = sampleQueue;
 ```
 
 Creates a new Queue.
-Make sure to export it from an [API Route](https://nextjs.org/docs/app/building-your-application/routing/router-handlers), otherwise it won't work.
-
-#### Usage
-
-```typescript
-import { sampleQueue } from "./app/api/queues/sample/route.ts";
-
-sampleQueue.enqueue();
-```
-
-Once you import the queue instance, you can add a new job to it with `enqueue`.
-
-#### Parameters
-
-```ts
-function Queue<T>(
-  path: string,
-  worker: (job: T, meta: JobMeta): Promise<void>,
-  defaultJobOptions?: { exclusive?: boolean }
-): { POST: (req: Request) => Promise<Response>, queue: QueueInstance<T> }
-```
+Make sure to export it from a [Route Handler](https://nextjs.org/docs/app/building-your-application/routing/router-handlers), otherwise it won't work.
 
 </TabItem>
 <TabItem value="page" label="Pages Router">
 
-#### Deceleration
-
 ```typescript title="pages/api/queues/sample.ts"
-import { Queue } from "quirrel/next";
+import { Queue } from "quirrel/next-pages";
 
 export default Queue("api/queues/sample", async (job, meta) => {
   // do something
@@ -58,15 +36,8 @@ export default Queue("api/queues/sample", async (job, meta) => {
 Creates a new Queue.
 Make sure to export it from an [API Route](https://nextjs.org/docs/api-routes/introduction), otherwise it won't work.
 
-#### Usage
-
-```typescript
-import { sampleQueue } from "./app/api/queues/sample.ts";
-
-sampleQueue.enqueue();
-```
-
-Once you import the queue instance, you can add a new job to it with `enqueue`.
+</TabItem>
+</Tabs>
 
 #### Parameters
 
@@ -78,8 +49,6 @@ function Queue<T>(
 ): QueueInstance<T>
 ```
 
-</TabItem>
-</Tabs>
 
 | Parameter           | Usage                                                           |
 | ------------------- | --------------------------------------------------------------- |
