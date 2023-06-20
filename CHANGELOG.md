@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.14.0](https://github.com/quirrel-dev/quirrel/compare/v1.13.4...v1.14.0) (2023-06-20)
+
+
+### Features
+
+* added nextjs 13 app router native support & docs improvements ([91a3d93](https://github.com/quirrel-dev/quirrel/commit/91a3d93347f68d121fb1b835e65d0ee2488249c6))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fastify/basic-auth to v5 ([#1107](https://github.com/quirrel-dev/quirrel/issues/1107)) ([c3cc7cf](https://github.com/quirrel-dev/quirrel/commit/c3cc7cf0a522f3908ac951226e2b4eed67358904))
+* **deps:** update dependency fastify to v4.10.2 [security] ([#1126](https://github.com/quirrel-dev/quirrel/issues/1126)) ([f9d4494](https://github.com/quirrel-dev/quirrel/commit/f9d4494bf56d72a86865bdbf54d9ea1a55717428))
+* **deps:** update dependency jsonwebtoken to v9 [security] ([#1112](https://github.com/quirrel-dev/quirrel/issues/1112)) ([55188c7](https://github.com/quirrel-dev/quirrel/commit/55188c74698e8f4a92a4c1b19ff21a5bb600aaff))
+
 ## [1.13.4](https://github.com/quirrel-dev/quirrel/compare/v1.13.3...v1.13.4) (2023-04-03)
 
 
