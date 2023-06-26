@@ -90,7 +90,7 @@ module.exports = {
             },
             {
               label: "Deploy",
-              to: "/deploying",
+              to: "/deployment/connecting",
             },
           ],
         },

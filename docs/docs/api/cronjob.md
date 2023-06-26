@@ -27,7 +27,7 @@ This creates a new CronJob, which will immediately be picked up by your local Qu
 
 :::note
 During development, your local Quirrel instance is able to detect `CronJob()` calls by watching your source directory.
-To register cron jobs on deployment, run `quirrel ci` [during deployment](/deploying)
+To register cron jobs on deployment, run `quirrel ci` [during deployment](/deployment/connecting)
 :::
 
 :::note
