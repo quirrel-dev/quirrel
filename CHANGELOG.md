@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.14.1](https://github.com/quirrel-dev/quirrel/compare/v1.14.0...v1.14.1) (2023-06-26)
+
+
+### Bug Fixes
+
+* add node 20 support ([#1153](https://github.com/quirrel-dev/quirrel/issues/1153)) ([0584045](https://github.com/quirrel-dev/quirrel/commit/0584045a3afacdfb144a8e09fc222bd2d7aa3655))
+* dead links ([139c74c](https://github.com/quirrel-dev/quirrel/commit/139c74c42bdbe27f9b9f768dd0a13b55c1f0ab3d))
+
 ## [1.14.0](https://github.com/quirrel-dev/quirrel/compare/v1.13.4...v1.14.0) (2023-06-20)
 
 
