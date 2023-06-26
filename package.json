@@ -17,6 +17,7 @@
     "!jest.config.js",
     "README.md"
   ],
+  "type": "module",
   "main": "dist/cjs/src/index.js",
   "module": "dist/esm/src/index.js",
   "version": "1.14.1",
