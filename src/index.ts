@@ -9,3 +9,4 @@ export {
   QuirrelLogger,
 } from "./client";
 export { runQuirrelDev } from "./cli/commands/index";
+export { Queue, CronJob } from "./combined";
