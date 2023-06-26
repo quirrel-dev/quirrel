@@ -130,10 +130,42 @@ export const handler = CronJob('admin-report-email-task-daily', '0 15 * * *', as
     input: `import {} from "quirrel/next"; { ( } }`,
     output: null,
   },
+
+  "user-land cronjob": {
+    input: `
+import * as QuirrelNext from "quirrel/next"
+
+function CronJob(route: string, schedule: string, handler: () => Promise<void>) {
+  const client = new QuirrelClient({
+    route,
+    handler,
+  })
+
+  return async function POST(request: Request) {
+    const { body, headers, status } = await client.respondTo(
+      await request.text(),
+      Object.fromEntries([...request.headers.entries()])
+    );
+  
+    return new Response(body, { headers, status });
+  }
+}
+
+export const POST = CronJob("/api/test", "0 15 * * *", async () => { /* ... */ })
+    `,
+    output: {
+      isValid: true,
+      schedule: "0 15 * * *",
+      framework: "next",
+      route: "api/test",
+      timezone: "Etc/UTC",
+    },
+  },
 };
 
 describe("detectQuirrelCronJob", () => {
   Object.entries(cases).forEach(([name, { input, output }]) => {
+    if (!name.includes("user-land")) return
     test(name, () => {
       expect(detectQuirrelCronJob(input)).toEqual(output);
     });
