@@ -13,11 +13,14 @@ During the process, Railway will clone this repository for you. In there, you fi
 
 Check Quirrel's [Docker image page](https://github.com/quirrel-dev/quirrel/pkgs/container/quirrel) to find the exact version you want to pin.
 
-Use the `PASSPHRASE` you set during the creation to issue a new token:
+Use the `PASSPHRASES` you set during the creation to issue a new token:
 
 ```sh
-curl --user ignored:<PASSPHRASE> -X PUT https://mighty-owl-production.up.railway.app/tokens/foo
+curl --user ignored:<PASSPHRASES> -X PUT https://mighty-owl-production.up.railway.app/tokens/foo
 ```
+
+Reference doc: [Acquire a token](https://docs.quirrel.dev/deployment/connecting#acquire-a-token)
+Token api source code: [src/api/scheduler/routes/tokens.ts](https://github.com/quirrel-dev/quirrel/blob/main/src/api/scheduler/routes/tokens.ts)
 
 You now have your own Quirrel instance 🥳
 
