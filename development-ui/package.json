@@ -33,7 +33,7 @@
     "typescript": "^4.2.3"
   },
   "devDependencies": {
-    "@parcel/reporter-bundle-analyzer": "2.7.0",
+    "@parcel/reporter-bundle-analyzer": "2.12.0",
     "@playwright/test": "1.35.1",
     "@types/chai": "4.3.3",
     "@types/ioredis": "4.28.10",
