@@ -4,7 +4,7 @@ import * as z from "zod";
 import type { IsExact, AssertTrue } from "conditional-type-checks";
 import Encryptor from "secure-e2ee";
 import { symmetric, asymmetric } from "secure-webhooks";
-import ms from "ms";
+import ms from "ms-tiny";
 import fetch from "cross-fetch";
 import fetchRetry from "@vercel/fetch-retry";
 import type { IncomingHttpHeaders } from "http";
@@ -225,7 +225,11 @@ function parseDuration(value: number | string | undefined): number | undefined {
   }
 
   if (typeof value === "string") {
-    return ms(value);
+    try {
+      return ms(value);
+    } catch {
+      return undefined;
+    }
   }
 
   return value;
