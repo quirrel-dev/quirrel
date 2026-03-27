@@ -129,7 +129,7 @@ const EnqueueJobOptionsSchema = z.object({
   id: z.string().optional(),
   exclusive: z.boolean().optional(),
   override: z.boolean().optional(),
-  retry: z.array(timeDuration("retry")).min(1).max(10).optional(),
+  retry: z.array(timeDuration("retry")).nonempty().max(10).optional(),
   delay: timeDuration("delay").optional(),
   runAt: z
     .date()
