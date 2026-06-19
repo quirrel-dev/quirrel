@@ -169,9 +169,10 @@ export interface EnqueueJobOptions {
 
   /**
    * If a job fails, retry it at along the specified intervals.
+   * Must contain at least one interval — an empty array is rejected at runtime.
    * @example ["5min", "1h", "1d"] // retries it after 5 minutes, 1:05 hours, and 1 day 1:05 hours
    */
-  retry?: (number | string)[];
+  retry?: [number | string, ...(number | string)[]];
 
   /**
    * Determines what to do when a job
