@@ -129,7 +129,7 @@ const EnqueueJobOptionsSchema = z.object({
   id: z.string().optional(),
   exclusive: z.boolean().optional(),
   override: z.boolean().optional(),
-  retry: z.array(timeDuration("retry")).min(1).max(10).optional(),
+  retry: z.array(timeDuration("retry")).nonempty().max(10).optional(),
   delay: timeDuration("delay").optional(),
   runAt: z
     .date()
@@ -169,9 +169,10 @@ export interface EnqueueJobOptions {
 
   /**
    * If a job fails, retry it at along the specified intervals.
+   * Must contain at least one interval — an empty array is rejected at runtime.
    * @example ["5min", "1h", "1d"] // retries it after 5 minutes, 1:05 hours, and 1 day 1:05 hours
    */
-  retry?: (number | string)[];
+  retry?: [number | string, ...(number | string)[]];
 
   /**
    * Determines what to do when a job
