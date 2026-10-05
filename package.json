@@ -47,7 +47,7 @@
     "@types/jest": "29.2.2",
     "@types/js-yaml": "4.0.5",
     "@types/jsonwebtoken": "8.5.9",
-    "@types/ms": "0.7.31",
+    "@types/ms": "0.7.34",
     "@types/node-fetch": "2.6.2",
     "@types/parse-gitignore": "1.0.0",
     "@types/redis": "4.0.10",
